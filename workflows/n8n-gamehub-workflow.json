@@ -1,0 +1,245 @@
+{
+  "name": "GameHub Content Generation Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 6,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "const games = [\n  'genshin-impact',\n  'honkai-star-rail',\n  'valorant',\n  'elden-ring',\n  'minecraft',\n  'zelda-tears-of-the-kingdom',\n  'baldurs-gate-3',\n  'apex-legends',\n  'fortnite',\n  'cyberpunk-2077'\n];\n\nconst randomGame = games[Math.floor(Math.random() * games.length)];\nconst topics = [\n  'Complete Beginners Guide',\n  'Best Tips and Tricks',\n  'How to Farm Resources',\n  'Secret Locations',\n  'Best Build Guide',\n  'Tier List Analysis'\n];\nconst randomTopic = topics[Math.floor(Math.random() * topics.length)];\n\nreturn {\n  gameSlug: randomGame,\n  topic: randomTopic,\n  timestamp: new Date().toISOString()\n};"
+      },
+      "id": "content-request-generator",
+      "name": "Generate Content Request",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.WEBSITE_API_URL}}/api/ai/generate-content",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$env.CLAUDE_API_KEY}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "gameSlug",
+              "value": "={{$json.gameSlug}}"
+            },
+            {
+              "name": "topic",
+              "value": "={{$json.topic}}"
+            },
+            {
+              "name": "type",
+              "value": "article"
+            }
+          ]
+        }
+      },
+      "id": "claude-api-call",
+      "name": "Call Claude API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [750, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "success-condition",
+              "leftValue": "={{$json.success}}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-success",
+      "name": "Check Success",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1000, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.DATABASE_URL}}",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "operation",
+              "value": "upsert"
+            },
+            {
+              "name": "table",
+              "value": "article"
+            },
+            {
+              "name": "data",
+              "value": "={{$json}}"
+            }
+          ]
+        }
+      },
+      "id": "save-to-database",
+      "name": "Save to Database",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1250, 200]
+    },
+    {
+      "parameters": {
+        "message": "=Content Generated Successfully\n\nGame: {{$json.gameName}}\nTopic: {{$json.topic}}\nTitle: {{$json.title}}\n\nContent has been saved to the database."
+      },
+      "id": "success-notification",
+      "name": "Send Success Notification",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1500, 200]
+    },
+    {
+      "parameters": {
+        "message": "=Content Generation Failed\n\nError: {{$json.error}}\nGame: {{$json.gameSlug}}\nTopic: {{$json.topic}}\n\nPlease check the logs for more details."
+      },
+      "id": "error-notification",
+      "name": "Send Error Notification",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [1250, 400]
+    },
+    {
+      "parameters": {
+        "functionCode": "return [{json: {error: 'Failed to generate content'}}];"
+      },
+      "id": "error-handler",
+      "name": "Handle Error",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1000, 400]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Generate Content Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Content Request": {
+      "main": [
+        [
+          {
+            "node": "Call Claude API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call Claude API": {
+      "main": [
+        [
+          {
+            "node": "Check Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Success": {
+      "main": [
+        [
+          {
+            "node": "Save to Database",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Database": {
+      "main": [
+        [
+          {
+            "node": "Send Success Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Error": {
+      "main": [
+        [
+          {
+            "node": "Send Error Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "timezone": "UTC"
+  },
+  "staticData": null,
+  "tags": ["automated", "content", "ai", "gamehub"],
+  "triggerCount": 1,
+  "updatedAt": "2026-01-20T00:00:00.000Z",
+  "versionId": "1"
+}

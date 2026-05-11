@@ -1,0 +1,75 @@
+// @ts-nocheck
+'use client'
+
+import Link from 'next/link'
+import { useLanguage } from '@/lib/language-context'
+
+export interface FooterProps {
+  className?: string
+}
+
+const FOOTER_LINKS = [
+  { sectionKey: 'games', links: [
+    { href: '/games', labelKey: 'view_all', key: 'games-all' },
+    { href: '/games?genre=RPG', label: 'RPG', key: 'games-rpg' },
+    { href: '/games?genre=FPS', label: 'FPS', key: 'games-fps' },
+    { href: '/games?genre=Indie', label: 'Indie', key: 'games-indie' },
+  ]},
+  { sectionKey: 'guides', links: [
+    { href: '/guides', labelKey: 'view_all', key: 'guides-all' },
+    { href: '/codes/genshin-impact', labelKey: 'codes', key: 'codes' },
+    { href: '/tier-list/valorant', labelKey: 'tier_list', key: 'tier-list' },
+  ]},
+  { sectionKey: 'creator', links: [
+    { href: '/creator/studio', labelKey: 'start_creating', key: 'creator' },
+  ]},
+] as const
+
+export function Footer({ className }: FooterProps) {
+  const { t } = useLanguage()
+
+  return (
+    <footer
+      className={className}
+      style={{ background: 'var(--bg-surface)', borderTop: '1px solid var(--border)' }}
+    >
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          {FOOTER_LINKS.map(({ sectionKey, links }) => (
+            <div key={sectionKey}>
+              <h3
+                className="text-sm font-semibold mb-3"
+                style={{ color: 'var(--text-primary)' }}
+              >
+                {t(sectionKey)}
+              </h3>
+              <ul className="space-y-2">
+                {links.map(link => (
+                  <li key={link.key}>
+                    <Link
+                      href={link.href}
+                      className="text-sm transition-colors hover:text-white"
+                      style={{ color: 'var(--text-secondary)' }}
+                    >
+                      {link.labelKey ? t(link.labelKey) : link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <div
+          className="mt-10 pt-6 text-xs"
+          style={{ borderTop: '1px solid var(--border)', color: 'var(--text-muted)' }}
+        >
+          <p>
+            GameHub is reader-supported.
+          </p>
+          <p className="mt-1">© {new Date().getFullYear()} GameHub. All rights reserved.</p>
+        </div>
+      </div>
+    </footer>
+  )
+}

@@ -1,65 +1,171 @@
-import Image from "next/image";
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { GameCard } from '@/components/games/GameCard'
+import { ResponsiveImage } from '@/components/ResponsiveImage'
+import { SkeletonCard, SkeletonGameCard, SkeletonBanner } from '@/components/Skeleton'
+import { Search, Sparkles, BookOpen, Gift, Trophy, TrendingUp, Star, Zap, Gamepad2, Users, Clock } from 'lucide-react'
+import { db } from '@/lib/db'
+import { redis } from '@/lib/redis'
+import { t } from '@/lib/i18n'
+import { JsonLdScript, getWebsiteSchema, getBreadcrumbSchema } from '@/components/seo/JsonLd'
 
-export default function Home() {
+// 使用客户端组件来处理语言
+import { HomeContent } from '@/components/HomeContent'
+
+export const metadata: Metadata = {
+  title: 'GameHub — Ultimate Gaming Guide Hub',
+  description: 'Discover the best game guides, tier lists, redeem codes, and walkthroughs for your favorite games. Updated daily.',
+  openGraph: {
+    title: 'GameHub - Ultimate Gaming Guide Hub',
+    description: 'Live redeem codes, AI-powered tier lists, walkthroughs and patch notes - updated in real time.',
+    images: [
+      {
+        url: 'https://picsum.photos/seed/gamehub/1200/630',
+        width: 1200,
+        height: 630,
+        alt: 'GameHub - Ultimate Gaming Guide Hub',
+      },
+    ],
+  },
+}
+
+export const revalidate = 60
+
+async function getFeaturedGames() {
+  try {
+    const games = await db.game.findMany({
+      take: 6,
+      orderBy: { guide_count: 'desc' },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        cover_url: true,
+        platforms: true,
+        genres: true,
+        score_opencritic: true,
+        score_steam_pct: true,
+        score_community: true,
+        score_review_count: true,
+        guide_count: true,
+        code_count: true,
+      },
+    })
+    return games.map(game => ({
+      id: game.id,
+      slug: game.slug,
+      name: game.name,
+      cover: { url: game.cover_url, igdb_url: '' },
+      scores: {
+        opencritic: game.score_opencritic,
+        community: game.score_community,
+        steam_positive_pct: game.score_steam_pct,
+        review_count: game.score_review_count,
+      },
+      platforms: (game.platforms as string[]),
+      genres: (game.genres as string[]),
+      screenshots: [],
+      tags: [],
+      has_tier_list: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      guide_count: game.guide_count,
+      code_count: game.code_count,
+    }))
+  } catch {
+    return []
+  }
+}
+
+async function getStats() {
+  try {
+    const [gameCount, articleCount, codeCount] = await Promise.all([
+      db.game.count(),
+      db.article.count(),
+      db.gameCode.count(),
+    ])
+    return {
+      games: gameCount,
+      articles: articleCount,
+      codes: codeCount,
+    }
+  } catch {
+    return { games: 0, articles: 0, codes: 0 }
+  }
+}
+
+async function getLatestGuides() {
+  try {
+    const cacheKey = 'latest_guides'
+    const cached = await redis.get(cacheKey)
+    if (cached) {
+      return cached
+    }
+
+    const articles = await db.article.findMany({
+      take: 3,
+      where: { status: 'published' },
+      orderBy: { published_at: 'desc' },
+      include: {
+        game: true,
+      },
+    })
+
+    const guides = articles.map(article => ({
+      id: article.id,
+      slug: article.slug,
+      title: article.title,
+      excerpt: article.excerpt,
+      cover_url: article.cover_url,
+      game_name: article.game?.name || '',
+      game_slug: article.game?.slug || '',
+      read_time: article.read_time,
+      view_count: article.view_count,
+    }))
+
+    await redis.set(cacheKey, guides, { ex: 300 })
+    return guides
+  } catch {
+    return []
+  }
+}
+
+async function getTrendingGames() {
+  try {
+    const games = await db.game.findMany({
+      take: 5,
+      orderBy: { guide_count: 'desc' },
+      select: {
+        id: true,
+        slug: true,
+        name: true,
+        cover_url: true,
+        guide_count: true,
+      },
+    })
+    return games
+  } catch {
+    return []
+  }
+}
+
+export default async function Home() {
+  const [featuredGames, stats, latestGuides, trendingGames] = await Promise.all([
+    getFeaturedGames(),
+    getStats(),
+    getLatestGuides(),
+    getTrendingGames(),
+  ])
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+    <>
+      <JsonLdScript data={getWebsiteSchema()} />
+      <HomeContent
+        featuredGames={featuredGames}
+        stats={stats}
+        latestGuides={latestGuides}
+        trendingGames={trendingGames}
+      />
+    </>
+  )
 }
