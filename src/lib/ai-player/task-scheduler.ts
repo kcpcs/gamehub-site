@@ -186,15 +186,19 @@ export class TaskScheduler {
     
     if (!targetId) return
 
-    const commentContent = await getCommentContent(targetId)
-    if (!commentContent) return
+    // Fetch the parent comment to get its article_slug and content
+    const parentComment = await db.comment.findUnique({
+      where: { id: targetId },
+      select: { content: true, article_slug: true },
+    })
+    if (!parentComment || !parentComment.article_slug) return
 
     const interactor = new ContentInteractor(player)
-    const generated = await interactor.generateReply(commentContent)
+    const generated = await interactor.generateReply(parentComment.content)
 
     await db.comment.create({
       data: {
-        article_slug: '',
+        article_slug: parentComment.article_slug,
         author_username: player.username,
         author_avatar: player.avatar,
         content: generated.content,
