@@ -4,6 +4,15 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: "./",
   },
+  outputFileTracingIncludes: {
+    "/api/**": ["./dev.db"],
+    "/admin/**": ["./dev.db"],
+    "/games/**": ["./dev.db"],
+    "/guides/**": ["./dev.db"],
+    "/codes/**": ["./dev.db"],
+    "/tier-list/**": ["./dev.db"],
+    "/": ["./dev.db"],
+  },
   images: {
     remotePatterns: [
       {
