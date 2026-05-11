@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { User, LogOut, Settings, BookOpen } from 'lucide-react'
-import { signOut } from '@/lib/auth'
+import { signOut } from 'next-auth/react'
 
 interface UserButtonProps {
   user?: {

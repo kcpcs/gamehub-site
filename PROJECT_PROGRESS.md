@@ -91,7 +91,7 @@ src/app/api/
 | 2-7 | 实现 Markdown 渲染（MDX 或 remark） | ⚠️ | — | 组件已创建，**需要完善** |
 | 2-8 | 实现全站 Algolia 搜索 UI（搜索弹窗） | ⚠️ | — | 组件已创建，**需要完善** |
 | 2-9 | 实现用户认证（NextAuth + Google OAuth） | ✅ | 2026-05-11 | 已实现NextAuth配置，添加Google OAuth支持，创建用户界面组件 |
-| 2-10 | 实现联盟链接重定向（/go/[partner]/[id]） | ⚠️ | — | 路由存在，**需要完善追踪逻辑** |
+| 2-10 | 实现联盟链接重定向（/go/[partner]/[id]） | ✅ | 2026-05-12 | 增强版：域名白名单、点击追踪、IP哈希 |
 
 ---
 
@@ -113,9 +113,9 @@ src/app/api/
 | # | 任务 | 状态 | 完成日期 | 备注 |
 |---|-----|------|---------|------|
 | 4-1 | 动态 XML Sitemap（Next.js sitemap.ts） | ✅ | 2026-05-11 | 已创建，从数据库动态生成游戏和攻略的Sitemap |
-| 4-2 | 全站 Schema.org 结构化数据注入 | ⚠️ | — | 组件已创建，**未集成到页面** |
+| 4-2 | 全站 Schema.org 结构化数据注入 | ✅ | 2026-05-12 | JsonLd.tsx组件已创建并集成到首页和攻略页 |
 | 4-3 | robots.txt 配置 | ✅ | 2026-05-11 | 已创建，配置了正确的抓取规则和Sitemap位置 |
-| 4-4 | OpenGraph 图片自动生成（next/og） | ❌ | — | **未创建** |
+| 4-4 | OpenGraph 图片自动生成（next/og） | ✅ | 2026-05-12 | src/app/api/og/route.tsx 已创建，支持5种类型 |
 | 4-5 | Google AdSense 广告位联调 | ❌ | — | 账号未注册 |
 | 4-6 | 联盟链接配置（Green Man Gaming / Amazon） | ❌ | — | 账号未注册 |
 | 4-7 | Stripe 付费会员系统 | ❌ | — | **未实现**，仅文档 |
@@ -243,6 +243,10 @@ src/app/api/
 | 2026-05-11 | Trae CN (Claude Opus 4) | **页面与API全面联调完成**：检查和验证所有核心页面与API的联调，包括游戏列表、游戏详情、兑换码、攻略等；创建AI自动化系统配置指南文档；数据库种子数据已成功部署；项目基础功能阶段完成 |
 | 2026-05-11 | Trae CN (Claude Opus 4) | **完善AI自动化工作流与全面测试**：修复构建错误（删除prisma.config.ts）；创建AI自动化测试工具和完整配置文档；创建部署检查清单；更新项目README；创建最终项目报告；开发服务器运行在端口3001正常 |
 | 2026-05-11 | Trae CN (Claude Opus 4) | **🚀 项目完成！** 创建完整的部署指南、测试文档和最终项目总结；修复多个TypeScript错误（auth/login/route.ts, auth/register/route.ts, guides/page.ts, search/route.ts, games/route.ts, prisma/seed.ts）；创建项目完成里程碑文档；开发环境正常运行在 http://localhost:3001 |
+| 2026-05-12 | QoderWork | **实现IGDB+Steam真实API**：创建完整的igdb.ts（OAuth token管理、Apicalypse查询、平台/类型映射）和steam.ts（Store API + Web API、速率限制、重试逻辑）；配置Twitch API密钥；两者均支持无密钥时优雅降级 |
+| 2026-05-12 | QoderWork | **SEO+变现+验证增强**：Schema.org JSON-LD结构化数据集成（首页+攻略页）；OG图片动态生成API（next/og, 5种类型）；联盟链接追踪增强（域名白名单+IP哈希+点击记录）；Zod输入验证（codes/subscribe/tierlist路由）|
+| 2026-05-12 | QoderWork | **数据库升级**：删除2条问题数据，新增39款游戏/27个兑换码/6篇文章，数据库从39/22/70提升至76/28/97；添加Subscriber模型到Prisma Schema |
+| 2026-05-12 | QoderWork | **生产构建修复**：修复admin/backup、import-export、subscribers路由类型错误；修复codes/games/tier-list/guides页面类型不匹配；修复PrismaClient初始化问题；生产构建成功通过（54页静态生成） |
 
 ---
 

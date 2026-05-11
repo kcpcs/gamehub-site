@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { signIn } from '@/lib/auth'
+import { signIn } from 'next-auth/react'
 
 export default function AuthPage() {
   const router = useRouter()
