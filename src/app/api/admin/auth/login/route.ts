@@ -50,36 +50,44 @@ export async function POST(request: NextRequest) {
     const isValid = await bcrypt.compare(password, admin.password_hash)
 
     if (!isValid) {
-      const newFailedAttempts = admin.failed_attempts + 1
-      let lockedUntil = null
+      try {
+        const newFailedAttempts = admin.failed_attempts + 1
+        let lockedUntil = null
 
-      if (newFailedAttempts >= 5) {
-        lockedUntil = new Date(now.getTime() + 15 * 60 * 1000)
+        if (newFailedAttempts >= 5) {
+          lockedUntil = new Date(now.getTime() + 15 * 60 * 1000)
+        }
+
+        await db.adminUser.update({
+          where: { id: admin.id },
+          data: {
+            failed_attempts: newFailedAttempts,
+            locked_until: lockedUntil?.toISOString() || null,
+          },
+        })
+      } catch {
+        // 写入失败（只读文件系统），忽略
       }
 
-      await db.adminUser.update({
-        where: { id: admin.id },
-        data: {
-          failed_attempts: newFailedAttempts,
-          locked_until: lockedUntil?.toISOString() || null,
-        },
-      })
-
-      const attemptsLeft = Math.max(0, 5 - newFailedAttempts)
       return NextResponse.json(
-        { success: false, error: `邮箱或密码错误，剩余${attemptsLeft}次尝试机会` },
+        { success: false, error: '邮箱或密码错误' },
         { status: 401 }
       )
     }
 
-    await db.adminUser.update({
-      where: { id: admin.id },
-      data: {
-        failed_attempts: 0,
-        locked_until: null,
-        last_login_at: new Date().toISOString(),
-      },
-    })
+    // 登录成功，尝试更新记录（失败不影响登录）
+    try {
+      await db.adminUser.update({
+        where: { id: admin.id },
+        data: {
+          failed_attempts: 0,
+          locked_until: null,
+          last_login_at: new Date().toISOString(),
+        },
+      })
+    } catch {
+      // 只读环境下写入失败，忽略
+    }
 
     const session = await createAdminSession(admin)
 
