@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { algoliasearch } from 'algoliasearch'
 import { redis } from '@/lib/redis'
 import type { ApiResponse } from '@/types'
 
 const CACHE_TTL = 300
 
+const client = process.env.ALGOLIA_APP_ID && process.env.ALGOLIA_API_KEY
+  ? algoliasearch(process.env.ALGOLIA_APP_ID, process.env.ALGOLIA_API_KEY)
+  : null
+
 interface SearchHit {
   objectID: string
-  type: 'game' | 'guide'
+  type: 'game' | 'guide' | 'code'
   slug: string
   title: string
   image_url: string
@@ -18,11 +22,14 @@ interface SearchHit {
 }
 
 /**
- * GET /api/search?q=query&type=games|guides|all&page=1
- * Database-based search with Redis caching.
- * Returns: ApiResponse<{ hits: SearchHit[]; nbHits: number; query: string }>
+ * GET /api/search?q=query&type=games|guides|codes|all&page=1
+ * Algolia-powered full-text search with Redis caching.
  */
 export async function GET(req: NextRequest) {
+  if (!client) {
+    return NextResponse.json({ success: false, error: 'Search not configured', code: 'SERVICE_UNAVAILABLE' }, { status: 503 })
+  }
+
   const { searchParams } = req.nextUrl
   const query = searchParams.get('q')?.trim()
   const type  = searchParams.get('type') ?? 'all'
@@ -33,7 +40,7 @@ export async function GET(req: NextRequest) {
   }
 
   const cacheKey = `search:${type}:${query}:${page}`
-  
+
   try {
     const cached = await redis.get(cacheKey)
     if (cached) {
@@ -41,85 +48,75 @@ export async function GET(req: NextRequest) {
     }
 
     const hits: SearchHit[] = []
-    
+    let nbHits = 0
+
+    const searchParamsAlgolia = {
+      query,
+      hitsPerPage: 10,
+      page,
+    }
+
     if (type === 'games' || type === 'all') {
-      const games = await db.game.findMany({
-        select: {
-          id: true,
-          slug: true,
-          name: true,
-          cover_url: true,
-          description: true,
-          platforms: true,
-          genres: true,
-        },
-        take: 10,
-        skip: page * 10,
+      const { hits: gameHits, nbHits: gameNbHits } = await client.searchSingleIndex({
+        indexName: 'gamehub_games',
+        searchParams: searchParamsAlgolia,
       })
-
-      // Filter on client side for SQLite
-      const filteredGames = games.filter(game => {
-        const searchLower = query.toLowerCase()
-        return game.name.toLowerCase().includes(searchLower) ||
-               game.slug.toLowerCase().includes(searchLower) ||
-               (game.description && game.description.toLowerCase().includes(searchLower))
-      })
-
-      filteredGames.forEach(game => {
+      nbHits += gameNbHits ?? 0
+      gameHits.forEach((hit: any) => {
         hits.push({
-          objectID: `game-${game.id}`,
+          objectID: hit.objectID,
           type: 'game',
-          slug: game.slug,
-          title: game.name,
-          image_url: game.cover_url,
-          excerpt: game.description?.slice(0, 150) + '...',
-          platform: game.platforms as string[],
-          genre: game.genres as string[],
+          slug: hit.slug,
+          title: hit.name,
+          image_url: hit.cover_url || '',
+          excerpt: hit.description?.slice(0, 150) + '...',
+          platform: hit.platforms,
+          genre: hit.genres,
         })
       })
     }
 
     if (type === 'guides' || type === 'all') {
-      const articles = await db.article.findMany({
-        where: {
-          status: 'published',
-        },
-        select: {
-          id: true,
-          slug: true,
-          title: true,
-          cover_url: true,
-          excerpt: true,
-          game: { select: { name: true } },
-        },
-        take: 10,
-        skip: page * 10,
+      const { hits: articleHits, nbHits: articleNbHits } = await client.searchSingleIndex({
+        indexName: 'gamehub_articles',
+        searchParams: searchParamsAlgolia,
       })
-
-      // Filter on client side for SQLite
-      const filteredArticles = articles.filter(article => {
-        const searchLower = query.toLowerCase()
-        return article.title.toLowerCase().includes(searchLower) ||
-               article.slug.toLowerCase().includes(searchLower) ||
-               (article.excerpt && article.excerpt.toLowerCase().includes(searchLower))
-      })
-
-      filteredArticles.forEach(article => {
+      nbHits += articleNbHits ?? 0
+      articleHits.forEach((hit: any) => {
         hits.push({
-          objectID: `guide-${article.id}`,
+          objectID: hit.objectID,
           type: 'guide',
-          slug: article.slug,
-          title: article.title,
-          image_url: article.cover_url,
-          excerpt: article.excerpt || undefined,
-          game_name: article.game?.name,
+          slug: hit.slug,
+          title: hit.title,
+          image_url: hit.cover_url || '',
+          excerpt: hit.excerpt,
+          game_name: hit.game_name,
+        })
+      })
+    }
+
+    if (type === 'codes' || type === 'all') {
+      const { hits: codeHits, nbHits: codeNbHits } = await client.searchSingleIndex({
+        indexName: 'gamehub_codes',
+        searchParams: searchParamsAlgolia,
+      })
+      nbHits += codeNbHits ?? 0
+      codeHits.forEach((hit: any) => {
+        hits.push({
+          objectID: hit.objectID,
+          type: 'code',
+          slug: hit.game_slug || hit.code,
+          title: hit.code,
+          image_url: '',
+          excerpt: hit.reward_desc,
+          game_name: hit.game_name,
         })
       })
     }
 
     const response: ApiResponse<{ hits: typeof hits; nbHits: number; query: string }> = {
       success: true,
-      data: { hits, nbHits: hits.length, query },
+      data: { hits, nbHits, query },
     }
 
     await redis.set(cacheKey, response, { ex: CACHE_TTL })

@@ -176,9 +176,9 @@ src/app/api/
 |-----|------|------|---------|--------|
 | Vercel | Next.js 部署 | ⏳ | vercel.com | 🔴 高 |
 | Railway | PostgreSQL + n8n | ⏳ | railway.app | 🔴 高 |
-| Upstash | Redis 缓存 | ⏳ | upstash.com | 🟡 中 |
-| Twitch Dev | IGDB API | ⏳ | dev.twitch.tv/console/apps | 🟡 中 |
-| Algolia | 全站搜索 | ⏳ | algolia.com | 🟡 中 |
+| Upstash | Redis 缓存 | ✅ | upstash.com | 🟡 中 |
+| Twitch Dev | IGDB API | ✅ | dev.twitch.tv/console/apps | 🟡 中 |
+| Algolia | 全站搜索 | ✅ | algolia.com | 🟡 中 |
 | Anthropic | Claude API | ⏳ | console.anthropic.com | 🟡 中 |
 | Cloudflare | CDN + R2 存储 | ⏳ | cloudflare.com | 🟢 低 |
 | Google AdSense | 广告变现 | ⏳ | adsense.google.com | 🟢 低 |
@@ -247,6 +247,7 @@ src/app/api/
 | 2026-05-12 | QoderWork | **SEO+变现+验证增强**：Schema.org JSON-LD结构化数据集成（首页+攻略页）；OG图片动态生成API（next/og, 5种类型）；联盟链接追踪增强（域名白名单+IP哈希+点击记录）；Zod输入验证（codes/subscribe/tierlist路由）|
 | 2026-05-12 | QoderWork | **数据库升级**：删除2条问题数据，新增39款游戏/27个兑换码/6篇文章，数据库从39/22/70提升至76/28/97；添加Subscriber模型到Prisma Schema |
 | 2026-05-12 | QoderWork | **生产构建修复**：修复admin/backup、import-export、subscribers路由类型错误；修复codes/games/tier-list/guides页面类型不匹配；修复PrismaClient初始化问题；生产构建成功通过（54页静态生成） |
+| 2026-05-12 | QoderWork | **外部服务配置**：Upstash Redis连接成功（新加坡节点）；Algolia搜索索引完成（76游戏+28文章+97兑换码），搜索测试通过 |
 
 ---
 
