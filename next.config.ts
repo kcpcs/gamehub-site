@@ -1,8 +1,14 @@
 import type { NextConfig } from "next";
+import path from "path";
 
 const nextConfig: NextConfig = {
   turbopack: {
     root: "./",
+  },
+  outputFileTracingIncludes: {
+    '/api/**/*': ['./dev.db'],
+    '/admin/**/*': ['./dev.db'],
+    '/**/*': ['./dev.db'],
   },
   images: {
     remotePatterns: [

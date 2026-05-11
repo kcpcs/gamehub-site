@@ -1,15 +1,28 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaLibSql } from '@prisma/adapter-libsql';
+import path from 'path';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+function getDatabaseUrl(): string {
+  if (process.env.DATABASE_URL && !process.env.DATABASE_URL.startsWith('file:')) {
+    // 远程数据库URL（如 Turso）直接使用
+    return process.env.DATABASE_URL;
+  }
+  
+  // 本地/Vercel文件数据库 - 使用绝对路径
+  const dbPath = path.join(process.cwd(), 'dev.db');
+  return `file:${dbPath}`;
+}
+
 function getDb(): PrismaClient {
   if (!globalForPrisma.prisma) {
     try {
+      const dbUrl = getDatabaseUrl();
       const adapter = new PrismaLibSql({
-        url: process.env.DATABASE_URL || 'file:./dev.db',
+        url: dbUrl,
       });
       globalForPrisma.prisma = new PrismaClient({
         adapter,
