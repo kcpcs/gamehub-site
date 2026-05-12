@@ -62,7 +62,12 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const session = await auth()
+  let session = null
+  try {
+    session = await auth()
+  } catch {
+    // auth() may fail if NEXTAUTH_SECRET is missing or DB is unavailable
+  }
 
   return (
     <html lang="en" suppressHydrationWarning>

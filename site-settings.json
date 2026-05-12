@@ -1,0 +1,32 @@
+{
+  "siteName": "GameHub",
+  "tagline": "Your Ultimate Gaming Guide Hub",
+  "defaultLanguage": "en",
+  "seo": {
+    "defaultTitle": "GameHub - Gaming Guides, Tier Lists & Codes",
+    "defaultDescription": "Discover the best gaming guides, tier lists, redemption codes, and strategies for your favorite games.",
+    "defaultKeywords": ["gaming", "guides", "tier lists", "game codes", "walkthroughs"]
+  },
+  "socialLinks": {
+    "twitter": "",
+    "discord": "",
+    "youtube": "",
+    "reddit": ""
+  },
+  "features": {
+    "aiPlayersEnabled": true,
+    "commentsEnabled": true,
+    "codeSubmissionEnabled": true
+  },
+  "smtp": {
+    "host": "",
+    "port": 587,
+    "user": "",
+    "configured": false
+  },
+  "apiKeys": {
+    "igdbConfigured": false,
+    "steamConfigured": false,
+    "openaiConfigured": false
+  }
+}
