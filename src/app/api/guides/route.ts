@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { redis } from '@/lib/redis'
+import { safeJsonParse } from '@/lib/data-utils'
 import type { ApiResponse, ArticleFilters, PaginationMeta } from '@/types'
 
 const CACHE_TTL = 300
@@ -24,7 +25,10 @@ export async function GET(req: NextRequest) {
 
   try {
     const cached = await redis.get(cacheKey)
-    if (cached) return NextResponse.json(cached)
+    if (cached) {
+      const parsedCached = typeof cached === 'string' ? JSON.parse(cached) : cached
+      return NextResponse.json(parsedCached)
+    }
 
     const where: Record<string, unknown> = { status: 'published' }
     if (filters.article_type) where.article_type = filters.article_type
@@ -50,7 +54,7 @@ export async function GET(req: NextRequest) {
         select: {
           id: true, slug: true, title: true, article_type: true,
           cover_url: true, cover_alt: true, excerpt: true, read_time: true,
-          view_count: true, published_at: true,
+          view_count: true, published_at: true, seo_keywords: true,
           game: { select: { slug: true, name: true } },
           author: { select: { id: true, username: true, avatar: true, creator_level: true } },
         },
@@ -58,17 +62,23 @@ export async function GET(req: NextRequest) {
       db.article.count({ where }),
     ])
 
+    // 处理文章数据
+    const processedArticles = articles.map(article => ({
+      ...article,
+      seo_keywords: safeJsonParse(article.seo_keywords, []),
+    }))
+
     const meta: PaginationMeta = {
       page: filters.page ?? 1, limit: filters.limit ?? 20, total,
       has_next: skip + articles.length < total,
       has_prev: (filters.page ?? 1) > 1,
     }
 
-    const response: ApiResponse<{ articles: typeof articles; meta: PaginationMeta }> = {
-      success: true, data: { articles, meta }, meta,
+    const response: ApiResponse<{ articles: typeof processedArticles; meta: PaginationMeta }> = {
+      success: true, data: { articles: processedArticles, meta }, meta,
     }
 
-    await redis.set(cacheKey, response, { ex: CACHE_TTL })
+    await redis.set(cacheKey, JSON.stringify(response), { ex: CACHE_TTL })
     return NextResponse.json(response)
   } catch (err) {
     console.error('[GET /api/guides]', err)

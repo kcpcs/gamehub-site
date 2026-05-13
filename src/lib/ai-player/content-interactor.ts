@@ -51,12 +51,14 @@ export class ContentInteractor {
     }
   }
 
-  async generateReply(context: string, parentContent?: string): Promise<GeneratedContent> {
+  async generateReply(context: string, parentContent?: string, articleSlug?: string): Promise<GeneratedContent> {
     const tone = this.getTone()
     const interests = this.getInterests()
     const personality = this.getPersonalityDescription()
 
-    const systemPrompt = `
+    const conversationHistory = articleSlug ? await this.getConversationHistory(articleSlug) : []
+
+    let systemPrompt = `
       You are ${this.player.username}, a ${this.player.occupation || 'gamer'} aged ${this.player.age || 'unknown'}.
       Personality: ${personality}
       Interests: ${interests.join(', ')}
@@ -70,11 +72,20 @@ export class ContentInteractor {
       - Sound natural, not robotic
       - Use appropriate emojis if fitting your tone
       - Avoid formal language unless your tone is professional
+    `
 
+    if (conversationHistory.length > 0) {
+      systemPrompt += `
+        Previous conversation (for context):
+        ${conversationHistory.map((msg, i) => `${i + 1}. ${msg}`).join('\n')}
+      `
+    }
+
+    systemPrompt += `
       Only output the reply text, no extra formatting.
     `
 
-    const userMessage = parentContent 
+    const userMessage = parentContent
       ? `Parent comment: ${parentContent}\n\nNew comment: ${context}\n\nYour reply:`
       : `Context: ${context}\n\nYour reply:`
 
@@ -163,11 +174,33 @@ export class ContentInteractor {
     }
   }
 
+  private async getConversationHistory(articleSlug: string): Promise<string[]> {
+    try {
+      const comments = await db.comment.findMany({
+        where: { article_slug: articleSlug },
+        select: {
+          author_username: true,
+          content: true,
+          created_at: true,
+        },
+        orderBy: { created_at: 'asc' },
+        take: 10,
+      })
+
+      return comments.map(
+        (c) =>
+          `${c.author_username}: ${c.content.substring(0, 100)}${c.content.length > 100 ? '...' : ''}`
+      )
+    } catch {
+      return []
+    }
+  }
+
   private getTone(): string {
-    const personality = typeof this.player.personality === 'string' 
-      ? JSON.parse(this.player.personality) 
+    const personality = typeof this.player.personality === 'string'
+      ? JSON.parse(this.player.personality)
       : this.player.personality
-    
+
     return personality.tone || 'friendly'
   }
 

@@ -2,26 +2,26 @@ import { useState } from 'react'
 import { TrendingUp, Users, FileText, Gift, ArrowUpRight, ArrowDownRight } from 'lucide-react'
 
 const stats = [
-  { label: '总用户数', value: 12580, change: '+12.5%', positive: true, icon: Users },
-  { label: '攻略文章', value: 289, change: '+8.3%', positive: true, icon: FileText },
-  { label: '兑换码', value: 156, change: '+5.2%', positive: true, icon: Gift },
-  { label: '今日访问', value: 3420, change: '-2.1%', positive: false, icon: TrendingUp },
+  { label: 'Total Users', value: 12580, change: '+12.5%', positive: true, icon: Users },
+  { label: 'Guides', value: 289, change: '+8.3%', positive: true, icon: FileText },
+  { label: 'Redeem Codes', value: 156, change: '+5.2%', positive: true, icon: Gift },
+  { label: 'Today\'s Visits', value: 3420, change: '-2.1%', positive: false, icon: TrendingUp },
 ]
 
 const recentActivity = [
-  { id: 1, type: '攻略', title: '原神新手入门指南', author: '玩家小明', time: '5分钟前', status: 'published' },
-  { id: 2, type: '评论', title: '感谢分享！', author: '游戏达人', time: '12分钟前', status: 'approved' },
-  { id: 3, type: '兑换码', title: 'GENSHINGIFT', author: '管理员', time: '30分钟前', status: 'active' },
-  { id: 4, type: '攻略', title: '艾尔登法环Boss攻略', author: '硬核玩家', time: '1小时前', status: 'pending' },
-  { id: 5, type: '用户', title: '新用户注册', author: '新用户123', time: '2小时前', status: 'registered' },
+  { id: 1, type: 'Guide', title: 'Genshin Impact Beginner Guide', author: 'Player Xiao', time: '5 minutes ago', status: 'published' },
+  { id: 2, type: 'Comment', title: 'Great guide!', author: 'GameMaster', time: '12 minutes ago', status: 'approved' },
+  { id: 3, type: 'Code', title: 'GENSHINGIFT', author: 'Admin', time: '30 minutes ago', status: 'active' },
+  { id: 4, type: 'Guide', title: 'Elden Ring Boss Guide', author: 'Hardcore Player', time: '1 hour ago', status: 'pending' },
+  { id: 5, type: 'User', title: 'New User Registration', author: 'NewUser123', time: '2 hours ago', status: 'registered' },
 ]
 
 const topGames = [
-  { rank: 1, name: '原神', guides: 156, visits: 125800, trend: '+15%' },
-  { rank: 2, name: '艾尔登法环', guides: 89, visits: 89500, trend: '+8%' },
+  { rank: 1, name: 'Genshin Impact', guides: 156, visits: 125800, trend: '+15%' },
+  { rank: 2, name: 'Elden Ring', guides: 89, visits: 89500, trend: '+8%' },
   { rank: 3, name: 'Valorant', guides: 67, visits: 76200, trend: '+12%' },
-  { rank: 4, name: '塞尔达传说', guides: 54, visits: 65800, trend: '-3%' },
-  { rank: 5, name: '博德之门3', guides: 43, visits: 45200, trend: '+25%' },
+  { rank: 4, name: 'Zelda: Breath of the Wild', guides: 54, visits: 65800, trend: '-3%' },
+  { rank: 5, name: 'Baldur\'s Gate 3', guides: 43, visits: 45200, trend: '+25%' },
 ]
 
 export function Dashboard() {
@@ -58,9 +58,9 @@ export function Dashboard() {
         <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
           <div className="p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">最近活动</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Activity</h3>
               <button className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">
-                查看全部
+                View All
               </button>
             </div>
           </div>
@@ -70,9 +70,9 @@ export function Dashboard() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      activity.type === '攻略' ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400' :
-                      activity.type === '评论' ? 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400' :
-                      activity.type === '兑换码' ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400' :
+                      activity.type === 'Guide' ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400' :
+                      activity.type === 'Comment' ? 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400' :
+                      activity.type === 'Code' ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400' :
                       'bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
                     }`}>
                       {activity.type}
@@ -89,10 +89,10 @@ export function Dashboard() {
                       ? 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400'
                       : 'bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
                   }`}>
-                    {activity.status === 'published' ? '已发布' :
-                     activity.status === 'approved' ? '已审核' :
-                     activity.status === 'active' ? '有效' :
-                     activity.status === 'pending' ? '待审核' : '已注册'}
+                    {activity.status === 'published' ? 'Published' :
+                     activity.status === 'approved' ? 'Approved' :
+                     activity.status === 'active' ? 'Active' :
+                     activity.status === 'pending' ? 'Pending' : 'Registered'}
                   </span>
                 </div>
               </div>
@@ -104,15 +104,15 @@ export function Dashboard() {
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
           <div className="p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">热门游戏排行</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Top Games</h3>
               <select 
                 value={timeRange}
                 onChange={(e) => setTimeRange(e.target.value)}
                 className="text-sm bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1.5"
               >
-                <option value="7days">近7天</option>
-                <option value="30days">近30天</option>
-                <option value="90days">近90天</option>
+                <option value="7days">Last 7 Days</option>
+                <option value="30days">Last 30 Days</option>
+                <option value="90days">Last 90 Days</option>
               </select>
             </div>
           </div>
@@ -130,7 +130,7 @@ export function Dashboard() {
                   </span>
                   <div className="flex-1">
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{game.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{game.guides} 篇攻略</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{game.guides} guides</p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{(game.visits / 1000).toFixed(1)}k</p>

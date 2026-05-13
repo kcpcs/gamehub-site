@@ -1,31 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
-// GET /api/admin/codes/[id] - 获取单个兑换码
+// GET /api/admin/codes/[id] - 获取单个兑换码详情
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = params
 
     const code = await db.gameCode.findUnique({
       where: { id },
       include: {
-        game: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-          },
-        },
-        submitted_by: {
-          select: {
-            id: true,
-            username: true,
-            email: true,
-          },
-        },
+        game: true,
+        submitted_by: true,
       },
     })
 
@@ -46,36 +34,29 @@ export async function GET(
   }
 }
 
-// PATCH /api/admin/codes/[id] - 更新兑换码
+// PATCH /api/admin/codes/[id] - 更新单个兑换码
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = params
     const body = await request.json()
 
-    const code = await db.gameCode.findUnique({ where: { id } })
-    if (!code) {
-      return NextResponse.json(
-        { success: false, error: 'Code not found' },
-        { status: 404 }
-      )
-    }
-
-    const updatedCode = await db.gameCode.update({
+    const code = await db.gameCode.update({
       where: { id },
       data: {
-        code: body.code ?? code.code,
-        game_id: body.game_id ?? code.game_id,
-        reward_desc: body.reward_desc ?? code.reward_desc,
-        source: body.source ?? code.source,
-        status: body.status ?? code.status,
-        expires_at: body.expires_at ? new Date(body.expires_at) : code.expires_at,
+        code: body.code,
+        game_id: body.game_id,
+        reward_desc: body.reward_desc,
+        source: body.source,
+        status: body.status,
+        expires_at: body.expires_at ? new Date(body.expires_at) : undefined,
+        verified_at: body.status === 'active' ? new Date() : undefined,
       },
     })
 
-    return NextResponse.json({ success: true, data: updatedCode })
+    return NextResponse.json({ success: true, data: code })
   } catch (error) {
     console.error('Error updating code:', error)
     return NextResponse.json(
@@ -85,13 +66,13 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/admin/codes/[id] - 删除兑换码
+// DELETE /api/admin/codes/[id] - 删除单个兑换码
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = params
 
     const code = await db.gameCode.findUnique({ where: { id } })
     if (!code) {
@@ -101,7 +82,9 @@ export async function DELETE(
       )
     }
 
-    await db.gameCode.delete({ where: { id } })
+    await db.gameCode.delete({
+      where: { id },
+    })
 
     await db.game.update({
       where: { id: code.game_id },

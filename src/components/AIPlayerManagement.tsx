@@ -112,7 +112,7 @@ export function AIPlayerManagement() {
   }
 
   const handleDeletePlayer = async (playerId: string) => {
-    if (!confirm('确定要删除这个AI玩家吗？')) return
+    if (!confirm('Are you sure you want to delete this AI player?')) return
     try {
       await fetch(`/api/admin/ai-players/${playerId}`, { method: 'DELETE' })
       fetchPlayers()
@@ -197,9 +197,9 @@ export function AIPlayerManagement() {
 
   const getStatusLabel = (status: string) => {
     switch (status) {
-      case 'active': return '运行中'
-      case 'inactive': return '已停止'
-      case 'paused': return '已暂停'
+      case 'active': return 'Active'
+      case 'inactive': return 'Inactive'
+      case 'paused': return 'Paused'
       default: return status
     }
   }
@@ -216,22 +216,22 @@ export function AIPlayerManagement() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-xl font-semibold text-gray-900">AI 仿真实玩家管理</h3>
-          <p className="text-sm text-gray-500">管理和监控AI玩家角色</p>
+          <h3 className="text-xl font-semibold text-gray-900">AI Player Management</h3>
+          <p className="text-sm text-gray-500">Manage and monitor AI player characters</p>
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
           className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
         >
           <Plus size={20} />
-          创建AI玩家
+          Create AI Player
         </button>
       </div>
 
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <Users className="w-5 h-5 text-gray-500" />
-          <span className="text-sm text-gray-600">筛选:</span>
+          <span className="text-sm text-gray-600">Filter:</span>
         </div>
         {['all', 'active', 'inactive', 'paused'].map((status) => (
           <button
@@ -243,7 +243,7 @@ export function AIPlayerManagement() {
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
             }`}
           >
-            {status === 'all' ? '全部' : getStatusLabel(status)}
+            {status === 'all' ? 'All' : getStatusLabel(status)}
           </button>
         ))}
       </div>
@@ -269,14 +269,14 @@ export function AIPlayerManagement() {
                   <div className="text-right">
                     <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Activity size={16} />
-                      <span>{player.total_posts} 帖子</span>
+                      <span>{player.total_posts} posts</span>
                       <span className="text-gray-300">|</span>
-                      <span>{player.total_comments} 评论</span>
+                      <span>{player.total_comments} comments</span>
                     </div>
                     {player.last_activity_at && (
                       <div className="flex items-center gap-2 text-xs text-gray-400 mt-1">
                         <Clock size={12} />
-                        <span>最后活跃: {new Date(player.last_activity_at).toLocaleString()}</span>
+                        <span>Last active: {new Date(player.last_activity_at).toLocaleString()}</span>
                       </div>
                     )}
                   </div>
@@ -297,31 +297,31 @@ export function AIPlayerManagement() {
                     <div>
                       <h5 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
                         <Settings size={16} />
-                        角色属性
+                        Character Attributes
                       </h5>
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
-                          <span className="text-gray-500">年龄</span>
-                          <span className="text-gray-900">{player.age || '未设置'}</span>
+                          <span className="text-gray-500">Age</span>
+                          <span className="text-gray-900">{player.age || 'Not set'}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-500">职业</span>
-                          <span className="text-gray-900">{player.occupation || '未设置'}</span>
+                          <span className="text-gray-500">Occupation</span>
+                          <span className="text-gray-900">{player.occupation || 'Not set'}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-500">活跃度</span>
+                          <span className="text-gray-500">Activity Level</span>
                           <span className="text-gray-900">{(player.activity_level * 100).toFixed(0)}%</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-gray-500">性格</span>
+                          <span className="text-gray-500">Personality</span>
                           <span className="text-gray-900">
                             {typeof player.personality === 'string' 
                               ? JSON.parse(player.personality).tone 
-                              : player.personality.tone || '友好'}
+                              : player.personality.tone || 'Friendly'}
                           </span>
                         </div>
                         <div>
-                          <span className="text-gray-500">兴趣爱好</span>
+                          <span className="text-gray-500">Interests</span>
                           <div className="flex flex-wrap gap-2 mt-1">
                             {Array.isArray(player.interests) 
                               ? player.interests.map((interest, idx) => (
@@ -345,31 +345,31 @@ export function AIPlayerManagement() {
                       <div>
                         <h5 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
                           <Clock size={16} />
-                          行为配置
+                          Behavior Configuration
                         </h5>
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
-                            <span className="text-gray-500">活动时间</span>
+                            <span className="text-gray-500">Active Hours</span>
                             <span className="text-gray-900">
                               {player.behavior_config.wake_up_time} - {player.behavior_config.sleep_time}
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-500">活动间隔</span>
+                            <span className="text-gray-500">Activity Interval</span>
                             <span className="text-gray-900">
-                              {player.behavior_config.activity_interval_min/60}-{player.behavior_config.activity_interval_max/60}分钟
+                              {player.behavior_config.activity_interval_min/60}-{player.behavior_config.activity_interval_max/60} minutes
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-500">发帖概率</span>
+                            <span className="text-gray-500">Post Probability</span>
                             <span className="text-gray-900">{(player.behavior_config.post_probability * 100).toFixed(0)}%</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-500">评论概率</span>
+                            <span className="text-gray-500">Comment Probability</span>
                             <span className="text-gray-900">{(player.behavior_config.comment_probability * 100).toFixed(0)}%</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-500">回复概率</span>
+                            <span className="text-gray-500">Reply Probability</span>
                             <span className="text-gray-900">{(player.behavior_config.reply_probability * 100).toFixed(0)}%</span>
                           </div>
                         </div>
@@ -387,7 +387,7 @@ export function AIPlayerManagement() {
                       className="flex items-center gap-1 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-200 rounded-lg transition-colors"
                     >
                       <Edit2 size={16} />
-                      编辑
+                      Edit
                     </button>
                     {player.status === 'inactive' && (
                       <button
@@ -398,7 +398,7 @@ export function AIPlayerManagement() {
                         className="flex items-center gap-1 px-3 py-1.5 text-sm text-green-600 hover:bg-green-100 rounded-lg transition-colors"
                       >
                         <Play size={16} />
-                        启动
+                        Start
                       </button>
                     )}
                     {player.status === 'active' && (
@@ -410,7 +410,7 @@ export function AIPlayerManagement() {
                         className="flex items-center gap-1 px-3 py-1.5 text-sm text-yellow-600 hover:bg-yellow-100 rounded-lg transition-colors"
                       >
                         <Square size={16} />
-                        停止
+                        Stop
                       </button>
                     )}
                     <button
@@ -421,7 +421,7 @@ export function AIPlayerManagement() {
                       className="flex items-center gap-1 px-3 py-1.5 text-sm text-red-600 hover:bg-red-100 rounded-lg transition-colors"
                     >
                       <Trash2 size={16} />
-                      删除
+                      Delete
                     </button>
                   </div>
                 </div>
@@ -433,12 +433,12 @@ export function AIPlayerManagement() {
         {players.length === 0 && (
           <div className="py-12 text-center">
             <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500">暂无AI玩家</p>
+            <p className="text-gray-500">No AI players yet</p>
             <button
               onClick={() => setShowCreateModal(true)}
               className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
             >
-              创建第一个AI玩家
+              Create first AI player
             </button>
           </div>
         )}
@@ -448,7 +448,7 @@ export function AIPlayerManagement() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-4 border-b">
-              <h3 className="text-lg font-semibold">创建AI玩家</h3>
+              <h3 className="text-lg font-semibold">Create AI Player</h3>
               <button 
                 onClick={() => setShowCreateModal(false)}
                 className="p-1 hover:bg-gray-100 rounded"
@@ -459,7 +459,7 @@ export function AIPlayerManagement() {
             <form onSubmit={handleCreatePlayer} className="p-4 space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">用户名 *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Username *</label>
                   <input
                     type="text"
                     required
@@ -469,7 +469,7 @@ export function AIPlayerManagement() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">邮箱 *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
                   <input
                     type="email"
                     required
@@ -481,7 +481,7 @@ export function AIPlayerManagement() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">年龄</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Age</label>
                   <input
                     type="number"
                     value={newPlayer.age}
@@ -490,7 +490,7 @@ export function AIPlayerManagement() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">职业</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Occupation</label>
                   <input
                     type="text"
                     value={newPlayer.occupation}
@@ -500,18 +500,18 @@ export function AIPlayerManagement() {
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">兴趣爱好（逗号分隔）</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Interests (comma separated)</label>
                 <input
                   type="text"
                   value={newPlayer.interests}
                   onChange={(e) => setNewPlayer({...newPlayer, interests: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="游戏, 电竞, 编程, 音乐"
+                  placeholder="games, esports, programming, music"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">活跃度</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Activity Level</label>
                   <input
                     type="number"
                     step="0.1"
@@ -523,25 +523,25 @@ export function AIPlayerManagement() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">语气风格</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tone Style</label>
                   <select
                     value={newPlayer.tone}
                     onChange={(e) => setNewPlayer({...newPlayer, tone: e.target.value})}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="friendly">友好</option>
-                    <option value="professional">专业</option>
-                    <option value="casual">随意</option>
-                    <option value="humorous">幽默</option>
-                    <option value="sarcastic">讽刺</option>
+                    <option value="friendly">Friendly</option>
+                    <option value="professional">Professional</option>
+                    <option value="casual">Casual</option>
+                    <option value="humorous">Humorous</option>
+                    <option value="sarcastic">Sarcastic</option>
                   </select>
                 </div>
               </div>
               <div className="border-t pt-4">
-                <h4 className="text-sm font-medium text-gray-700 mb-3">行为配置</h4>
+                <h4 className="text-sm font-medium text-gray-700 mb-3">Behavior Configuration</h4>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">起床时间</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Wake Up Time</label>
                     <input
                       type="time"
                       value={newPlayer.behavior.wake_up_time}
@@ -550,7 +550,7 @@ export function AIPlayerManagement() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">睡觉时间</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Sleep Time</label>
                     <input
                       type="time"
                       value={newPlayer.behavior.sleep_time}
@@ -561,7 +561,7 @@ export function AIPlayerManagement() {
                 </div>
                 <div className="grid grid-cols-3 gap-4 mt-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">发帖概率</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Post Probability</label>
                     <input
                       type="number"
                       step="0.01"
@@ -573,7 +573,7 @@ export function AIPlayerManagement() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">评论概率</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Comment Probability</label>
                     <input
                       type="number"
                       step="0.01"
@@ -585,7 +585,7 @@ export function AIPlayerManagement() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">回复概率</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Reply Probability</label>
                     <input
                       type="number"
                       step="0.01"
@@ -604,14 +604,14 @@ export function AIPlayerManagement() {
                   onClick={() => setShowCreateModal(false)}
                   className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
                 >
-                  取消
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                 >
                   <Save size={16} />
-                  保存
+                  Save
                 </button>
               </div>
             </form>

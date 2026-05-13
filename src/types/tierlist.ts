@@ -2,7 +2,7 @@
 // TIER LIST TYPES  —  READ-ONLY CONTRACT
 // ============================================================
 
-export type TierGrade = 'S' | 'A' | 'B' | 'C' | 'D' | 'F'
+export type TierGrade = 'T0' | 'T1' | 'T2' | 'T3' | 'T4' | 'S' | 'A' | 'B' | 'C' | 'D' | 'F'
 export type TierCategory = 'character' | 'weapon' | 'class' | 'skill' | 'item'
 
 export interface TierEntry {

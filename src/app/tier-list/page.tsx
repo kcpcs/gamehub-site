@@ -58,7 +58,7 @@ export default async function TierListPage() {
             >
               <div className="relative aspect-[3/4] overflow-hidden">
                 <img
-                  src={game.cover_url || `https://picsum.photos/seed/${game.slug}/300/400`}
+                  src={game.cover_url || `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=video%20game%20${encodeURIComponent(game.slug)}%20cover%20dark%20theme&image_size=square`}
                   alt={game.name}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   loading="lazy"

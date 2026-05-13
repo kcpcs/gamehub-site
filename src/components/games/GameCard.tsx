@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client"
 
 import type { Game } from '@/types'
@@ -10,6 +9,24 @@ interface GameCardProps {
   game: Game
 }
 
+// 安全解析 JSON 字段
+function safeJsonParse<T = any>(value: any, defaultValue: T): T {
+  if (value === null || value === undefined) {
+    return defaultValue
+  }
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value)
+    } catch {
+      return defaultValue
+    }
+  }
+  if (Array.isArray(value) || typeof value === 'object') {
+    return value
+  }
+  return defaultValue
+}
+
 function getScoreColor(score?: number): string {
   if (!score || score < 50) return 'var(--danger)'
   if (score < 75) return 'var(--warning)'
@@ -17,8 +34,20 @@ function getScoreColor(score?: number): string {
 }
 
 export function GameCard({ game }: GameCardProps) {
-  const displayScore = game.scores.opencritic || game.scores.community || game.scores.steam_positive_pct
+  // 安全获取数据
+  const scores = game.scores || {}
+  const displayScore = scores.opencritic || scores.community || scores.steam_positive_pct || 
+                      game.score_opencritic || game.score_community || game.score_steam_pct
   const scoreColor = getScoreColor(displayScore)
+  
+  const coverUrl = game.cover?.url || game.cover?.igdb_url || game.cover_url || ''
+  
+  const platforms = safeJsonParse(game.platforms, [])
+  const safePlatforms = Array.isArray(platforms) ? platforms : []
+  
+  const guideCount = game.guide_count || 0
+  const codeCount = game.code_count || 0
+  
   const [isSaved, setIsSaved] = useState(false)
 
   const handleSave = (e: React.MouseEvent) => {
@@ -35,7 +64,7 @@ export function GameCard({ game }: GameCardProps) {
     >
       <div className="relative aspect-[3/4] overflow-hidden">
         <ResponsiveImage
-          src={game.cover.url || game.cover.igdb_url}
+          src={coverUrl}
           alt={game.name}
           className="transition-transform duration-500 group-hover:scale-110"
         />
@@ -75,7 +104,7 @@ export function GameCard({ game }: GameCardProps) {
           </h3>
           
           <div className="flex flex-wrap gap-1.5 mb-2">
-            {game.platforms.slice(0, 3).map((platform) => (
+            {safePlatforms.slice(0, 3).map((platform: string) => (
               <span 
                 key={platform}
                 className="flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium"
@@ -91,13 +120,13 @@ export function GameCard({ game }: GameCardProps) {
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
-              {game.guide_count} guides
+              {guideCount} guides
             </span>
             <span className="flex items-center gap-1 text-xs" style={{ color: 'var(--text-secondary)' }}>
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
-              {game.code_count} codes
+              {codeCount} codes
             </span>
           </div>
         </div>

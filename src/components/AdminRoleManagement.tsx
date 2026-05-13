@@ -26,16 +26,16 @@ interface AdminRole {
 }
 
 const permissionLabels: Record<string, string> = {
-  can_manage_users: '管理用户',
-  can_manage_games: '管理游戏',
-  can_manage_articles: '管理文章',
-  can_manage_codes: '管理兑换码',
-  can_manage_tierlists: '管理排行榜',
-  can_manage_comments: '管理评论',
-  can_view_analytics: '查看分析',
-  can_manage_settings: '管理设置',
-  can_manage_roles: '管理角色',
-  can_manage_ai_players: '管理AI玩家',
+  can_manage_users: 'Manage Users',
+  can_manage_games: 'Manage Games',
+  can_manage_articles: 'Manage Articles',
+  can_manage_codes: 'Manage Codes',
+  can_manage_tierlists: 'Manage Tier Lists',
+  can_manage_comments: 'Manage Comments',
+  can_view_analytics: 'View Analytics',
+  can_manage_settings: 'Manage Settings',
+  can_manage_roles: 'Manage Roles',
+  can_manage_ai_players: 'Manage AI Players',
 }
 
 export function AdminRoleManagement() {
@@ -136,7 +136,7 @@ export function AdminRoleManagement() {
 
       const result = await response.json()
       if (result.success) {
-        setOperationSuccess(editingRole ? '更新成功' : '创建成功')
+        setOperationSuccess(editingRole ? 'Updated successfully' : 'Created successfully')
         setTimeout(() => {
           setShowModal(false)
           fetchRoles()
@@ -145,12 +145,12 @@ export function AdminRoleManagement() {
         setError(result.error)
       }
     } catch (err) {
-      setError('操作失败')
+      setError('Operation failed')
     }
   }
 
   const handleDelete = async (roleId: string) => {
-    if (!confirm('确定要删除该角色吗？')) return
+    if (!confirm('Are you sure you want to delete this role?')) return
     try {
       const response = await fetch(`/api/admin/roles/${roleId}`, {
         method: 'DELETE',
@@ -162,12 +162,12 @@ export function AdminRoleManagement() {
         setError(result.error)
       }
     } catch (err) {
-      setError('删除失败')
+      setError('Delete failed')
     }
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('zh-CN')
+    return new Date(dateString).toLocaleDateString('en-US')
   }
 
   const defaultRoles = ['super_admin_role', 'admin_role', 'moderator_role', 'editor_role']
@@ -177,7 +177,7 @@ export function AdminRoleManagement() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500 dark:text-gray-400">加载中...</p>
+          <p className="text-gray-500 dark:text-gray-400">Loading...</p>
         </div>
       </div>
     )
@@ -193,7 +193,7 @@ export function AdminRoleManagement() {
             onClick={fetchRoles}
             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
           >
-            重试
+            Retry
           </button>
         </div>
       </div>
@@ -205,15 +205,15 @@ export function AdminRoleManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">角色权限管理</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">管理管理员角色和权限</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Role & Permission Management</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage admin roles and permissions</p>
         </div>
         <button
           onClick={handleOpenCreateModal}
           className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
         >
           <Plus size={18} />
-          创建角色
+          Create Role
         </button>
       </div>
 
@@ -242,7 +242,7 @@ export function AdminRoleManagement() {
                   <button
                     onClick={() => handleOpenEditModal(role)}
                     className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
-                    title="编辑"
+                    title="Edit"
                   >
                     <Edit2 size={16} />
                   </button>
@@ -250,7 +250,7 @@ export function AdminRoleManagement() {
                     <button
                       onClick={() => handleDelete(role.id)}
                       className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                      title="删除"
+                      title="Delete"
                     >
                       <Trash2 size={16} />
                     </button>
@@ -262,7 +262,7 @@ export function AdminRoleManagement() {
             {/* Permissions */}
             <div className="p-4">
               <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
-                权限
+                Permissions
               </h4>
               <div className="grid grid-cols-2 gap-2">
                 {Object.entries(permissionLabels).map(([key, label]) => (
@@ -286,9 +286,9 @@ export function AdminRoleManagement() {
             {/* Footer */}
             <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-t border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                <span>创建于 {formatDate(role.created_at)}</span>
+                <span>Created {formatDate(role.created_at)}</span>
                 {defaultRoles.includes(role.id) && (
-                  <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-600 rounded-full">默认角色</span>
+                  <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-600 rounded-full">Default Role</span>
                 )}
               </div>
             </div>
@@ -304,7 +304,7 @@ export function AdminRoleManagement() {
             {/* Modal Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {editingRole ? '编辑角色' : '创建角色'}
+                {editingRole ? 'Edit Role' : 'Create Role'}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
@@ -329,7 +329,7 @@ export function AdminRoleManagement() {
               {/* Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  角色名称 <span className="text-red-500">*</span>
+                  Role Name <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -343,7 +343,7 @@ export function AdminRoleManagement() {
               {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  描述
+                  Description
                 </label>
                 <textarea
                   value={formData.description}
@@ -356,7 +356,7 @@ export function AdminRoleManagement() {
               {/* Permissions */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  权限设置
+                  Permission Settings
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   {Object.entries(permissionLabels).map(([key, label]) => (
@@ -400,14 +400,14 @@ export function AdminRoleManagement() {
                   onClick={() => setShowModal(false)}
                   className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
-                  取消
+                  Cancel
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
                 >
                   <Save size={16} />
-                  {editingRole ? '更新' : '创建'}
+                  {editingRole ? 'Update' : 'Create'}
                 </button>
               </div>
             </form>

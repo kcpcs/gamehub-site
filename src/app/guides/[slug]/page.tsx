@@ -4,8 +4,11 @@ import { VideoEmbed, LiveStreamsSection } from '@/components/VideoEmbed'
 import { LikeButton, BookmarkButton, HelpfulVote, CommentSection, ShareButtons, ReadingProgress } from '@/components/InteractiveComponents'
 import { AuthorCard, RelatedArticles } from '@/components/AuthorComponents'
 import { TableOfContentsNav } from '@/components/TableOfContentsNav'
+import { FAQSection } from '@/components/FAQSection'
+import { FAQSchema } from '@/components/FAQSchema'
 import { Clock, Star } from 'lucide-react'
 import { JsonLdScript, getArticleSchema, getBreadcrumbSchema } from '@/components/seo/JsonLd'
+import { getGameCoverUrl } from '@/lib/game-images'
 
 interface GuideDetailPageProps {
   params: {
@@ -430,243 +433,243 @@ Finding your main takes time, but keep playing and you'll find your champion!`,
       socialLinks: { twitter: 'LoLMaster', youtube: 'LoLMaster' }
     }
   },
-  'hollow-knight-进阶攻略': {
+  'hollow-knight-advanced-guide': {
     id: '6',
-    title: 'Hollow Knight 进阶攻略',
-    slug: 'hollow-knight-进阶攻略',
-    excerpt: '深入探索空洞骑士的进阶玩法和隐藏内容',
-    content: `## 空洞骑士进阶指南
+    title: 'Hollow Knight Advanced Guide',
+    slug: 'hollow-knight-advanced-guide',
+    excerpt: 'Deep dive into Hollow Knight advanced gameplay and hidden content',
+    content: `## Hollow Knight Advanced Guide
 
-欢迎来到空洞骑士的进阶世界！这篇攻略将帮助你深入探索这个美丽而危险的地下王国。
+Welcome to the advanced world of Hollow Knight! This guide will help you explore this beautiful yet dangerous underground kingdom.
 
-### 地图探索技巧
+### Map Exploration Tips
 
-掌握以下技巧可以更高效地探索：
+Master these techniques for efficient exploration:
 
-1. **标记重要位置** - 使用地图标记功能
-2. **学会冲刺** - 快速移动的关键
-3. **二段跳** - 到达更高的地方
-4. **梦之门** - 快速旅行
+1. **Mark important locations** - Use map marking feature
+2. **Learn to dash** - Key to fast movement
+3. **Double jump** - Reach higher places
+4. **Dream gate** - Fast travel
 
-### Boss 战攻略
+### Boss Battle Strategies
 
-主要 Boss 打法：
+Main Boss tactics:
 
-- **假骑士**: 攻击间隔较长，容易躲避
-- **黄蜂女**: 快速移动，注意跳跃攻击
-- **螳螂领主**: 三连斩需要精准躲避
-- **空洞骑士**: 最终 Boss，需要熟练掌握所有技能
+- **False Knight**: Long attack intervals, easy to dodge
+- **Hornet**: Fast movement, watch for jumping attacks
+- **Mantis Lords**: Triple slash needs precise dodging
+- **Hollow Knight**: Final boss, master all skills
 
-### 隐藏区域
+### Hidden Areas
 
-游戏中有许多隐藏区域等待发现：
+Many hidden areas waiting to be discovered:
 
-- **深邃巢穴**: 隐藏的昆虫巢穴
-- **古老盆地**: 游戏的核心区域
-- **格林剧场**: 神秘的表演场地
-- **神居**: 挑战终极 Boss 的地方
+- **Deepnest**: Hidden insect nest
+- **Ancient Basin**: Core area of the game
+- **Grimm Troupe**: Mysterious performance venue
+- **Godhome**: Ultimate boss challenge area
 
-### 护符搭配
+### Charm Builds
 
-选择合适的护符组合：
+Choose the right charm combinations:
 
-| 护符 | 效果 | 推荐搭配 |
-|------|------|----------|
-| 灵魂大师 | 增加灵魂获取 | 战斗流 |
-| 快速聚集 | 快速回复灵魂 | 续航流 |
-| 坚固力量 | 增加攻击力 | 输出流 |
+| Charm | Effect | Recommended Build |
+|------|------|-----------------|
+| Soul Master | Increase soul gain | Combat build |
+| Quick Focus | Fast soul regeneration | Sustain build |
+| Unbreakable Strength | Increase attack power | Damage build |
 
-### 结局解锁
+### Ending Unlocks
 
-游戏有多种结局：
+Game has multiple endings:
 
-1. **普通结局**: 击败空洞骑士
-2. **真结局**: 完成所有条件
-3. **隐藏结局**: 特殊条件触发
+1. **Normal Ending**: Defeat the Hollow Knight
+2. **True Ending**: Complete all conditions
+3. **Hidden Ending**: Special conditions trigger
 
-### 结语
+### Conclusion
 
-空洞骑士是一款充满深度的游戏，祝你探索愉快！`,
+Hollow Knight is a deep game, enjoy your exploration!`,
     read_time: 10,
     view_count: 8500,
     like_count: 1800,
     share_count: 520,
-    published_at: '2024-01-20',
+    published_at: 'January 20, 2024',
     difficulty: 'Expert',
     game: {
       name: 'Hollow Knight',
       slug: 'hollow-knight',
-      cover_url: 'https://picsum.photos/seed/hollowknight/1200/630'
+      cover_url: getGameCoverUrl('Hollow Knight')
     },
     author: {
-      name: '空洞骑士专家',
-      bio: '空洞骑士爱好者，完成所有结局和成就',
+      name: 'Hollow Knight Expert',
+      bio: 'Hollow Knight enthusiast, completed all endings and achievements',
       level: 7,
       reputation: 8500,
       articles: 23,
       followers: 3200,
-      join_date: '2023-06',
+      join_date: 'June 2023',
       socialLinks: { twitter: 'HollowKnightPro' }
     }
   },
-  'god-of-war-新手入门指南': {
+  'god-of-war-beginners-guide': {
     id: '7',
-    title: 'God of War 新手入门指南',
-    slug: 'god-of-war-新手入门指南',
-    excerpt: '踏上奎托斯的北欧征程，掌握战斗和探索技巧',
-    content: `## God of War 新手指南
+    title: 'God of War Beginner Guide',
+    slug: 'god-of-war-beginners-guide',
+    excerpt: 'Embark on Kratos Nordic journey, master combat and exploration',
+    content: `## God of War Beginner Guide
 
-欢迎来到战神的世界！这篇指南将帮助你开始你的北欧之旅。
+Welcome to the world of God of War! This guide will help you start your Nordic journey.
 
-### 战斗基础
+### Combat Basics
 
-战神的战斗系统深度且富有策略性：
+God of War combat system is deep and strategic:
 
-1. **轻攻击**: 快速连续攻击
-2. **重攻击**: 高伤害但较慢
-3. **格挡**: 完美格挡可以反击
-4. **闪避**: 躲避敌人攻击
+1. **Light Attack**: Fast consecutive attacks
+2. **Heavy Attack**: High damage but slower
+3. **Parry**: Perfect parry enables counterattack
+4. **Dodge**: Evade enemy attacks
 
-### 装备系统
+### Equipment System
 
-收集和升级装备：
+Collect and upgrade equipment:
 
-- **武器**: 利维坦之斧和混沌之刃
-- **护甲**: 提供防御和属性加成
-- **符文**: 赋予特殊能力
-- **附魔**: 增强武器效果
+- **Weapons**: Leviathan Axe and Blades of Chaos
+- **Armor**: Provides defense and stat bonuses
+- **Runes**: Grant special abilities
+- **Enchantments**: Enhance weapon effects
 
-### 探索技巧
+### Exploration Tips
 
-九界充满秘密：
+Nine Realms are full of secrets:
 
-- **符文宝箱**: 需要找到符文才能打开
-- **奥丁的渡鸦**: 收集所有渡鸦
-- **诺伦三女神宝箱**: 打破封印获取奖励
-- **隐藏区域**: 仔细探索每个角落
+- **Rune Chests**: Need to find runes to open
+- **Odin Ravens**: Collect all ravens
+- **Nornir Chests**: Break seals for rewards
+- **Hidden Areas**: Explore every corner carefully
 
-### 技能升级
+### Skill Upgrades
 
-升级你的技能树：
+Upgrade your skill tree:
 
-| 技能树 | 特点 |
+| Skill Tree | Features |
 |--------|------|
-| 利维坦之斧 | 冰属性攻击 |
-| 混沌之刃 | 火属性攻击 |
-| 防御技能 | 格挡和闪避 |
-| 斯巴达之怒 | 爆发攻击 |
+| Leviathan Axe | Ice elemental attacks |
+| Blades of Chaos | Fire elemental attacks |
+| Defense Skills | Parry and dodge |
+| Spartan Rage | Burst attacks |
 
-### 角色培养
+### Character Development
 
-提升阿特柔斯的能力：
+Improve Atreus abilities:
 
-- **弓箭技能**: 远程攻击
-- **符文召唤**: 召唤动物伙伴
-- **对话选项**: 影响剧情走向
+- **Bow Skills**: Ranged attacks
+- **Rune Summons**: Summon animal companions
+- **Dialogue Options**: Affect story direction
 
-### 结语
+### Conclusion
 
-战神是一段史诗般的旅程，享受这段冒险吧！`,
+God of War is an epic journey, enjoy the adventure!`,
     read_time: 8,
     view_count: 12000,
     like_count: 2800,
     share_count: 890,
-    published_at: '2024-02-05',
+    published_at: 'February 5, 2024',
     difficulty: 'Beginner',
     game: {
       name: 'God of War',
       slug: 'god-of-war',
-      cover_url: 'https://picsum.photos/seed/godofwar/1200/630'
+      cover_url: getGameCoverUrl('God of War')
     },
     author: {
-      name: '战神玩家',
-      bio: '战神系列忠实粉丝，白金成就获得者',
+      name: 'God of War Player',
+      bio: 'God of War series fan, platinum achievement holder',
       level: 8,
       reputation: 15000,
       articles: 35,
       followers: 5600,
-      join_date: '2022-11',
+      join_date: 'November 2022',
       socialLinks: { youtube: 'GodofWarChannel' }
     }
   },
-  'the-legend-of-zelda-breath-of-the-wild-角色强度排名': {
+  'zelda-breath-of-the-wild-character-tier-list': {
     id: '8',
-    title: 'The Legend of Zelda: Breath of the Wild 角色强度排名',
-    slug: 'the-legend-of-zelda-breath-of-the-wild-角色强度排名',
-    excerpt: '塞尔达传说荒野之息角色强度分析与排名',
-    content: `## 塞尔达传说角色强度排名
+    title: 'The Legend of Zelda: Breath of the Wild Character Tier List',
+    slug: 'zelda-breath-of-the-wild-character-tier-list',
+    excerpt: 'Breath of the Wild character strength analysis and ranking',
+    content: `## Zelda Character Tier List
 
-探索海拉鲁大陆上最强的角色和能力！
+Explore the strongest characters and abilities in Hyrule!
 
-### 角色排名
+### Character Rankings
 
-基于综合能力的排名：
+Ranked based on overall ability:
 
-**S 级 - 最强**:
-- **林克**: 主角，拥有所有能力
-- **塞尔达**: 智慧与力量并存
+**S Tier - Strongest**:
+- **Link**: Main character, all abilities
+- **Zelda**: Wisdom and power combined
 
-**A 级 - 强力**:
-- **达尔克尔**: 岩石之力，防御极强
-- **米法**: 治疗能力，支援型
-- **乌尔波扎**: 雷电攻击，范围伤害
-- **力巴尔**: 飞行能力，空战无敌
+**A Tier - Powerful**:
+- **Daruk**: Rock power, extremely defensive
+- **Mipha**: Healing abilities, support type
+- **Urbosa**: Lightning attacks, area damage
+- **Revali**: Flight ability, unbeatable in air combat
 
-**B 级 - 实用**:
-- **英帕**: 智慧型角色
-- **塞尔达公主**: 剧情关键角色
+**B Tier - Practical**:
+- **Impa**: Wisdom character
+- **Princess Zelda**: Story key character
 
-### 武器强度
+### Weapon Strength
 
-最强武器排名：
+Strongest weapon ranking:
 
-1. **大师剑**: 游戏最强武器
-2. **远古兵装**: 强力古代武器
-3. **守护者武器**: 高科技装备
-4. **神兽武器**: 来自神兽的馈赠
+1. **Master Sword**: Strongest weapon in game
+2. **Ancient Arms**: Powerful ancient weapons
+3. **Guardian Weapons**: High-tech equipment
+4. **Divine Beast Weapons**: Gifts from divine beasts
 
-### 能力解析
+### Ability Analysis
 
-每个角色的独特能力：
+Each character unique ability:
 
-| 角色 | 能力 | 用途 |
+| Character | Ability | Purpose |
 |------|------|------|
-| 达尔克尔 | 守护之力 | 无敌防御 |
-| 米法 | 治愈之光 | 自动回血 |
-| 乌尔波扎 | 雷鸣之力 | 雷电攻击 |
-| 力巴尔 | 御风之力 | 空中冲刺 |
+| Daruk | Protection | Invincible defense |
+| Mipha | Grace | Auto healing |
+| Urbosa | Fury | Lightning attack |
+| Revali | Gale | Air dash |
 
-### 战斗技巧
+### Combat Tips
 
-成为战斗大师：
+Become a combat master:
 
-- **完美闪避**: 触发子弹时间
-- **完美格挡**: 反弹攻击
-- **元素克制**: 利用元素弱点
-- **环境利用**: 使用地形优势
+- **Perfect Dodge**: Trigger bullet time
+- **Perfect Parry**: Reflect attacks
+- **Elemental Weakness**: Use elemental advantages
+- **Environmental Use**: Use terrain to your advantage
 
-### 结语
+### Conclusion
 
-掌握这些技巧，你将成为海拉鲁的传奇！`,
+Master these skills and you will become a legend in Hyrule!`,
     read_time: 7,
     view_count: 15000,
     like_count: 3200,
     share_count: 1100,
-    published_at: '2024-01-28',
+    published_at: 'January 28, 2024',
     difficulty: 'Intermediate',
     game: {
       name: 'The Legend of Zelda: Breath of the Wild',
       slug: 'the-legend-of-zelda-breath-of-the-wild',
-      cover_url: 'https://picsum.photos/seed/zelda/1200/630'
+      cover_url: getGameCoverUrl('The Legend of Zelda Breath of the Wild')
     },
     author: {
-      name: '海拉鲁勇者',
-      bio: '塞尔达传说系列专家，全成就达成',
+      name: 'Hyrule Hero',
+      bio: 'Zelda series expert, all achievements completed',
       level: 9,
       reputation: 18000,
       articles: 42,
       followers: 7800,
-      join_date: '2021-03',
+      join_date: 'March 2021',
       socialLinks: { twitter: 'HyruleHero', youtube: 'ZeldaMaster' }
     }
   }
@@ -744,6 +747,39 @@ const relatedArticles: Record<string, Array<{ id: string; slug: string; title: s
   ]
 }
 
+const faqData: Record<string, Array<{ question: string; answer: string }>> = {
+  'minecraft-survival-guide-2024': [
+    { question: 'What is the best way to find diamonds in Minecraft?', answer: 'The best method is to mine at Y-level -58 using a diamond or netherite pickaxe with the Fortune enchantment. Use TNT or branch mining for efficiency. Always carry torches to light up your path and prevent mob spawns.' },
+    { question: 'How do I survive the first night in Minecraft?', answer: 'Quickly gather wood to craft a workbench and tools, then build a small shelter before dark. Make a bed to skip the night if possible. Digging a 3-block deep hole and covering the top also works as a temporary safe spot.' },
+    { question: 'What food should I prioritize early in the game?', answer: 'Start with bread from wheat, then upgrade to meat from cows or pigs. Cook meat in a furnace to get more hunger points. Farms are essential for sustainable food sources long-term.' },
+    { question: 'How do I defeat the Ender Dragon?', answer: 'First destroy all End Crystals to prevent the dragon from healing. Use beds for massive damage (they explode in the End). Bring plenty of arrows, potions, and blocks to build bridges to the main island.' }
+  ],
+  'genshin-impact-beginners-guide': [
+    { question: 'What is the best 4-star character for beginners?', answer: 'Bennet is widely regarded as the best 4-star character. He provides healing, attack buffs, and Pyro application all in one kit. He works well with almost every team composition.' },
+    { question: 'How should I spend my Primogems as a new player?', answer: 'Always prioritize limited character banners. Save for characters you want rather than pulling on every banner. Avoid spending on the standard banner except with free pulls. 5-star weapons are nice but characters come first.' },
+    { question: 'What artifacts should I farm first?', answer: 'Start with the Noblesse Oblige set for supports and Gladiator\'s Finale for DPS characters. Wait until Adventure Rank 45 to farm artifacts seriously, as that\'s when 5-star artifacts become guaranteed.' },
+    { question: 'How do I increase my Adventure Rank quickly?', answer: 'Complete daily commissions, spend your Resin daily, do world quests, and explore. Open chests, collect waypoints, and do events when available. Resin efficiency is key for consistent progression.' }
+  ],
+  'valorant-agent-guide': [
+    { question: 'What is the best agent for beginners in Valorant?', answer: 'Sage is perfect for beginners. She has simple abilities that help the team (healing, walls, revives) and teaches players about positioning and map control without requiring precise mechanical skill.' },
+    { question: 'How do I improve my aim in Valorant?', answer: 'Practice in the Range daily, focus on crosshair placement, and play Deathmatch. Lower your sensitivity for better precision. Consistency is more important than speed when starting out.' },
+    { question: 'What are the most important callouts to learn?', answer: 'Learn common locations like A Site, B Site, Mid, and spawn. Master the specific callouts for each map - sites, chokepoints, and common angles. Clear communication wins games.' },
+    { question: 'Should I play ranked immediately?', answer: 'Wait until you\'ve mastered the basics in unrated. Learn all agents and maps first. Playing too early can lead to frustration and bad habits. Focus on improvement rather than rank when you do start.' }
+  ],
+  'apex-legends-weapons-guide': [
+    { question: 'What is the best weapon combination in Apex Legends?', answer: 'The R-301 Carbine with a shotgun (either Mastiff or Eva-8) is a very versatile combination. The R-301 handles medium to long range, while the shotgun covers close quarters fights.' },
+    { question: 'How do I get better at movement in Apex?', answer: 'Practice slide jumping, wall bouncing, and tap strafing (if on controller). Movement is key to surviving fights and outmaneuvering opponents. Watch pro players and mimic their movement patterns.' },
+    { question: 'What legend should I main as a beginner?', answer: 'Lifeline is great for beginners. Her healing drone and revival shield support the team while teaching basic positioning. Gibraltar or Bangalore are also solid choices for learning team play.' },
+    { question: 'How important is loot priority in Apex?', answer: 'Extremely important! Prioritize shields and weapons first. Early game focus on survival, late game focus on optimal loadouts. Knowing what to pick up and what to ignore saves crucial time.' }
+  ],
+  'league-of-legends-champion-guide': [
+    { question: 'What is the easiest role for beginners in LoL?', answer: 'Bot lane ADC is generally the easiest to start with, as you have a support to help you. Focus last hitting minions and learning positioning. Alternatively, Top Lane is good for learning 1v1 matchups.' },
+    { question: 'How do I climb ranked in League of Legends?', answer: 'Focus on a small pool of champions (2-3) to master. Learn wave management, map awareness, and objective control. Review your losses to identify mistakes. Consistency beats trying to carry every game.' },
+    { question: 'What are the most important macro concepts?', answer: 'Wave management, objective timers, vision control, and knowing when to group versus split push. Understanding map pressure and when to take fights wins more games than individual mechanics.' },
+    { question: 'Should I use a build guide or experiment?', answer: 'Use established build guides from sites like OP.GG or U.GG when starting out. Once you understand itemization, you can adapt builds based on the game state. Core items usually remain consistent.' }
+  ]
+}
+
 async function getArticle(inputSlug: string): Promise<Article> {
   const slug = decodeURIComponent(inputSlug)
   const originalSlug = inputSlug
@@ -769,7 +805,7 @@ async function getArticle(inputSlug: string): Promise<Article> {
         share_count: dbArticle.share_count || 0,
         published_at: dbArticle.published_at ? new Date(dbArticle.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'January 1, 2024',
         difficulty: 'Intermediate',
-        game: dbArticle.game || { name: 'Unknown', slug: 'unknown', cover_url: 'https://picsum.photos/seed/default/1200/630' },
+        game: dbArticle.game || { name: 'Unknown', slug: 'unknown', cover_url: getGameCoverUrl('Unknown Game') },
         author: {
           name: (dbArticle as any).author?.name || 'Anonymous',
           bio: (dbArticle as any).author?.bio || '',
@@ -808,7 +844,7 @@ function getDefaultArticle(): Article {
     share_count: 0,
     published_at: 'January 1, 2024',
     difficulty: 'Intermediate',
-    game: { name: 'Unknown', slug: 'unknown', cover_url: 'https://picsum.photos/seed/default/1200/630' },
+    game: { name: 'Unknown', slug: 'unknown', cover_url: getGameCoverUrl('Unknown Game') },
     author: {
       name: 'Anonymous',
       bio: '',
@@ -859,6 +895,10 @@ export default async function GuideDetailPage({ params }: GuideDetailPageProps) 
   const currentVideos = videos[slug] || []
   const currentComments = comments[slug] || []
   const currentRelatedArticles = relatedArticles[slug] || []
+  const currentFAQs = faqData[slug] || [
+    { question: `What is ${article.game.name}?`, answer: `${article.game.name} is a popular video game that this guide covers in detail.` },
+    { question: `Is ${article.game.name} worth playing?`, answer: `Absolutely! This guide will help you get started and master the game.` }
+  ]
 
   const renderContent = () => {
     const lines = article.content.split('\n')
@@ -937,6 +977,13 @@ export default async function GuideDetailPage({ params }: GuideDetailPageProps) 
         { name: article.game.name, url: `/guides?game=${article.game.slug}` },
         { name: article.title },
       ])} />
+      <FAQSchema 
+        faqs={currentFAQs}
+        articleTitle={article.title}
+        articleUrl={`/guides/${article.slug}`}
+        datePublished={article.published_at}
+        author={article.author.name}
+      />
     <div className="min-h-screen">
       <ReadingProgress progress={0} />
 
@@ -986,6 +1033,8 @@ export default async function GuideDetailPage({ params }: GuideDetailPageProps) 
             <div className="prose max-w-none" style={{ backgroundColor: 'var(--bg-surface)', borderRadius: '2xl', padding: '2rem', border: '1px solid var(--border)' }}>
               {renderContent()}
             </div>
+
+            <FAQSection faqs={currentFAQs} />
 
             <HelpfulVote articleId={article.id} />
 

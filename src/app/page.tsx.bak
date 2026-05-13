@@ -1,0 +1,133 @@
+// 简化版首页 - 用于测试
+export default function SimpleHome() {
+  return (
+    <div style={{ 
+      padding: '50px', 
+      fontFamily: 'system-ui, sans-serif',
+      backgroundColor: '#0d1117',
+      color: '#e6edf3',
+      minHeight: '100vh'
+    }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <h1 style={{ 
+          fontSize: '48px', 
+          marginBottom: '10px',
+          background: 'linear-gradient(135deg, #c4b5fd 0%, #7c3aed 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text'
+        }}>
+          GameHub
+        </h1>
+        <p style={{ color: '#8b949e', fontSize: '20px', marginBottom: '40px' }}>
+          Ultimate Gaming Guide Hub
+        </p>
+        
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+          gap: '20px', 
+          marginBottom: '40px'
+        }}>
+          <a href="/games" style={{ 
+            display: 'block',
+            padding: '24px', 
+            backgroundColor: '#161b22', 
+            border: '1px solid #30363d',
+            borderRadius: '12px',
+            textDecoration: 'none',
+            color: '#e6edf3',
+            transition: 'all 0.2s'
+          }} onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'scale(1.02)'
+            e.currentTarget.style.borderColor = '#7c3aed'
+          }} onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'scale(1)'
+            e.currentTarget.style.borderColor = '#30363d'
+          }}>
+            <h2 style={{ fontSize: '20px', marginBottom: '8px', color: '#7c3aed' }}>🎮 Games</h2>
+            <p style={{ color: '#8b949e', margin: 0 }}>Browse our collection</p>
+          </a>
+          
+          <a href="/guides" style={{ 
+            display: 'block',
+            padding: '24px', 
+            backgroundColor: '#161b22', 
+            border: '1px solid #30363d',
+            borderRadius: '12px',
+            textDecoration: 'none',
+            color: '#e6edf3',
+            transition: 'all 0.2s'
+          }} onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'scale(1.02)'
+            e.currentTarget.style.borderColor = '#7c3aed'
+          }} onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'scale(1)'
+            e.currentTarget.style.borderColor = '#30363d'
+          }}>
+            <h2 style={{ fontSize: '20px', marginBottom: '8px', color: '#7c3aed' }}>📖 Guides</h2>
+            <p style={{ color: '#8b949e', margin: 0 }}>Expert walkthroughs</p>
+          </a>
+          
+          <a href="/codes" style={{ 
+            display: 'block',
+            padding: '24px', 
+            backgroundColor: '#161b22', 
+            border: '1px solid #30363d',
+            borderRadius: '12px',
+            textDecoration: 'none',
+            color: '#e6edf3',
+            transition: 'all 0.2s'
+          }} onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'scale(1.02)'
+            e.currentTarget.style.borderColor = '#7c3aed'
+          }} onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'scale(1)'
+            e.currentTarget.style.borderColor = '#30363d'
+          }}>
+            <h2 style={{ fontSize: '20px', marginBottom: '8px', color: '#7c3aed' }}>🎁 Codes</h2>
+            <p style={{ color: '#8b949e', margin: 0 }}>Redeem free rewards</p>
+          </a>
+          
+          <a href="/tier-list" style={{ 
+            display: 'block',
+            padding: '24px', 
+            backgroundColor: '#161b22', 
+            border: '1px solid #30363d',
+            borderRadius: '12px',
+            textDecoration: 'none',
+            color: '#e6edf3',
+            transition: 'all 0.2s'
+          }} onMouseOver={(e) => {
+            e.currentTarget.style.transform = 'scale(1.02)'
+            e.currentTarget.style.borderColor = '#7c3aed'
+          }} onMouseOut={(e) => {
+            e.currentTarget.style.transform = 'scale(1)'
+            e.currentTarget.style.borderColor = '#30363d'
+          }}>
+            <h2 style={{ fontSize: '20px', marginBottom: '8px', color: '#7c3aed' }}>🏆 Tier Lists</h2>
+            <p style={{ color: '#8b949e', margin: 0 }}>Community rankings</p>
+          </a>
+        </div>
+        
+        <div style={{ 
+          backgroundColor: '#161b22', 
+          padding: '20px', 
+          borderRadius: '8px',
+          border: '1px solid #30363d'
+        }}>
+          <h3 style={{ fontSize: '16px', marginBottom: '10px', color: '#7c3aed' }}>🔧 Debug Info</h3>
+          <p style={{ color: '#8b949e', fontSize: '14px', margin: '5px 0' }}>
+            ✓ This simplified home page is working
+          </p>
+          <p style={{ color: '#8b949e', fontSize: '14px', margin: '5px 0' }}>
+            ✓ Database: Connected
+          </p>
+          <p style={{ color: '#8b949e', fontSize: '14px', margin: '5px 0' }}>
+            Time: {new Date().toLocaleString()}
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}

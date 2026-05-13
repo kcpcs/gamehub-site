@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import type { Game, Platform, Genre } from '@/types'
 import { GameCard } from '@/components/games/GameCard'
 import { GameFilters } from '@/components/games/GameFilters'
@@ -27,6 +27,24 @@ interface GamesApiResponse {
   meta?: PaginationMeta
 }
 
+// 安全解析 JSON 字段
+function safeJsonParse<T = any>(value: any, defaultValue: T): T {
+  if (value === null || value === undefined) {
+    return defaultValue
+  }
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value)
+    } catch {
+      return defaultValue
+    }
+  }
+  if (Array.isArray(value) || typeof value === 'object') {
+    return value
+  }
+  return defaultValue
+}
+
 async function fetchGamesPage(
   page: number,
   limit: number = INITIAL_LIMIT,
@@ -37,38 +55,52 @@ async function fetchGamesPage(
     if (!res.ok) throw new Error('Failed to fetch')
     const data: GamesApiResponse = await res.json()
     if (data.success && data.data?.games) {
-      const games = data.data.games.map((game: any) => ({
-        id: game.id,
-        slug: game.slug,
-        name: game.name,
-        cover: { url: game.cover_url || `https://picsum.photos/seed/${game.slug}/300/400` },
-        screenshots: [],
-        platforms: game.platforms || [],
-        genres: game.genres || [],
-        tags: [],
-        developer: '',
-        publisher: '',
-        release_date: '',
-        scores: game.scores || {
+      const games = data.data.games.map((game: any) => {
+        // 安全处理所有字段
+        const platforms = safeJsonParse(game.platforms, [])
+        const genres = safeJsonParse(game.genres, [])
+        const coverUrl = game.cover?.url || game.cover_url || 
+                        `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=video%20game%20${encodeURIComponent(game.slug)}%20cover%20dark%20theme&image_size=square`
+        
+        const scores = game.scores || {
           opencritic: game.score_opencritic,
           steam_positive_pct: game.score_steam_pct,
           community: game.score_community,
           review_count: game.score_review_count
-        },
-        description: '',
-        guide_count: game.guide_count || 0,
-        code_count: game.code_count || 0,
-        has_tier_list: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      }))
+        }
+
+        return {
+          id: game.id,
+          slug: game.slug,
+          name: game.name,
+          cover: { url: coverUrl, igdb_url: game.cover?.igdb_url || '' },
+          screenshots: safeJsonParse(game.screenshots, []),
+          platforms: Array.isArray(platforms) ? platforms : [],
+          genres: Array.isArray(genres) ? genres : [],
+          tags: safeJsonParse(game.tags, []),
+          developer: game.developer || '',
+          publisher: game.publisher || '',
+          release_date: game.release_date || '',
+          scores: scores,
+          score_opencritic: game.score_opencritic,
+          score_steam_pct: game.score_steam_pct,
+          score_community: game.score_community,
+          score_review_count: game.score_review_count,
+          description: game.description || '',
+          guide_count: game.guide_count || 0,
+          code_count: game.code_count || 0,
+          has_tier_list: game.has_tier_list || false,
+          created_at: game.created_at || new Date().toISOString(),
+          updated_at: game.updated_at || new Date().toISOString()
+        }
+      })
       return {
         games,
         meta: data.meta || data.data.meta || { page, limit, total: 0, has_next: false, has_prev: false }
       }
     }
-  } catch {
-    // Fallback handled in hook
+  } catch (error) {
+    console.error('Error fetching games:', error)
   }
   return { games: [], meta: { page, limit, total: 0, has_next: false, has_prev: false } }
 }
@@ -83,6 +115,24 @@ export default function GamesPage() {
     search?: string
   }>({ sort: 'popular' })
   const [isInitialLoad, setIsInitialLoad] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
+
+  // 初始加载
+  useEffect(() => {
+    console.log('开始初始加载游戏数据...')
+    fetchGamesPage(1, INITIAL_LIMIT, filters.sort)
+      .then(({ games: initialGames, meta }) => {
+        console.log('初始加载完成，找到', initialGames.length, '个游戏')
+        setGames(initialGames)
+        setHasMore(meta.has_next)
+        setIsInitialLoad(false)
+      })
+      .catch(err => {
+        console.error('初始加载失败:', err)
+        setLoadError(err instanceof Error ? err.message : '加载失败')
+        setIsInitialLoad(false)
+      })
+  }, [])
 
   const loadMore = useCallback(async () => {
     const currentSort = filters.sort === 'newest' ? 'latest' : filters.sort === 'score' ? 'rating' : filters.sort
@@ -118,6 +168,20 @@ export default function GamesPage() {
     if (filters.search && !game.name.toLowerCase().includes(filters.search.toLowerCase())) return false
     return true
   })
+
+  if (loadError) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="text-center py-16" style={{ color: '#ff4444' }}>
+          <h2 className="text-2xl font-bold mb-4">加载错误</h2>
+          <p>{loadError}</p>
+          <p className="mt-4 text-sm" style={{ color: '#8b949e' }}>
+            请查看浏览器控制台 (F12) 获取更多信息，或访问 <a href="/test-games" style={{ color: '#7c3aed' }}>/test-games</a> 测试页面
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   if (isInitialLoad && games.length === 0) {
     return (

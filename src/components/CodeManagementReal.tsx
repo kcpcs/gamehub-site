@@ -27,9 +27,9 @@ interface Pagination {
 }
 
 const statusLabels: Record<string, { label: string; className: string }> = {
-  active: { label: '有效', className: 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400' },
-  expired: { label: '已过期', className: 'bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400' },
-  unverified: { label: '待验证', className: 'bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400' },
+  active: { label: 'Active', className: 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400' },
+  expired: { label: 'Expired', className: 'bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400' },
+  unverified: { label: 'Unverified', className: 'bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400' },
 }
 
 export function CodeManagementReal() {
@@ -196,7 +196,7 @@ export function CodeManagementReal() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
               type="text"
-              placeholder="搜索兑换码..."
+              placeholder="Search codes..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -207,16 +207,16 @@ export function CodeManagementReal() {
             onChange={(e) => handleStatusFilterChange(e.target.value)}
             className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="all">所有状态</option>
-            <option value="active">有效</option>
-            <option value="expired">已过期</option>
-            <option value="unverified">待验证</option>
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="expired">Expired</option>
+            <option value="unverified">Unverified</option>
           </select>
           <button
             type="submit"
             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
           >
-            搜索
+            Search
           </button>
         </form>
         <button
@@ -224,7 +224,7 @@ export function CodeManagementReal() {
           className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
         >
           <Plus size={20} />
-          添加兑换码
+          Add Code
         </button>
       </div>
 
@@ -252,19 +252,19 @@ export function CodeManagementReal() {
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">兑换码</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">游戏</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">奖励</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">来源</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">状态</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">操作</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Code</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Game</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Reward</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Source</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {codes.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                    暂无兑换码数据
+                    No codes found
                   </td>
                 </tr>
               ) : (
@@ -278,7 +278,7 @@ export function CodeManagementReal() {
                         <button
                           onClick={() => handleCopy(code.code, code.id)}
                           className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
-                          title="复制"
+                          title="Copy"
                         >
                           {copiedId === code.id ? (
                             <Check size={16} className="text-green-500" />
@@ -308,13 +308,13 @@ export function CodeManagementReal() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
-                        <button onClick={() => handleView(code)} className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors" title="查看">
+                        <button onClick={() => handleView(code)} className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors" title="View">
                           <Copy size={18} />
                         </button>
-                        <button onClick={() => handleEdit(code)} className="p-2 text-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 rounded-lg transition-colors" title="编辑">
+                        <button onClick={() => handleEdit(code)} className="p-2 text-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 rounded-lg transition-colors" title="Edit">
                           <Edit2 size={18} />
                         </button>
-                        <button onClick={() => setDeleteConfirm(code.id)} className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors" title="删除">
+                        <button onClick={() => setDeleteConfirm(code.id)} className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors" title="Delete">
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -331,7 +331,7 @@ export function CodeManagementReal() {
       {pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-500 dark:text-gray-400">
-            显示 {(pagination.page - 1) * pagination.limit + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} 条，共 {pagination.total} 条
+            Showing {(pagination.page - 1) * pagination.limit + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
           </span>
           <div className="flex items-center gap-2">
             <button
@@ -342,7 +342,7 @@ export function CodeManagementReal() {
               <ChevronLeft className="w-5 h-5" />
             </button>
             <span className="px-4 py-2 text-sm">
-              第 {pagination.page} / {pagination.totalPages} 页
+              Page {pagination.page} of {pagination.totalPages}
             </span>
             <button
               onClick={() => handlePageChange(pagination.page + 1)}
@@ -361,7 +361,7 @@ export function CodeManagementReal() {
           <div className="bg-white dark:bg-gray-800 rounded-lg max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                {modalMode === 'view' ? '兑换码详情' : modalMode === 'edit' ? '编辑兑换码' : '添加兑换码'}
+                {modalMode === 'view' ? 'Code Details' : modalMode === 'edit' ? 'Edit Code' : 'Add Code'}
               </h3>
               <button onClick={() => setShowModal(false)}>
                 <XIcon className="w-6 h-6" />
@@ -381,26 +381,26 @@ export function CodeManagementReal() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">游戏：</span>
-                      <span className="font-medium">{selectedCode.game?.name}</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Game:</span>
+                      <span className="font-medium ml-2">{selectedCode.game?.name}</span>
                     </div>
                     <div>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">来源：</span>
-                      <span>{selectedCode.source}</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Source:</span>
+                      <span className="ml-2">{selectedCode.source}</span>
                     </div>
                     <div>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">状态：</span>
-                      <span className={`px-2 py-1 text-xs rounded ${statusLabels[selectedCode.status]?.className}`}>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Status:</span>
+                      <span className={`px-2 py-1 text-xs rounded-full ml-2 ${statusLabels[selectedCode.status]?.className}`}>
                         {statusLabels[selectedCode.status]?.label}
                       </span>
                     </div>
                     <div>
-                      <span className="text-sm text-gray-500 dark:text-gray-400">过期时间：</span>
-                      <span>{selectedCode.expires_at ? new Date(selectedCode.expires_at).toLocaleDateString() : '永不过期'}</span>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">Expires:</span>
+                      <span className="ml-2">{selectedCode.expires_at ? new Date(selectedCode.expires_at).toLocaleDateString('en-US') : 'Never'}</span>
                     </div>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500 dark:text-gray-400">奖励描述：</span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">Reward:</span>
                     <p className="mt-1 font-medium">{selectedCode.reward_desc}</p>
                   </div>
                 </div>
@@ -408,7 +408,7 @@ export function CodeManagementReal() {
               {(modalMode === 'edit' || modalMode === 'create') && (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">兑换码</label>
+                    <label className="block text-sm font-medium mb-1">Code</label>
                     <input
                       type="text"
                       value={formData.code || ''}
@@ -417,7 +417,7 @@ export function CodeManagementReal() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">奖励描述</label>
+                    <label className="block text-sm font-medium mb-1">Reward</label>
                     <input
                       type="text"
                       value={formData.reward_desc || ''}
@@ -426,21 +426,21 @@ export function CodeManagementReal() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">来源</label>
+                    <label className="block text-sm font-medium mb-1">Source</label>
                     <select
                       value={formData.source || 'official'}
                       onChange={(e) => setFormData({ ...formData, source: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="official">官方</option>
+                      <option value="official">Official</option>
                       <option value="discord">Discord</option>
                       <option value="reddit">Reddit</option>
                       <option value="twitter">Twitter</option>
-                      <option value="user">用户提交</option>
+                      <option value="user">User Submitted</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">过期时间（可选）</label>
+                    <label className="block text-sm font-medium mb-1">Expires (Optional)</label>
                     <input
                       type="date"
                       value={formData.expires_at ? formData.expires_at.split('T')[0] : ''}
@@ -456,14 +456,14 @@ export function CodeManagementReal() {
                 onClick={() => setShowModal(false)}
                 className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               >
-                取消
+                Cancel
               </button>
               {modalMode === 'view' ? (
                 <button
                   onClick={() => handleEdit(selectedCode!)}
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                 >
-                  编辑
+                  Edit
                 </button>
               ) : (
                 <button
@@ -471,7 +471,7 @@ export function CodeManagementReal() {
                   disabled={saving}
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
                 >
-                  {saving ? '保存中...' : '保存'}
+                  {saving ? 'Saving...' : 'Save'}
                 </button>
               )}
             </div>
@@ -485,23 +485,23 @@ export function CodeManagementReal() {
           <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full mx-4 p-6">
             <div className="flex items-center gap-3 mb-4">
               <AlertCircle className="w-6 h-6 text-red-500" />
-              <h3 className="text-lg font-bold">确认删除</h3>
+              <h3 className="text-lg font-bold">Confirm Delete</h3>
             </div>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              确定要删除这个兑换码吗？此操作不可撤销。
+              Are you sure you want to delete this code? This action cannot be undone.
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setDeleteConfirm(null)}
                 className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               >
-                取消
+                Cancel
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm)}
                 className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
               >
-                删除
+                Delete
               </button>
             </div>
           </div>

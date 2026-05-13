@@ -1,41 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
-// GET /api/admin/articles/[id] - 获取单个文章
+// GET /api/admin/articles/[id] - 获取单个文章详情
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = params
 
     const article = await db.article.findUnique({
       where: { id },
       include: {
-        game: {
-          select: {
-            id: true,
-            name: true,
-            slug: true,
-          },
-        },
-        author: {
-          select: {
-            id: true,
-            username: true,
-            email: true,
-          },
-        },
-        comments: {
-          orderBy: { created_at: 'desc' },
-          take: 20,
-        },
-        _count: {
-          select: {
-            comments: true,
-            likes: true,
-          },
-        },
+        game: true,
+        author: true,
       },
     })
 
@@ -56,47 +34,35 @@ export async function GET(
   }
 }
 
-// PATCH /api/admin/articles/[id] - 更新文章
+// PATCH /api/admin/articles/[id] - 更新单个文章
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = params
     const body = await request.json()
 
-    const article = await db.article.findUnique({ where: { id } })
-    if (!article) {
-      return NextResponse.json(
-        { success: false, error: 'Article not found' },
-        { status: 404 }
-      )
-    }
-
-    const updatedArticle = await db.article.update({
+    const article = await db.article.update({
       where: { id },
       data: {
-        title: body.title ?? article.title,
-        slug: body.slug ?? article.slug,
-        content: body.content ?? article.content,
-        article_type: body.article_type ?? article.article_type,
-        status: body.status ?? article.status,
-        game_id: body.game_id ?? article.game_id,
-        cover_url: body.cover_url ?? article.cover_url,
-        cover_alt: body.cover_alt ?? article.cover_alt,
-        excerpt: body.excerpt ?? article.excerpt,
-        read_time: body.read_time ?? article.read_time,
-        seo_title: body.seo_title ?? article.seo_title,
-        seo_description: body.seo_description ?? article.seo_description,
-        view_count: body.view_count ?? article.view_count,
-        share_count: body.share_count ?? article.share_count,
-        published_at: body.status === 'published' && !article.published_at
-          ? new Date()
-          : article.published_at,
+        title: body.title,
+        slug: body.slug,
+        content: body.content,
+        article_type: body.article_type,
+        status: body.status,
+        game_id: body.game_id,
+        cover_url: body.cover_url,
+        cover_alt: body.cover_alt,
+        excerpt: body.excerpt,
+        read_time: body.read_time,
+        seo_title: body.seo_title,
+        seo_description: body.seo_description,
+        published_at: body.status === 'published' ? new Date() : undefined,
       },
     })
 
-    return NextResponse.json({ success: true, data: updatedArticle })
+    return NextResponse.json({ success: true, data: article })
   } catch (error) {
     console.error('Error updating article:', error)
     return NextResponse.json(
@@ -106,23 +72,17 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/admin/articles/[id] - 删除文章
+// DELETE /api/admin/articles/[id] - 删除单个文章
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = params
 
-    const article = await db.article.findUnique({ where: { id } })
-    if (!article) {
-      return NextResponse.json(
-        { success: false, error: 'Article not found' },
-        { status: 404 }
-      )
-    }
-
-    await db.article.delete({ where: { id } })
+    await db.article.delete({
+      where: { id },
+    })
 
     return NextResponse.json({
       success: true,

@@ -1,39 +1,10 @@
 {
-  "framework": "nextjs",
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "installCommand": "npm install",
-  "regions": ["iad1"],
-  "functions": {
-    "src/app/api/**/*.ts": {
-      "maxDuration": 30
-    },
-    "src/app/api/internal/generate/route.ts": {
-      "maxDuration": 120
-    },
-    "src/app/api/stripe/**/*.ts": {
-      "maxDuration": 60
-    }
-  },
+  "framework": "nextjs",
+  "regions": ["hkg1"],
   "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate"
-        }
-      ]
-    },
-    {
-      "source": "/og/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=31536000, immutable"
-        }
-      ]
-    },
     {
       "source": "/(.*)",
       "headers": [
@@ -43,17 +14,20 @@
         },
         {
           "key": "X-Frame-Options",
-          "value": "DENY"
+          "value": "SAMEORIGIN"
         },
         {
           "key": "X-XSS-Protection",
           "value": "1; mode=block"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
         }
       ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/admin",
+      "destination": "/admin/dashboard",
+      "permanent": false
     }
   ]
 }

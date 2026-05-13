@@ -20,6 +20,11 @@ interface TierRowProps {
 
 function TierRow({ grade, entries, color, bgColor, votedEntries, onVote, onEntryClick }: TierRowProps) {
   const gradeColors: Record<TierGrade, { bg: string; text: string; border: string }> = {
+    T0: { bg: '#7c3aed', text: 'white', border: '#9f67ff' },
+    T1: { bg: '#22c55e', text: 'white', border: '#2ea043' },
+    T2: { bg: '#3b82f6', text: 'white', border: '#388bfd' },
+    T3: { bg: '#eab308', text: 'black', border: '#d29922' },
+    T4: { bg: '#f97316', text: 'white', border: '#ea580c' },
     S: { bg: 'var(--accent)', text: 'white', border: 'var(--accent-light)' },
     A: { bg: 'var(--success)', text: 'white', border: '#2ea043' },
     B: { bg: 'var(--info)', text: 'white', border: '#388bfd' },
@@ -149,24 +154,21 @@ export default function TierListPage({ params }: { params: Promise<{ game: strin
         is_community: true,
         updated_at: new Date().toISOString(),
         entries: [
-          { id: '1', name: 'Jett', image_url: 'https://picsum.photos/seed/jett/100/100', grade: 'S', vote_count: 2340, avg_score: 4.8, description: 'Best duelist, unmatched mobility' },
-          { id: '2', name: 'Raze', image_url: 'https://picsum.photos/seed/raze/100/100', grade: 'S', vote_count: 2180, avg_score: 4.7, description: 'Explosive damage dealer' },
-          { id: '3', name: 'Neon', image_url: 'https://picsum.photos/seed/neon/100/100', grade: 'S', vote_count: 1950, avg_score: 4.6, description: 'High speed controller' },
-          { id: '4', name: 'Phoenix', image_url: 'https://picsum.photos/seed/phoenix/100/100', grade: 'A', vote_count: 1890, avg_score: 4.3, description: 'Self-sustaining duelist' },
-          { id: '5', name: 'Yoru', image_url: 'https://picsum.photos/seed/yoru/100/100', grade: 'A', vote_count: 1650, avg_score: 4.1, description: 'Stealthy fragger' },
-          { id: '6', name: 'Reyna', image_url: 'https://picsum.photos/seed/reyna/100/100', grade: 'A', vote_count: 2100, avg_score: 4.4, description: 'Queen of aim duels' },
-          { id: '7', name: 'Sova', image_url: 'https://picsum.photos/seed/sova/100/100', grade: 'A', vote_count: 1780, avg_score: 4.2, description: 'Recon master' },
-          { id: '8', name: 'Killjoy', image_url: 'https://picsum.photos/seed/killjoy/100/100', grade: 'B', vote_count: 1450, avg_score: 3.9, description: 'Defensive sentinal' },
-          { id: '9', name: 'Cypher', image_url: 'https://picsum.photos/seed/cypher/100/100', grade: 'B', vote_count: 1320, avg_score: 3.7, description: 'Information gatherer' },
-          { id: '10', name: 'Sage', image_url: 'https://picsum.photos/seed/sage/100/100', grade: 'B', vote_count: 1580, avg_score: 3.8, description: 'Healing support' },
-          { id: '11', name: 'Viper', image_url: 'https://picsum.photos/seed/viper/100/100', grade: 'B', vote_count: 1420, avg_score: 3.6, description: 'Area denial controller' },
-          { id: '12', name: 'Brimstone', image_url: 'https://picsum.photos/seed/brimstone/100/100', grade: 'C', vote_count: 980, avg_score: 3.2, description: 'Utility-based controller' },
-          { id: '13', name: 'Omen', image_url: 'https://picsum.photos/seed/omen/100/100', grade: 'C', vote_count: 1050, avg_score: 3.3, description: 'Mystery initiator' },
-          { id: '14', name: 'Breach', image_url: 'https://picsum.photos/seed/breach/100/100', grade: 'C', vote_count: 890, avg_score: 3.0, description: 'Seeding initiator' },
-          { id: '15', name: 'Kayo', image_url: 'https://picsum.photos/seed/kayo/100/100', grade: 'D', vote_count: 420, avg_score: 2.4, description: 'Flash-focused initiator' },
-          { id: '16', name: 'Skye', image_url: 'https://picsum.photos/seed/skye/100/100', grade: 'D', vote_count: 380, avg_score: 2.2, description: 'Healing initiator' },
-          { id: '17', name: 'Fade', image_url: 'https://picsum.photos/seed/fade/100/100', grade: 'D', vote_count: 350, avg_score: 2.1, description: 'Prowler-based recon' },
-          { id: '18', name: 'Harbor', image_url: 'https://picsum.photos/seed/harbor/100/100', grade: 'F', vote_count: 120, avg_score: 1.5, description: 'Underpowered controller' },
+          { id: '1', name: 'Jett', image_url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=valorant%20jett%20character%20portrait%20dark%20theme&image_size=square', grade: 'T0', vote_count: 2340, avg_score: 4.8, description: 'Best duelist, unmatched mobility' },
+          { id: '2', name: 'Raze', image_url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=valorant%20raze%20character%20portrait%20dark%20theme&image_size=square', grade: 'T0', vote_count: 2180, avg_score: 4.7, description: 'Explosive damage dealer' },
+          { id: '3', name: 'Reyna', image_url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=valorant%20reyna%20character%20portrait%20dark%20theme&image_size=square', grade: 'T1', vote_count: 2100, avg_score: 4.4, description: 'Queen of aim duels' },
+          { id: '4', name: 'Sova', image_url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=valorant%20sova%20character%20portrait%20dark%20theme&image_size=square', grade: 'T1', vote_count: 1780, avg_score: 4.2, description: 'Recon master' },
+          { id: '5', name: 'Phoenix', image_url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=valorant%20phoenix%20character%20portrait%20dark%20theme&image_size=square', grade: 'T1', vote_count: 1890, avg_score: 4.3, description: 'Self-sustaining duelist' },
+          { id: '6', name: 'Killjoy', image_url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=valorant%20killjoy%20character%20portrait%20dark%20theme&image_size=square', grade: 'T2', vote_count: 1450, avg_score: 3.9, description: 'Defensive sentinal' },
+          { id: '7', name: 'Sage', image_url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=valorant%20sage%20character%20portrait%20dark%20theme&image_size=square', grade: 'T2', vote_count: 1580, avg_score: 3.8, description: 'Healing support' },
+          { id: '8', name: 'Yoru', image_url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=valorant%20yoru%20character%20portrait%20dark%20theme&image_size=square', grade: 'T2', vote_count: 1650, avg_score: 4.1, description: 'Stealthy fragger' },
+          { id: '9', name: 'Cypher', image_url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=valorant%20cypher%20character%20portrait%20dark%20theme&image_size=square', grade: 'T3', vote_count: 1320, avg_score: 3.7, description: 'Information gatherer' },
+          { id: '10', name: 'Viper', image_url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=valorant%20viper%20character%20portrait%20dark%20theme&image_size=square', grade: 'T3', vote_count: 1420, avg_score: 3.6, description: 'Area denial controller' },
+          { id: '11', name: 'Neon', image_url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=valorant%20neon%20character%20portrait%20dark%20theme&image_size=square', grade: 'T3', vote_count: 1950, avg_score: 4.6, description: 'High speed duelist' },
+          { id: '12', name: 'Brimstone', image_url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=valorant%20brimstone%20character%20portrait%20dark%20theme&image_size=square', grade: 'T4', vote_count: 980, avg_score: 3.2, description: 'Utility-based controller' },
+          { id: '13', name: 'Omen', image_url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=valorant%20omen%20character%20portrait%20dark%20theme&image_size=square', grade: 'T4', vote_count: 1050, avg_score: 3.3, description: 'Mystery initiator' },
+          { id: '14', name: 'Breach', image_url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=valorant%20breach%20character%20portrait%20dark%20theme&image_size=square', grade: 'T4', vote_count: 890, avg_score: 3.0, description: 'Seeding initiator' },
+          { id: '15', name: 'Kayo', image_url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=valorant%20kayo%20character%20portrait%20dark%20theme&image_size=square', grade: 'T4', vote_count: 420, avg_score: 2.4, description: 'Flash-focused initiator' },
         ]
       }
 
@@ -226,6 +228,11 @@ export default function TierListPage({ params }: { params: Promise<{ game: strin
   }
 
   const groupedEntries = tierList ? {
+    T0: tierList.entries.filter(e => e.grade === 'T0'),
+    T1: tierList.entries.filter(e => e.grade === 'T1'),
+    T2: tierList.entries.filter(e => e.grade === 'T2'),
+    T3: tierList.entries.filter(e => e.grade === 'T3'),
+    T4: tierList.entries.filter(e => e.grade === 'T4'),
     S: tierList.entries.filter(e => e.grade === 'S'),
     A: tierList.entries.filter(e => e.grade === 'A'),
     B: tierList.entries.filter(e => e.grade === 'B'),
@@ -364,6 +371,61 @@ export default function TierListPage({ params }: { params: Promise<{ game: strin
         </div>
 
         <div className="space-y-2">
+          {groupedEntries && groupedEntries.T0.length > 0 && (
+            <TierRow 
+              grade="T0" 
+              entries={groupedEntries.T0} 
+              color="#7c3aed" 
+              bgColor="var(--bg-raised)"
+              votedEntries={votedEntries}
+              onVote={handleVote}
+              onEntryClick={handleEntryClick}
+            />
+          )}
+          {groupedEntries && groupedEntries.T1.length > 0 && (
+            <TierRow 
+              grade="T1" 
+              entries={groupedEntries.T1} 
+              color="#22c55e" 
+              bgColor="var(--bg-raised)"
+              votedEntries={votedEntries}
+              onVote={handleVote}
+              onEntryClick={handleEntryClick}
+            />
+          )}
+          {groupedEntries && groupedEntries.T2.length > 0 && (
+            <TierRow 
+              grade="T2" 
+              entries={groupedEntries.T2} 
+              color="#3b82f6" 
+              bgColor="var(--bg-raised)"
+              votedEntries={votedEntries}
+              onVote={handleVote}
+              onEntryClick={handleEntryClick}
+            />
+          )}
+          {groupedEntries && groupedEntries.T3.length > 0 && (
+            <TierRow 
+              grade="T3" 
+              entries={groupedEntries.T3} 
+              color="#eab308" 
+              bgColor="var(--bg-raised)"
+              votedEntries={votedEntries}
+              onVote={handleVote}
+              onEntryClick={handleEntryClick}
+            />
+          )}
+          {groupedEntries && groupedEntries.T4.length > 0 && (
+            <TierRow 
+              grade="T4" 
+              entries={groupedEntries.T4} 
+              color="#f97316" 
+              bgColor="var(--bg-raised)"
+              votedEntries={votedEntries}
+              onVote={handleVote}
+              onEntryClick={handleEntryClick}
+            />
+          )}
           {groupedEntries && groupedEntries.S.length > 0 && (
             <TierRow 
               grade="S" 

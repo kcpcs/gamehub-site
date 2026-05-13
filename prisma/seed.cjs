@@ -498,6 +498,32 @@ const tierListsData = [
 async function seed() {
   console.log('🌱 Starting database seeding...');
 
+  // Clear existing data (in correct order to avoid foreign key errors)
+  console.log('🗑️  Clearing existing data...');
+  // Start with tables that have no dependencies
+  try { await db.tierEntry.deleteMany(); } catch(e) {}
+  try { await db.tierVote.deleteMany(); } catch(e) {}
+  try { await db.tierList.deleteMany(); } catch(e) {}
+  try { await db.gameCode.deleteMany(); } catch(e) {}
+  try { await db.comment.deleteMany(); } catch(e) {}
+  try { await db.like.deleteMany(); } catch(e) {}
+  try { await db.favorite.deleteMany(); } catch(e) {}
+  try { await db.article.deleteMany(); } catch(e) {}
+  try { await db.game.deleteMany(); } catch(e) {}
+  try { await db.user.deleteMany(); } catch(e) {}
+  try { await db.auditLog.deleteMany(); } catch(e) {}
+  try { await db.adminUser.deleteMany(); } catch(e) {}
+  try { await db.adminRole.deleteMany(); } catch(e) {}
+  try { await db.aIActivityLog.deleteMany(); } catch(e) {}
+  try { await db.aIStats.deleteMany(); } catch(e) {}
+  try { await db.aIBehaviorConfig.deleteMany(); } catch(e) {}
+  try { await db.aIPlayer.deleteMany(); } catch(e) {}
+  try { await db.subscriber.deleteMany(); } catch(e) {}
+  try { await db.systemSetting.deleteMany(); } catch(e) {}
+  try { await db.affiliateClick.deleteMany(); } catch(e) {}
+  try { await db.pointTransaction.deleteMany(); } catch(e) {}
+  console.log('✅ Data cleared!');
+
   // Create games
   const createdGames = [];
   for (const game of gamesData) {
@@ -529,7 +555,7 @@ async function seed() {
     const createdArticle = await db.article.create({
       data: {
         ...article,
-        gameId: game.id,
+        game_id: game.id,
         seo_keywords: JSON.stringify(article.seo_keywords),
         source_urls: JSON.stringify([]),
         affiliate_links: JSON.stringify([]),
@@ -557,7 +583,7 @@ async function seed() {
     const createdCode = await db.gameCode.create({
       data: {
         ...code,
-        gameId: game.id,
+        game_id: game.id,
       }
     });
     
@@ -584,7 +610,7 @@ async function seed() {
         category: tierListData.category,
         patch_version: tierListData.patch_version,
         is_community: tierListData.is_community,
-        gameId: game.id,
+        game_id: game.id,
         total_votes: tierListData.entries.reduce((sum, entry) => sum + entry.vote_count, 0),
         entries: {
           create: tierListData.entries

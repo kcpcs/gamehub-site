@@ -85,7 +85,7 @@ export function AdminLayoutEnhanced() {
               </div>
               <div>
                 <h1 className="text-lg font-bold text-gray-900 dark:text-white">GameHub</h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400">管理后台</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Admin Panel</p>
               </div>
             </div>
           )}
@@ -184,7 +184,7 @@ export function AdminLayoutEnhanced() {
                 </span>
                 <input
                   type="text"
-                  placeholder="搜索..."
+                  placeholder="Search..."
                   className="pl-10 pr-4 py-2 w-64 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -204,7 +204,7 @@ export function AdminLayoutEnhanced() {
               {/* Admin Badge */}
               <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                 <Shield className="w-4 h-4 text-green-600 dark:text-green-400" />
-                <span className="text-xs font-medium text-green-700 dark:text-green-400">管理员</span>
+                <span className="text-xs font-medium text-green-700 dark:text-green-400">Admin</span>
               </div>
 
               {/* User Avatar */}
@@ -225,7 +225,7 @@ export function AdminLayoutEnhanced() {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-500 dark:text-gray-400">
             <span>© 2024 GameHub. All rights reserved.</span>
             <div className="flex items-center gap-4">
-              <span>时区: UTC+8</span>
+              <span>Timezone: UTC+8</span>
               <span>v1.0.0</span>
             </div>
           </div>

@@ -49,30 +49,60 @@ async function getFeaturedGames() {
         score_review_count: true,
         guide_count: true,
         code_count: true,
+        has_tier_list: true,
+        created_at: true,
+        updated_at: true,
       },
     })
-    return games.map(game => ({
-      id: game.id,
-      slug: game.slug,
-      name: game.name,
-      cover: { url: game.cover_url, igdb_url: '' },
-      scores: {
-        opencritic: game.score_opencritic,
-        community: game.score_community,
-        steam_positive_pct: game.score_steam_pct,
-        review_count: game.score_review_count,
-      },
-      platforms: (game.platforms as string[]),
-      genres: (game.genres as string[]),
-      screenshots: [],
-      tags: [],
-      has_tier_list: false,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      guide_count: game.guide_count,
-      code_count: game.code_count,
-    }))
-  } catch {
+    return games.map(game => {
+      // 正确处理 JSON 字段
+      let platforms: string[] = []
+      let genres: string[] = []
+      
+      try {
+        platforms = typeof game.platforms === 'string' 
+          ? JSON.parse(game.platforms) 
+          : Array.isArray(game.platforms) 
+            ? game.platforms 
+            : []
+      } catch {
+        platforms = []
+      }
+      
+      try {
+        genres = typeof game.genres === 'string' 
+          ? JSON.parse(game.genres) 
+          : Array.isArray(game.genres) 
+            ? game.genres 
+            : []
+      } catch {
+        genres = []
+      }
+      
+      return {
+        id: game.id,
+        slug: game.slug,
+        name: game.name,
+        cover: { url: game.cover_url, igdb_url: '' },
+        scores: {
+          opencritic: game.score_opencritic,
+          community: game.score_community,
+          steam_positive_pct: game.score_steam_pct,
+          review_count: game.score_review_count,
+        },
+        platforms: platforms,
+        genres: genres,
+        screenshots: [],
+        tags: [],
+        has_tier_list: game.has_tier_list || false,
+        created_at: game.created_at?.toISOString() || new Date().toISOString(),
+        updated_at: game.updated_at?.toISOString() || new Date().toISOString(),
+        guide_count: game.guide_count,
+        code_count: game.code_count,
+      }
+    })
+  } catch (error) {
+    console.error('Error fetching featured games:', error)
     return []
   }
 }
@@ -99,7 +129,7 @@ async function getLatestGuides() {
     const cacheKey = 'latest_guides'
     const cached = await redis.get(cacheKey)
     if (cached) {
-      return cached
+      return JSON.parse(cached)
     }
 
     const articles = await db.article.findMany({
@@ -123,7 +153,7 @@ async function getLatestGuides() {
       view_count: article.view_count,
     }))
 
-    await redis.set(cacheKey, guides, { ex: 300 })
+    await redis.set(cacheKey, JSON.stringify(guides), { ex: 300 })
     return guides
   } catch {
     return []
@@ -143,8 +173,16 @@ async function getTrendingGames() {
         guide_count: true,
       },
     })
-    return games
-  } catch {
+    return games.map(game => ({
+      id: game.id,
+      slug: game.slug,
+      name: game.name,
+      cover_url: game.cover_url,
+      cover: { url: game.cover_url, igdb_url: '' },
+      guide_count: game.guide_count,
+    }))
+  } catch (error) {
+    console.error('Error fetching trending games:', error)
     return []
   }
 }

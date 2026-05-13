@@ -26,7 +26,8 @@ export async function GET(req: NextRequest) {
   try {
     const cached = await redis.get(cacheKey)
     if (cached) {
-      return NextResponse.json(cached as ApiResponse<unknown>)
+      const parsedCached = typeof cached === 'string' ? JSON.parse(cached) : cached
+      return NextResponse.json(parsedCached as ApiResponse<unknown>)
     }
 
     const where: Record<string, unknown> = {}
@@ -63,16 +64,58 @@ export async function GET(req: NextRequest) {
     ])
 
     // Convert JSON fields to arrays and filter on client side for SQLite
-    let processedGames = games.map(game => ({
-      ...game,
-      platforms: game.platforms as string[],
-      genres: game.genres as string[],
-      scores: {
-        opencritic: game.score_opencritic || 0,
-        community: game.score_community || 0,
-        review_count: game.score_review_count || 0
+    let processedGames = games.map(game => {
+      // 正确处理 JSON 字段
+      let platforms: string[] = []
+      let genres: string[] = []
+      
+      try {
+        platforms = typeof game.platforms === 'string' 
+          ? JSON.parse(game.platforms) 
+          : Array.isArray(game.platforms) 
+            ? game.platforms 
+            : []
+      } catch {
+        platforms = []
       }
-    }))
+      
+      try {
+        genres = typeof game.genres === 'string' 
+          ? JSON.parse(game.genres) 
+          : Array.isArray(game.genres) 
+            ? game.genres 
+            : []
+      } catch {
+        genres = []
+      }
+      
+      return {
+        id: game.id,
+        slug: game.slug,
+        name: game.name,
+        cover_url: game.cover_url,
+        cover: { url: game.cover_url, igdb_url: '' },
+        platforms: platforms,
+        genres: genres,
+        score_opencritic: game.score_opencritic,
+        score_steam_pct: game.score_steam_pct,
+        score_community: game.score_community,
+        score_review_count: game.score_review_count,
+        guide_count: game.guide_count,
+        code_count: game.code_count,
+        scores: {
+          opencritic: game.score_opencritic || 0,
+          steam_positive_pct: game.score_steam_pct || 0,
+          community: game.score_community || 0,
+          review_count: game.score_review_count || 0
+        },
+        screenshots: [],
+        tags: [],
+        has_tier_list: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }
+    })
 
     // Apply client-side filtering
     if (filters.platform) {
@@ -98,7 +141,7 @@ export async function GET(req: NextRequest) {
       meta,
     }
 
-    await redis.set(cacheKey, response, { ex: CACHE_TTL })
+    await redis.set(cacheKey, JSON.stringify(response), { ex: CACHE_TTL })
     return NextResponse.json(response)
   } catch (err) {
     console.error('[GET /api/games]', err)

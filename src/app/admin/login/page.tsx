@@ -39,15 +39,15 @@ export default function AdminLoginPage() {
       const result = await response.json()
 
       if (result.success) {
-        setSuccess('登录成功，正在跳转...')
+        setSuccess('Login successful, redirecting...')
         setTimeout(() => {
           router.push('/admin')
         }, 1500)
       } else {
-        setError(result.error || '登录失败')
+        setError(result.error || 'Login failed')
       }
     } catch (err) {
-      setError('网络错误，请稍后重试')
+      setError('Network error, please try again later')
     } finally {
       setLoading(false)
     }
@@ -61,8 +61,8 @@ export default function AdminLoginPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 mb-4 shadow-lg shadow-blue-500/30">
             <Gamepad2 className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white mb-2">GameHub 管理后台</h1>
-          <p className="text-gray-400">管理员登录</p>
+          <h1 className="text-2xl font-bold text-white mb-2">GameHub Admin Panel</h1>
+          <p className="text-gray-400">Admin Login</p>
         </div>
 
         {/* Login Card */}
@@ -90,7 +90,7 @@ export default function AdminLoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Input */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">邮箱</label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
@@ -106,7 +106,7 @@ export default function AdminLoginPage() {
 
             {/* Password Input */}
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">密码</label>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Password</label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
@@ -136,10 +136,10 @@ export default function AdminLoginPage() {
               {loading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  登录中...
+                  Signing in...
                 </>
               ) : (
-                '登录'
+                'Sign In'
               )}
             </button>
           </form>
@@ -147,7 +147,7 @@ export default function AdminLoginPage() {
           {/* Forgot Password */}
           <div className="mt-6 text-center">
             <button className="text-sm text-gray-400 hover:text-white transition-colors">
-              忘记密码？
+              Forgot Password?
             </button>
           </div>
 
@@ -155,7 +155,7 @@ export default function AdminLoginPage() {
           {process.env.NODE_ENV === 'development' && (
             <div className="mt-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
               <p className="text-yellow-300 text-xs text-center">
-                开发模式：管理员权限已自动授予
+                Development Mode: Admin privileges automatically granted
               </p>
             </div>
           )}

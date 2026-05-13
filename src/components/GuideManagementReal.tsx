@@ -37,16 +37,16 @@ interface Pagination {
 }
 
 const statusLabels: Record<string, { label: string; className: string }> = {
-  published: { label: '已发布', className: 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400' },
-  draft: { label: '草稿', className: 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400' },
-  review: { label: '审核中', className: 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400' },
+  published: { label: 'Published', className: 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400' },
+  draft: { label: 'Draft', className: 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400' },
+  review: { label: 'In Review', className: 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400' },
 }
 
 const typeLabels: Record<string, { label: string; className: string }> = {
-  guide: { label: '攻略', className: 'bg-blue-100 dark:bg-blue-900/50 text-blue-600' },
-  tierlist: { label: '排行榜', className: 'bg-purple-100 dark:bg-purple-900/50 text-purple-600' },
-  news: { label: '新闻', className: 'bg-orange-100 dark:bg-orange-900/50 text-orange-600' },
-  codes: { label: '兑换码', className: 'bg-green-100 dark:bg-green-900/50 text-green-600' },
+  guide: { label: 'Guide', className: 'bg-blue-100 dark:bg-blue-900/50 text-blue-600' },
+  tierlist: { label: 'Tier List', className: 'bg-purple-100 dark:bg-purple-900/50 text-purple-600' },
+  news: { label: 'News', className: 'bg-orange-100 dark:bg-orange-900/50 text-orange-600' },
+  codes: { label: 'Codes', className: 'bg-green-100 dark:bg-green-900/50 text-green-600' },
 }
 
 export function GuideManagementReal() {
@@ -201,7 +201,7 @@ export function GuideManagementReal() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    return date.toLocaleDateString('zh-CN', { year: 'numeric', month: 'short', day: 'numeric' })
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
   }
 
   return (
@@ -214,7 +214,7 @@ export function GuideManagementReal() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input
                 type="text"
-                placeholder="搜索攻略..."
+                placeholder="Search guides..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg w-64 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -228,10 +228,10 @@ export function GuideManagementReal() {
               }}
               className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="all">所有状态</option>
-              <option value="published">已发布</option>
-              <option value="draft">草稿</option>
-              <option value="review">审核中</option>
+              <option value="all">All Status</option>
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+              <option value="review">In Review</option>
             </select>
             <select 
               value={typeFilter}
@@ -241,17 +241,17 @@ export function GuideManagementReal() {
               }}
               className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              <option value="all">所有类型</option>
-              <option value="guide">攻略</option>
-              <option value="tierlist">排行榜</option>
-              <option value="news">新闻</option>
-              <option value="codes">兑换码</option>
+              <option value="all">All Types</option>
+              <option value="guide">Guide</option>
+              <option value="tierlist">Tier List</option>
+              <option value="news">News</option>
+              <option value="codes">Codes</option>
             </select>
             <button
               type="submit"
               className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
             >
-              搜索
+              Search
             </button>
           </div>
           <button
@@ -259,7 +259,7 @@ export function GuideManagementReal() {
             className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
           >
             <Plus size={20} />
-            添加攻略
+            Add Guide
           </button>
         </form>
       </div>
@@ -288,19 +288,19 @@ export function GuideManagementReal() {
           <table className="w-full">
             <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">标题</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">游戏</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">类型</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">状态</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">阅读</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">操作</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Title</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Game</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Views</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               {articles.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                    暂无文章数据
+                    No articles found
                   </td>
                 </tr>
               ) : (
@@ -337,13 +337,13 @@ export function GuideManagementReal() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-1">
-                        <button onClick={() => handleView(article)} className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors" title="查看">
+                        <button onClick={() => handleView(article)} className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors" title="View">
                           <Eye size={18} />
                         </button>
-                        <button onClick={() => handleEdit(article)} className="p-2 text-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 rounded-lg transition-colors" title="编辑">
+                        <button onClick={() => handleEdit(article)} className="p-2 text-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 rounded-lg transition-colors" title="Edit">
                           <Edit2 size={18} />
                         </button>
-                        <button onClick={() => setDeleteConfirm(article.id)} className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors" title="删除">
+                        <button onClick={() => setDeleteConfirm(article.id)} className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors" title="Delete">
                           <Trash2 size={18} />
                         </button>
                       </div>
@@ -360,7 +360,7 @@ export function GuideManagementReal() {
       {pagination.totalPages > 1 && (
         <div className="flex items-center justify-between">
           <span className="text-sm text-gray-500 dark:text-gray-400">
-            显示 {(pagination.page - 1) * pagination.limit + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} 条，共 {pagination.total} 条
+            Showing {(pagination.page - 1) * pagination.limit + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total}
           </span>
           <div className="flex items-center gap-2">
             <button
@@ -371,7 +371,7 @@ export function GuideManagementReal() {
               <ChevronLeft className="w-5 h-5" />
             </button>
             <span className="px-4 py-2 text-sm">
-              第 {pagination.page} / {pagination.totalPages} 页
+              Page {pagination.page} of {pagination.totalPages}
             </span>
             <button
               onClick={() => handlePageChange(pagination.page + 1)}
@@ -390,7 +390,7 @@ export function GuideManagementReal() {
           <div className="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
               <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                {modalMode === 'view' ? '文章详情' : modalMode === 'edit' ? '编辑文章' : '创建文章'}
+                {modalMode === 'view' ? 'Article Details' : modalMode === 'edit' ? 'Edit Article' : 'Create Article'}
               </h3>
               <button onClick={() => setShowModal(false)}>
                 <XIcon className="w-6 h-6" />
@@ -418,7 +418,7 @@ export function GuideManagementReal() {
                     <span>·</span>
                     <span>{formatDate(selectedArticle.published_at || selectedArticle.created_at)}</span>
                     <span>·</span>
-                    <span>{selectedArticle.read_time} 分钟阅读</span>
+                    <span>{selectedArticle.read_time} min read</span>
                   </div>
                   {selectedArticle.excerpt && (
                     <p className="text-gray-600 dark:text-gray-300 border-l-4 border-blue-500 pl-4">
@@ -434,7 +434,7 @@ export function GuideManagementReal() {
               ) : (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium mb-1">标题</label>
+                    <label className="block text-sm font-medium mb-1">Title</label>
                     <input
                       type="text"
                       value={formData.title || ''}
@@ -453,33 +453,33 @@ export function GuideManagementReal() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium mb-1">类型</label>
+                      <label className="block text-sm font-medium mb-1">Type</label>
                       <select
                         value={formData.article_type || 'guide'}
                         onChange={(e) => setFormData({ ...formData, article_type: e.target.value })}
                         className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        <option value="guide">攻略</option>
-                        <option value="tierlist">排行榜</option>
-                        <option value="news">新闻</option>
-                        <option value="codes">兑换码</option>
+                        <option value="guide">Guide</option>
+                        <option value="tierlist">Tier List</option>
+                        <option value="news">News</option>
+                        <option value="codes">Codes</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium mb-1">状态</label>
+                      <label className="block text-sm font-medium mb-1">Status</label>
                       <select
                         value={formData.status || 'draft'}
                         onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
                         className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        <option value="draft">草稿</option>
-                        <option value="review">审核中</option>
-                        <option value="published">已发布</option>
+                        <option value="draft">Draft</option>
+                        <option value="review">In Review</option>
+                        <option value="published">Published</option>
                       </select>
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">摘要</label>
+                    <label className="block text-sm font-medium mb-1">Excerpt</label>
                     <textarea
                       value={formData.excerpt || ''}
                       onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
@@ -488,7 +488,7 @@ export function GuideManagementReal() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium mb-1">内容 (Markdown)</label>
+                    <label className="block text-sm font-medium mb-1">Content (Markdown)</label>
                     <ArticleEditor 
                       initialContent={formData.content || ''}
                       onSave={(content) => setFormData({ ...formData, content })}
@@ -502,14 +502,14 @@ export function GuideManagementReal() {
                 onClick={() => setShowModal(false)}
                 className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               >
-                取消
+                Cancel
               </button>
               {modalMode === 'view' ? (
                 <button
                   onClick={() => handleEdit(selectedArticle!)}
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
                 >
-                  编辑
+                  Edit
                 </button>
               ) : (
                 <button
@@ -517,7 +517,7 @@ export function GuideManagementReal() {
                   disabled={saving}
                   className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
                 >
-                  {saving ? '保存中...' : '保存'}
+                  {saving ? 'Saving...' : 'Save'}
                 </button>
               )}
             </div>
@@ -531,23 +531,23 @@ export function GuideManagementReal() {
           <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full mx-4 p-6">
             <div className="flex items-center gap-3 mb-4">
               <AlertCircle className="w-6 h-6 text-red-500" />
-              <h3 className="text-lg font-bold">确认删除</h3>
+              <h3 className="text-lg font-bold">Confirm Delete</h3>
             </div>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              确定要删除这篇文章吗？此操作不可撤销。
+              Are you sure you want to delete this article? This action cannot be undone.
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setDeleteConfirm(null)}
                 className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               >
-                取消
+                Cancel
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm)}
                 className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
               >
-                删除
+                Delete
               </button>
             </div>
           </div>

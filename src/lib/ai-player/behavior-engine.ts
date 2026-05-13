@@ -23,7 +23,7 @@ export class BehaviorEngine {
     const now = new Date()
     const currentHour = now.getHours()
     const currentMinute = now.getMinutes()
-    
+
     const [wakeHour, wakeMinute] = this.config.wake_up_time.split(':').map(Number)
     const [sleepHour, sleepMinute] = this.config.sleep_time.split(':').map(Number)
 
@@ -88,7 +88,8 @@ export class BehaviorEngine {
       }
     }
 
-    if (Math.random() < 0.5) {
+    const likeOrView = Math.random()
+    if (likeOrView < 0.4) {
       return {
         action: 'like',
         targetType: 'article',
@@ -105,12 +106,37 @@ export class BehaviorEngine {
 
   async getRandomTarget(targetType: string): Promise<string | null> {
     try {
+      const interests = this.getInterests()
+
       if (targetType === 'article') {
-        const articles = await db.article.findMany({
-          where: { status: 'published' },
-          take: 50,
-          select: { slug: true },
-        })
+        let articles
+
+        if (interests.length > 0) {
+          const randomInterest = interests[Math.floor(Math.random() * interests.length)]
+          articles = await db.article.findMany({
+            where: {
+              status: 'published',
+              OR: [
+                { title: { contains: randomInterest } },
+                { content: { contains: randomInterest } },
+                { game: { name: { contains: randomInterest } } },
+              ],
+            },
+            take: 50,
+            select: { slug: true, view_count: true },
+            orderBy: { view_count: 'desc' },
+          })
+        }
+
+        if (!articles || articles.length === 0) {
+          articles = await db.article.findMany({
+            where: { status: 'published' },
+            take: 50,
+            select: { slug: true, view_count: true },
+            orderBy: { view_count: 'desc' },
+          })
+        }
+
         if (articles.length === 0) return null
         return articles[Math.floor(Math.random() * articles.length)].slug
       }
@@ -118,7 +144,8 @@ export class BehaviorEngine {
       if (targetType === 'comment') {
         const comments = await db.comment.findMany({
           take: 50,
-          select: { id: true },
+          select: { id: true, created_at: true },
+          orderBy: { created_at: 'desc' },
         })
         if (comments.length === 0) return null
         return comments[Math.floor(Math.random() * comments.length)].id
@@ -131,16 +158,16 @@ export class BehaviorEngine {
   }
 
   getPersonalityTone(): string {
-    const personality = typeof this.player.personality === 'string' 
-      ? JSON.parse(this.player.personality) 
+    const personality = typeof this.player.personality === 'string'
+      ? JSON.parse(this.player.personality)
       : this.player.personality
-    
+
     return personality.tone || 'friendly'
   }
 
   getInterests(): string[] {
-    return typeof this.player.interests === 'string' 
-      ? JSON.parse(this.player.interests) 
+    return typeof this.player.interests === 'string'
+      ? JSON.parse(this.player.interests)
       : this.player.interests
   }
 }

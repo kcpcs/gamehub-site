@@ -65,7 +65,7 @@ export function BackupManagement() {
       const result = await response.json()
       
       if (result.success) {
-        setSuccess('备份创建成功')
+        setSuccess('Backup created successfully')
         fetchBackups()
       } else {
         throw new Error(result.error || 'Failed to create backup')
@@ -95,7 +95,7 @@ export function BackupManagement() {
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
 
-      setSuccess('下载成功')
+      setSuccess('Download successful')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Download failed')
     }
@@ -111,7 +111,7 @@ export function BackupManagement() {
       
       if (result.success) {
         setDeleteConfirm(null)
-        setSuccess('备份删除成功')
+        setSuccess('Backup deleted successfully')
         fetchBackups()
       } else {
         throw new Error(result.error || 'Failed to delete backup')
@@ -129,7 +129,7 @@ export function BackupManagement() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    return date.toLocaleString('zh-CN', {
+    return date.toLocaleString('en-US', {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit',
@@ -143,9 +143,9 @@ export function BackupManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">备份管理</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Backup Management</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            数据库完整备份与恢复
+            Complete database backup and restore
           </p>
         </div>
         <button
@@ -154,7 +154,7 @@ export function BackupManagement() {
           className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
         >
           {creating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Plus size={18} />}
-          创建备份
+          Create Backup
         </button>
       </div>
 
@@ -189,8 +189,8 @@ export function BackupManagement() {
                 <Database className="text-blue-500" size={20} />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">备份列表</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400">共 {backups.length} 个备份</p>
+                <h3 className="font-semibold text-gray-900 dark:text-white">Backup List</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{backups.length} backup{backups.length !== 1 ? 's' : ''} total</p>
               </div>
             </div>
           </div>
@@ -198,8 +198,8 @@ export function BackupManagement() {
           {backups.length === 0 ? (
             <div className="p-8 text-center">
               <HardDrive className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-500 dark:text-gray-400">暂无备份记录</p>
-              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">点击上方按钮创建第一个备份</p>
+              <p className="text-gray-500 dark:text-gray-400">No backups yet</p>
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Click the button above to create your first backup</p>
             </div>
           ) : (
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -226,17 +226,17 @@ export function BackupManagement() {
                           <div className="flex flex-wrap gap-2 mt-2">
                             {backup.metadata.total_games !== undefined && (
                               <span className="px-2 py-0.5 text-xs bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 rounded">
-                                游戏: {backup.metadata.total_games}
+                                Games: {backup.metadata.total_games}
                               </span>
                             )}
                             {backup.metadata.total_articles !== undefined && (
                               <span className="px-2 py-0.5 text-xs bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 rounded">
-                                文章: {backup.metadata.total_articles}
+                                Articles: {backup.metadata.total_articles}
                               </span>
                             )}
                             {backup.metadata.total_codes !== undefined && (
                               <span className="px-2 py-0.5 text-xs bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 rounded">
-                                兑换码: {backup.metadata.total_codes}
+                                Codes: {backup.metadata.total_codes}
                               </span>
                             )}
                           </div>
@@ -247,14 +247,14 @@ export function BackupManagement() {
                       <button
                         onClick={() => handleDownload(backup.filename)}
                         className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors"
-                        title="下载"
+                        title="Download"
                       >
                         <Download size={18} />
                       </button>
                       <button
                         onClick={() => setDeleteConfirm(backup.filename)}
                         className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors"
-                        title="删除"
+                        title="Delete"
                       >
                         <Trash2 size={18} />
                       </button>
@@ -269,12 +269,12 @@ export function BackupManagement() {
 
       {/* Info Box */}
       <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-        <h4 className="font-medium text-yellow-800 dark:text-yellow-400 mb-2">备份说明</h4>
+        <h4 className="font-medium text-yellow-800 dark:text-yellow-400 mb-2">Backup Information</h4>
         <ul className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
-          <li>• 备份包含所有游戏、文章、兑换码、用户等核心数据</li>
-          <li>• 建议定期创建备份，以防数据丢失</li>
-          <li>• 下载的备份文件可在紧急情况下用于数据恢复</li>
-          <li>• 备份文件存储在服务器本地，请及时下载保存</li>
+          <li>• Backups include all games, articles, codes, users, and other core data</li>
+          <li>• Regular backups are recommended to prevent data loss</li>
+          <li>• Downloaded backup files can be used for emergency recovery</li>
+          <li>• Backups are stored locally on the server, please download promptly</li>
         </ul>
       </div>
 
@@ -284,23 +284,23 @@ export function BackupManagement() {
           <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full mx-4 p-6">
             <div className="flex items-center gap-3 mb-4">
               <AlertCircle className="w-6 h-6 text-red-500" />
-              <h3 className="text-lg font-bold">确认删除</h3>
+              <h3 className="text-lg font-bold">Confirm Delete</h3>
             </div>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              确定要删除这个备份吗？此操作不可撤销。
+              Are you sure you want to delete this backup? This action cannot be undone.
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setDeleteConfirm(null)}
                 className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               >
-                取消
+                Cancel
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm)}
                 className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
               >
-                删除
+                Delete
               </button>
             </div>
           </div>

@@ -16,15 +16,15 @@ import { Analytics } from './Analytics'
 import { SystemSettings } from './SystemSettings'
 
 const navItems = [
-  { id: 'dashboard', label: '仪表盘', icon: LayoutDashboard, component: DashboardReal, description: '数据概览与统计' },
-  { id: 'users', label: '用户管理', icon: Users, component: UserManagement, description: '用户CRUD与角色管理' },
-  { id: 'games', label: '游戏管理', icon: Gamepad2, component: GameManagement, description: '游戏数据维护' },
-  { id: 'guides', label: '攻略管理', icon: FileText, component: GuideManagement, description: '文章内容管理' },
-  { id: 'codes', label: '兑换码管理', icon: Gift, component: CodeManagement, description: '兑换码维护' },
-  { id: 'tierlists', label: '排行榜管理', icon: BarChart3, component: TierListManagement, description: 'Tier List管理' },
-  { id: 'comments', label: '评论管理', icon: MessageSquare, component: CommentManagement, description: '评论审核' },
-  { id: 'analytics', label: '数据分析', icon: TrendingUp, component: Analytics, description: '运营数据分析' },
-  { id: 'settings', label: '系统设置', icon: Settings, component: SystemSettings, description: '网站配置' },
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, component: DashboardReal, description: 'Overview & Statistics' },
+  { id: 'users', label: 'Users', icon: Users, component: UserManagement, description: 'User Management & Roles' },
+  { id: 'games', label: 'Games', icon: Gamepad2, component: GameManagement, description: 'Game Data Management' },
+  { id: 'guides', label: 'Guides', icon: FileText, component: GuideManagement, description: 'Content Management' },
+  { id: 'codes', label: 'Codes', icon: Gift, component: CodeManagement, description: 'Redeem Code Management' },
+  { id: 'tierlists', label: 'Tier Lists', icon: BarChart3, component: TierListManagement, description: 'Tier List Management' },
+  { id: 'comments', label: 'Comments', icon: MessageSquare, component: CommentManagement, description: 'Comment Moderation' },
+  { id: 'analytics', label: 'Analytics', icon: TrendingUp, component: Analytics, description: 'Business Analytics' },
+  { id: 'settings', label: 'Settings', icon: Settings, component: SystemSettings, description: 'Site Configuration' },
 ]
 
 export function AdminLayout() {
@@ -48,7 +48,7 @@ export function AdminLayout() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">GameHub</h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">管理后台</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Admin Panel</p>
             </div>
           </div>
         </div>
@@ -84,7 +84,7 @@ export function AdminLayout() {
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700">
           <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
             <LogOut size={20} />
-            <span className="font-medium">退出登录</span>
+            <span className="font-medium">Logout</span>
           </button>
         </div>
       </aside>
@@ -117,7 +117,7 @@ export function AdminLayout() {
           <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
             <Shield className="w-4 h-4 text-green-600 dark:text-green-400" />
             <span className="text-xs font-medium text-green-700 dark:text-green-400">
-              管理员
+              Admin
             </span>
           </div>
           <div className="relative">
@@ -128,7 +128,7 @@ export function AdminLayout() {
             </span>
             <input
               type="text"
-              placeholder="搜索..."
+              placeholder="Search..."
               className="pl-10 pr-4 py-2 w-64 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>

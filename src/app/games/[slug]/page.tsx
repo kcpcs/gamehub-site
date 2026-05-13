@@ -7,17 +7,7 @@ import { addToHistory } from '@/components/RecentHistory'
 import { LikeButton, ShareButton } from '@/components/LikeShareButtons'
 import { Breadcrumb } from '@/components/Breadcrumb'
 import { PlatformIcon } from '@/components/PlatformIcon'
-import { CopyButton } from '@/components/codes/CopyButton'
-
-interface GameCodes {
-  active_codes: Array<{
-    id: string
-    code: string
-    reward_desc: string
-    source: CodeSource
-    expires_at: string | null
-  }>
-}
+import { GameDetailTabs } from '@/components/games/GameDetailTabs'
 
 interface GameGuide {
   id: string
@@ -41,21 +31,14 @@ interface GameTierList {
 export default function GameDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params)
   const [game, setGame] = useState<Game | null>(null)
-  const [codes, setCodes] = useState<GameCodes | null>(null)
-  const [guides, setGuides] = useState<GameGuide[]>([])
-  const [tierList, setTierList] = useState<GameTierList | null>(null)
   const [loading, setLoading] = useState(true)
   const [isFavorite, setIsFavorite] = useState(false)
+  const [tierList, setTierList] = useState<GameTierList | null>(null)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [gameRes, codesRes, guidesRes, tierRes] = await Promise.all([
-          fetch(`/api/games/${slug}`),
-          fetch(`/api/codes/${slug}`),
-          fetch(`/api/guides?game_slug=${slug}&limit=5`),
-          fetch(`/api/tier-list/${slug}`)
-        ])
+        const gameRes = await fetch(`/api/games/${slug}`)
 
         if (gameRes.ok) {
           const gameResponse = await gameRes.json()
@@ -80,24 +63,11 @@ export default function GameDetailPage({ params }: { params: Promise<{ slug: str
           }
         }
 
-        if (codesRes.ok) {
-          const codesResponse = await codesRes.json()
-          if (codesResponse.success && codesResponse.data) {
-            setCodes(codesResponse.data)
-          }
-        }
-
-        if (guidesRes.ok) {
-          const guidesResponse = await guidesRes.json()
-          if (guidesResponse.success && guidesResponse.data) {
-            setGuides(guidesResponse.data.slice(0, 5))
-          }
-        }
-
-        if (tierRes.ok) {
-          const tierResponse = await tierRes.json()
-          if (tierResponse.success && tierResponse.data) {
-            setTierList(tierResponse.data)
+        const tierListRes = await fetch(`/api/tier-list/${slug}`)
+        if (tierListRes.ok) {
+          const tierListData = await tierListRes.json()
+          if (tierListData.success && tierListData.data) {
+            setTierList(tierListData.data)
           }
         }
       } catch {
@@ -118,17 +88,6 @@ export default function GameDetailPage({ params }: { params: Promise<{ slug: str
     if (score >= 80) return 'var(--success)'
     if (score >= 60) return 'var(--warning)'
     return 'var(--danger)'
-  }
-
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return 'Unknown'
-    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-  }
-
-  const formatViews = (views: number) => {
-    if (views >= 1000000) return `${(views / 1000000).toFixed(1)}M`
-    if (views >= 1000) return `${(views / 1000).toFixed(1)}K`
-    return views.toString()
   }
 
   if (loading) {
@@ -232,114 +191,12 @@ export default function GameDetailPage({ params }: { params: Promise<{ slug: str
             </div>
           </div>
 
-          <div className="rounded-xl p-6" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-            <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
-              About {game.name}
-            </h2>
-            <p className="leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-              {game.description || 'No description available.'}
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="rounded-xl p-5" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-              <p className="text-sm mb-1" style={{ color: 'var(--text-muted)' }}>Developer</p>
-              <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{game.developer || 'Unknown'}</p>
-            </div>
-            <div className="rounded-xl p-5" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-              <p className="text-sm mb-1" style={{ color: 'var(--text-muted)' }}>Publisher</p>
-              <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{game.publisher || 'Unknown'}</p>
-            </div>
-            <div className="rounded-xl p-5" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-              <p className="text-sm mb-1" style={{ color: 'var(--text-muted)' }}>Release Date</p>
-              <p className="font-medium" style={{ color: 'var(--text-primary)' }}>
-                {game.release_date ? formatDate(game.release_date) : 'Unknown'}
-              </p>
-            </div>
-            <div className="rounded-xl p-5" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-              <p className="text-sm mb-1" style={{ color: 'var(--text-muted)' }}>Community Score</p>
-              <p className="font-medium" style={{ color: getScoreColor(game.scores?.community) }}>
-                {game.scores?.community || 'N/A'}
-              </p>
-            </div>
-          </div>
-
-          {codes?.active_codes && codes.active_codes.length > 0 && (
-            <div className="rounded-xl p-6" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  Active Codes
-                </h2>
-                <Link
-                  href={`/codes/${game.slug}`}
-                  className="text-sm font-medium"
-                  style={{ color: 'var(--accent-light)' }}
-                >
-                  View All →
-                </Link>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {codes.active_codes.slice(0, 4).map((code) => (
-                  <div
-                    key={code.id}
-                    className="flex items-center justify-between p-4 rounded-lg"
-                    style={{ backgroundColor: 'var(--bg-overlay)' }}
-                  >
-                    <div>
-                      <code className="font-mono text-sm" style={{ color: 'var(--accent-light)' }}>
-                        {code.code}
-                      </code>
-                      <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
-                        {code.reward_desc}
-                      </p>
-                    </div>
-                    <CopyButton code={code.code} />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {guides.length > 0 && (
-            <div className="rounded-xl p-6" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
-                  Popular Guides
-                </h2>
-                <Link
-                  href="/guides"
-                  className="text-sm font-medium"
-                  style={{ color: 'var(--accent-light)' }}
-                >
-                  View All →
-                </Link>
-              </div>
-              <div className="space-y-3">
-                {guides.map((guide) => (
-                  <Link
-                    key={guide.id}
-                    href={`/guides/${guide.slug}`}
-                    className="flex items-center gap-4 p-3 rounded-lg transition-colors hover:bg-opacity-50"
-                    style={{ backgroundColor: 'var(--bg-overlay)' }}
-                  >
-                    <img
-                      src={guide.cover_url}
-                      alt={guide.title}
-                      className="w-16 h-10 rounded-lg object-cover"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-medium truncate" style={{ color: 'var(--text-primary)' }}>
-                        {guide.title}
-                      </h3>
-                      <p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
-                        {formatViews(guide.view_count)} views · {formatDate(guide.created_at)}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
+          <GameDetailTabs 
+            gameSlug={game.slug}
+            hasGuides={game.guide_count > 0}
+            hasCodes={game.code_count > 0}
+            hasTierList={game.has_tier_list}
+          />
         </div>
 
         <div className="space-y-6">

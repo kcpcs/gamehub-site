@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
                 data: {
                   name: item.name,
                   slug: item.slug,
-                  cover_url: item.cover_url || 'https://picsum.photos/seed/' + item.slug + '/800/450',
+                  cover_url: item.cover_url || `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=video%20game%20guide%20cover%20art%20${encodeURIComponent(item.name || item.slug)}%20gaming%20dark%20theme%20fantasy%20style&image_size=landscape_16_9`,
                   platforms: item.platforms || [],
                   genres: item.genres || [],
                   description: item.description,
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
                   article_type: item.article_type || 'guide',
                   status: item.status || 'draft',
                   excerpt: item.excerpt || '',
-                  cover_url: item.cover_url || 'https://picsum.photos/seed/' + item.slug + '/800/450',
+                  cover_url: item.cover_url || `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=video%20game%20guide%20cover%20art%20${encodeURIComponent(item.name || item.slug)}%20gaming%20dark%20theme%20fantasy%20style&image_size=landscape_16_9`,
                   cover_alt: item.cover_alt || item.title || '',
                   seo_title: item.seo_title || item.title || '',
                   seo_description: item.seo_description || item.excerpt || '',

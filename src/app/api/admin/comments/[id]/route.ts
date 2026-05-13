@@ -1,30 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
-// GET /api/admin/comments/[id] - 获取单条评论详情
+// GET /api/admin/comments/[id] - 获取单个评论详情
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = params
 
     const comment = await db.comment.findUnique({
       where: { id },
       include: {
-        article: {
-          select: { slug: true, title: true },
-        },
-        replies: {
-          orderBy: { created_at: 'asc' },
-        },
-        parent: {
-          select: {
-            id: true,
-            author_username: true,
-            content: true,
-          },
-        },
+        article: true,
+        replies: true,
       },
     })
 
@@ -45,41 +34,23 @@ export async function GET(
   }
 }
 
-// PATCH /api/admin/comments/[id] - 更新/审核评论
+// PATCH /api/admin/comments/[id] - 更新单个评论
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = params
     const body = await request.json()
 
-    const comment = await db.comment.findUnique({ where: { id } })
-    if (!comment) {
-      return NextResponse.json(
-        { success: false, error: 'Comment not found' },
-        { status: 404 }
-      )
-    }
-
-    const updateData: any = {}
-
-    // Allow editing content (moderation)
-    if (body.content !== undefined) {
-      updateData.content = body.content
-    }
-
-    // Allow updating likes
-    if (body.likes !== undefined) {
-      updateData.likes = body.likes
-    }
-
-    const updatedComment = await db.comment.update({
+    const comment = await db.comment.update({
       where: { id },
-      data: updateData,
+      data: {
+        content: body.content,
+      },
     })
 
-    return NextResponse.json({ success: true, data: updatedComment })
+    return NextResponse.json({ success: true, data: comment })
   } catch (error) {
     console.error('Error updating comment:', error)
     return NextResponse.json(
@@ -89,30 +60,21 @@ export async function PATCH(
   }
 }
 
-// DELETE /api/admin/comments/[id] - 删除单条评论
+// DELETE /api/admin/comments/[id] - 删除单个评论
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params
+    const { id } = params
 
-    const comment = await db.comment.findUnique({ where: { id } })
-    if (!comment) {
-      return NextResponse.json(
-        { success: false, error: 'Comment not found' },
-        { status: 404 }
-      )
-    }
-
-    // Delete replies first
-    await db.comment.deleteMany({ where: { parent_id: id } })
-    // Delete the comment
-    await db.comment.delete({ where: { id } })
+    await db.comment.deleteMany({
+      where: { OR: [{ id }, { parent_id: id }] },
+    })
 
     return NextResponse.json({
       success: true,
-      message: 'Comment deleted successfully',
+      message: 'Comment and its replies deleted successfully',
     })
   } catch (error) {
     console.error('Error deleting comment:', error)

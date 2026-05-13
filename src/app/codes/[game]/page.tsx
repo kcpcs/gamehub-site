@@ -9,7 +9,7 @@ import { HowToRedeem } from '@/components/codes/HowToRedeem'
 const placeholderData: CodesPageData = {
   game_slug: 'genshin-impact',
   game_name: 'Genshin Impact',
-  game_cover: 'https://picsum.photos/seed/genshin/320/240',
+  game_cover: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=genshin%20impact%20game%20cover%20dark%20theme&image_size=square',
   active_codes: [
     { id: '1', code: 'GENSHINGIFT', reward_desc: '60 Primogems + 5 Hero Wit', status: 'active', source: 'official', source_url: undefined, expires_at: undefined, verified_at: new Date().toISOString(), game_id: '1', game_slug: 'genshin-impact', game_name: 'Genshin Impact', created_at: new Date().toISOString() },
     { id: '2', code: 'ADVENTURE2026', reward_desc: '100 Primogems', status: 'active', source: 'discord', source_url: undefined, expires_at: undefined, verified_at: new Date().toISOString(), game_id: '1', game_slug: 'genshin-impact', game_name: 'Genshin Impact', created_at: new Date().toISOString() }

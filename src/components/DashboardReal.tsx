@@ -42,12 +42,12 @@ interface Stats {
 }
 
 const statusLabels: Record<string, { label: string; className: string }> = {
-  published: { label: '已发布', className: 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400' },
-  draft: { label: '草稿', className: 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400' },
-  review: { label: '审核中', className: 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400' },
-  active: { label: '有效', className: 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400' },
-  expired: { label: '已过期', className: 'bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400' },
-  unverified: { label: '待验证', className: 'bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400' },
+  published: { label: 'Published', className: 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400' },
+  draft: { label: 'Draft', className: 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400' },
+  review: { label: 'In Review', className: 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400' },
+  active: { label: 'Active', className: 'bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400' },
+  expired: { label: 'Expired', className: 'bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400' },
+  unverified: { label: 'Unverified', className: 'bg-orange-100 dark:bg-orange-900/50 text-orange-600 dark:text-orange-400' },
 }
 
 export function DashboardReal() {
@@ -95,11 +95,11 @@ export function DashboardReal() {
     const diffHours = Math.floor(diffMs / 3600000)
     const diffDays = Math.floor(diffMs / 86400000)
 
-    if (diffMins < 1) return '刚刚'
-    if (diffMins < 60) return `${diffMins}分钟前`
-    if (diffHours < 24) return `${diffHours}小时前`
-    if (diffDays < 7) return `${diffDays}天前`
-    return date.toLocaleDateString('zh-CN')
+    if (diffMins < 1) return 'Just now'
+    if (diffMins < 60) return `${diffMins} min${diffMins > 1 ? 's' : ''} ago`
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`
+    if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
   }
 
   if (loading && !stats) {
@@ -107,7 +107,7 @@ export function DashboardReal() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-500" />
-          <p className="text-gray-500 dark:text-gray-400">加载中...</p>
+          <p className="text-gray-500 dark:text-gray-400">Loading...</p>
         </div>
       </div>
     )
@@ -123,7 +123,7 @@ export function DashboardReal() {
             onClick={fetchStats}
             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
           >
-            重试
+            Retry
           </button>
         </div>
       </div>
@@ -135,10 +135,10 @@ export function DashboardReal() {
   const { overview, recent_activity, top_games } = stats
 
   const statCards = [
-    { label: '总游戏数', value: overview.total_games, change: '+5', icon: FileText, color: 'blue' },
-    { label: '攻略文章', value: overview.total_articles, change: '+12', icon: FileText, color: 'green' },
-    { label: '兑换码', value: overview.total_codes, change: '+8', icon: Gift, color: 'purple' },
-    { label: '注册用户', value: overview.total_users, change: '+25', icon: Users, color: 'orange' },
+    { label: 'Total Games', value: overview.total_games, change: '+5', icon: FileText, color: 'blue' },
+    { label: 'Guides', value: overview.total_articles, change: '+12', icon: FileText, color: 'green' },
+    { label: 'Codes', value: overview.total_codes, change: '+8', icon: Gift, color: 'purple' },
+    { label: 'Users', value: overview.total_users, change: '+25', icon: Users, color: 'orange' },
   ]
 
   return (
@@ -146,9 +146,9 @@ export function DashboardReal() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">仪表盘</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            欢迎回来！以下是网站运营概览
+            Welcome back! Here's your site overview.
           </p>
         </div>
         <div className="flex items-center gap-4">
@@ -157,9 +157,9 @@ export function DashboardReal() {
             onChange={(e) => setTimeRange(e.target.value)}
             className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="7">近7天</option>
-            <option value="30">近30天</option>
-            <option value="90">近90天</option>
+            <option value="7">Last 7 days</option>
+            <option value="30">Last 30 days</option>
+            <option value="90">Last 90 days</option>
           </select>
           <button
             onClick={fetchStats}
@@ -167,11 +167,11 @@ export function DashboardReal() {
             className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            刷新
+            Refresh
           </button>
           {lastUpdated && (
             <span className="text-xs text-gray-400">
-              更新于 {lastUpdated.toLocaleTimeString('zh-CN')}
+              Updated {lastUpdated.toLocaleTimeString('en-US')}
             </span>
           )}
         </div>
@@ -212,28 +212,28 @@ export function DashboardReal() {
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
           <div className="flex items-center gap-2 mb-2">
             <CheckCircle className="w-4 h-4 text-green-500" />
-            <span className="text-sm font-medium text-green-700 dark:text-green-400">已发布文章</span>
+            <span className="text-sm font-medium text-green-700 dark:text-green-400">Published Guides</span>
           </div>
           <p className="text-2xl font-bold text-green-600 dark:text-green-400">{overview.published_articles}</p>
         </div>
         <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
           <div className="flex items-center gap-2 mb-2">
             <AlertCircle className="w-4 h-4 text-yellow-500" />
-            <span className="text-sm font-medium text-yellow-700 dark:text-yellow-400">草稿文章</span>
+            <span className="text-sm font-medium text-yellow-700 dark:text-yellow-400">Drafts</span>
           </div>
           <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{overview.draft_articles}</p>
         </div>
         <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
           <div className="flex items-center gap-2 mb-2">
             <CheckCircle className="w-4 h-4 text-green-500" />
-            <span className="text-sm font-medium text-green-700 dark:text-green-400">有效兑换码</span>
+            <span className="text-sm font-medium text-green-700 dark:text-green-400">Active Codes</span>
           </div>
           <p className="text-2xl font-bold text-green-600 dark:text-green-400">{overview.active_codes}</p>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
           <div className="flex items-center gap-2 mb-2">
             <AlertCircle className="w-4 h-4 text-gray-400" />
-            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">已过期兑换码</span>
+            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Expired Codes</span>
           </div>
           <p className="text-2xl font-bold text-gray-500 dark:text-gray-400">{overview.expired_codes}</p>
         </div>
@@ -243,12 +243,12 @@ export function DashboardReal() {
         {/* Recent Activity */}
         <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
           <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">最近活动</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Activity</h3>
           </div>
           <div className="divide-y divide-gray-200 dark:divide-gray-700 max-h-96 overflow-y-auto">
             {recent_activity.articles.length === 0 && recent_activity.codes.length === 0 ? (
               <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-                暂无活动记录
+                No recent activity
               </div>
             ) : (
               <>
@@ -256,9 +256,7 @@ export function DashboardReal() {
                   <div key={activity.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          statusLabels[activity.status]?.className || 'bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
-                        }`}>
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${statusLabels[activity.status]?.className || 'bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300'}`}>
                           {statusLabels[activity.status]?.label || activity.status}
                         </span>
                         <div>
@@ -273,9 +271,7 @@ export function DashboardReal() {
                   <div key={code.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          statusLabels[code.status]?.className || 'bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
-                        }`}>
+                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${statusLabels[code.status]?.className || 'bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300'}`}>
                           {statusLabels[code.status]?.label || code.status}
                         </span>
                         <div>
@@ -294,7 +290,7 @@ export function DashboardReal() {
         {/* Top Games */}
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
           <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">热门游戏排行</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Top Games</h3>
           </div>
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {top_games.map((game) => (
@@ -315,14 +311,14 @@ export function DashboardReal() {
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{game.name}</p>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{game.guide_count} 篇攻略</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{game.guide_count} guides</p>
                   </div>
                 </div>
               </div>
             ))}
             {top_games.length === 0 && (
               <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-                暂无游戏数据
+                No games found
               </div>
             )}
           </div>

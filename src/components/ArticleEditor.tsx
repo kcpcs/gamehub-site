@@ -31,16 +31,16 @@ export function ArticleEditor({ initialContent = '', onSave, onCancel }: Article
   }, [content])
 
   const toolbarButtons = [
-    { icon: Heading1, label: '标题1', action: () => insertMarkdown('# ') },
-    { icon: Heading2, label: '标题2', action: () => insertMarkdown('## ') },
-    { icon: Bold, label: '粗体', action: () => insertMarkdown('**', '**') },
-    { icon: Italic, label: '斜体', action: () => insertMarkdown('*', '*') },
-    { icon: List, label: '无序列表', action: () => insertMarkdown('- ') },
-    { icon: ListOrdered, label: '有序列表', action: () => insertMarkdown('1. ') },
-    { icon: Quote, label: '引用', action: () => insertMarkdown('> ') },
-    { icon: Code, label: '代码', action: () => insertMarkdown('`', '`') },
-    { icon: Link, label: '链接', action: () => insertMarkdown('[', '](url)') },
-    { icon: Image, label: '图片', action: () => insertMarkdown('![alt](', ')') },
+    { icon: Heading1, label: 'Heading 1', action: () => insertMarkdown('# ') },
+    { icon: Heading2, label: 'Heading 2', action: () => insertMarkdown('## ') },
+    { icon: Bold, label: 'Bold', action: () => insertMarkdown('**', '**') },
+    { icon: Italic, label: 'Italic', action: () => insertMarkdown('*', '*') },
+    { icon: List, label: 'Unordered List', action: () => insertMarkdown('- ') },
+    { icon: ListOrdered, label: 'Ordered List', action: () => insertMarkdown('1. ') },
+    { icon: Quote, label: 'Quote', action: () => insertMarkdown('> ') },
+    { icon: Code, label: 'Code', action: () => insertMarkdown('`', '`') },
+    { icon: Link, label: 'Link', action: () => insertMarkdown('[', '](url)') },
+    { icon: Image, label: 'Image', action: () => insertMarkdown('![alt](', ')') },
   ]
 
   const handleSave = () => {
@@ -98,7 +98,7 @@ export function ArticleEditor({ initialContent = '', onSave, onCancel }: Article
             type="button"
           >
             <Eye size={16} />
-            {showPreview ? '编辑' : '预览'}
+            {showPreview ? 'Edit' : 'Preview'}
           </button>
         </div>
       </div>
@@ -114,7 +114,7 @@ export function ArticleEditor({ initialContent = '', onSave, onCancel }: Article
           data-editor
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="在这里输入文章内容... (支持 Markdown 格式)"
+          placeholder="Enter article content here... (Markdown format supported)"
           className="w-full min-h-96 p-6 border-0 resize-none focus:outline-none focus:ring-0 font-mono text-sm"
         />
       )}
@@ -126,7 +126,7 @@ export function ArticleEditor({ initialContent = '', onSave, onCancel }: Article
           className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
           type="button"
         >
-          取消
+          Cancel
         </button>
         <button
           onClick={handleSave}
@@ -134,7 +134,7 @@ export function ArticleEditor({ initialContent = '', onSave, onCancel }: Article
           type="button"
         >
           <Save size={18} />
-          保存
+          Save
         </button>
       </div>
     </div>

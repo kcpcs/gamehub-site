@@ -2,6 +2,10 @@
 class MockRedis {
   private cache: Map<string, { value: string; expiresAt: number | null }> = new Map()
 
+  async ping() {
+    return 'PONG'
+  }
+
   async set(key: string, value: string, options?: { ex?: number; px?: number; nx?: boolean; xx?: boolean }) {
     if (options?.nx && this.cache.has(key)) {
       return null

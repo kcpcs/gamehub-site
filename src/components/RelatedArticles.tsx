@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { getGameCoverUrl } from '@/lib/game-images'
 
 interface ArticleWithGame {
   id: string
@@ -49,7 +50,7 @@ export function RelatedArticles({ currentSlug, articles }: RelatedArticlesProps)
           >
             <div className="aspect-video rounded-lg overflow-hidden mb-3">
               <img
-                src={article.game?.cover_url || 'https://picsum.photos/seed/generic-game/400/225'}
+                src={article.game?.cover_url || getGameCoverUrl(article.game?.name || article.title)}
                 alt={article.title}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               />

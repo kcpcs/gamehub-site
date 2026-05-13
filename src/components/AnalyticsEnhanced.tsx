@@ -32,29 +32,29 @@ interface ChartData {
 }
 
 const mockChartData: ChartData[] = [
-  { day: '周一', visits: 1200, guides: 15, codes: 8 },
-  { day: '周二', visits: 1500, guides: 18, codes: 12 },
-  { day: '周三', visits: 1350, guides: 12, codes: 6 },
-  { day: '周四', visits: 1800, guides: 22, codes: 15 },
-  { day: '周五', visits: 2100, guides: 28, codes: 20 },
-  { day: '周六', visits: 2800, guides: 35, codes: 25 },
-  { day: '周日', visits: 2500, guides: 30, codes: 18 },
+  { day: 'Mon', visits: 1200, guides: 15, codes: 8 },
+  { day: 'Tue', visits: 1500, guides: 18, codes: 12 },
+  { day: 'Wed', visits: 1350, guides: 12, codes: 6 },
+  { day: 'Thu', visits: 1800, guides: 22, codes: 15 },
+  { day: 'Fri', visits: 2100, guides: 28, codes: 20 },
+  { day: 'Sat', visits: 2800, guides: 35, codes: 25 },
+  { day: 'Sun', visits: 2500, guides: 30, codes: 18 },
 ]
 
 const mockPlatformData = [
   { platform: 'PC', percentage: 45, color: '#3b82f6' },
-  { platform: '移动端', percentage: 35, color: '#22c55e' },
+  { platform: 'Mobile', percentage: 35, color: '#22c55e' },
   { platform: 'PS5', percentage: 12, color: '#a855f7' },
   { platform: 'Xbox', percentage: 5, color: '#f97316' },
   { platform: 'Switch', percentage: 3, color: '#6b7280' },
 ]
 
 const mockTopArticles = [
-  { title: '原神新手入门指南', views: 12580, likes: 342, trend: '+15%', trendUp: true },
-  { title: '艾尔登法环Boss攻略', views: 8950, likes: 287, trend: '+8%', trendUp: true },
-  { title: 'Valorant角色排行榜', views: 7620, likes: 215, trend: '-3%', trendUp: false },
-  { title: '塞尔达传说隐藏神庙', views: 6580, likes: 189, trend: '+12%', trendUp: true },
-  { title: '博德之门3职业选择', views: 4520, likes: 156, trend: '+25%', trendUp: true },
+  { title: 'Genshin Impact Beginner Guide', views: 12580, likes: 342, trend: '+15%', trendUp: true },
+  { title: 'Elden Ring Boss Guide', views: 8950, likes: 287, trend: '+8%', trendUp: true },
+  { title: 'Valorant Character Tier List', views: 7620, likes: 215, trend: '-3%', trendUp: false },
+  { title: 'Zelda Hidden Shrine Guide', views: 6580, likes: 189, trend: '+12%', trendUp: true },
+  { title: 'Baldur\'s Gate 3 Class Guide', views: 4520, likes: 156, trend: '+25%', trendUp: true },
 ]
 
 export function AnalyticsEnhanced() {
@@ -96,9 +96,9 @@ export function AnalyticsEnhanced() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">数据分析</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Analytics</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            全面了解网站运营状况
+            Comprehensive website performance overview
           </p>
         </div>
         <div className="flex items-center gap-4">
@@ -107,16 +107,16 @@ export function AnalyticsEnhanced() {
             onChange={(e) => setTimeRange(e.target.value)}
             className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            <option value="7days">近7天</option>
-            <option value="30days">近30天</option>
-            <option value="90days">近90天</option>
+            <option value="7days">Last 7 Days</option>
+            <option value="30days">Last 30 Days</option>
+            <option value="90days">Last 90 Days</option>
           </select>
           <button
             onClick={handleExport}
             className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
           >
             <Download size={18} />
-            导出数据
+            Export Data
           </button>
         </div>
       </div>
@@ -126,7 +126,7 @@ export function AnalyticsEnhanced() {
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">总访问量</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Visits</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white">{totalVisits.toLocaleString()}</p>
               <div className="flex items-center gap-1 mt-2 text-sm text-green-500">
                 <TrendingUp size={16} />
@@ -142,7 +142,7 @@ export function AnalyticsEnhanced() {
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">攻略发布</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Guides Published</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white">{totalGuides}</p>
               <div className="flex items-center gap-1 mt-2 text-sm text-green-500">
                 <TrendingUp size={16} />
@@ -158,7 +158,7 @@ export function AnalyticsEnhanced() {
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">兑换码新增</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">New Codes</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white">{totalCodes}</p>
               <div className="flex items-center gap-1 mt-2 text-sm text-green-500">
                 <TrendingUp size={16} />
@@ -174,7 +174,7 @@ export function AnalyticsEnhanced() {
         <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">活跃用户</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Active Users</p>
               <p className="text-3xl font-bold text-gray-900 dark:text-white">8,420</p>
               <div className="flex items-center gap-1 mt-2 text-sm text-green-500">
                 <TrendingUp size={16} />
@@ -197,8 +197,8 @@ export function AnalyticsEnhanced() {
               <BarChart3 className="text-blue-500" size={20} />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">访问趋势</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">每日访问量与内容发布</p>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Visit Trends</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Daily visits and content publishing</p>
             </div>
           </div>
           
@@ -213,12 +213,12 @@ export function AnalyticsEnhanced() {
                     <div 
                       className="w-6 bg-gradient-to-t from-blue-500 to-blue-400 rounded-t transition-all duration-500 hover:from-blue-600 hover:to-blue-500"
                       style={{ height: `${visitHeight}%` }}
-                      title={`访问: ${data.visits}`}
+                      title={`Visits: ${data.visits}`}
                     />
                     <div 
                       className="w-6 bg-gradient-to-t from-green-500 to-green-400 rounded-t transition-all duration-500 hover:from-green-600 hover:to-green-500"
                       style={{ height: `${guideHeight}%` }}
-                      title={`攻略: ${data.guides}`}
+                      title={`Guides: ${data.guides}`}
                     />
                   </div>
                   <span className="text-xs text-gray-500 dark:text-gray-400">{data.day}</span>
@@ -231,11 +231,11 @@ export function AnalyticsEnhanced() {
           <div className="flex items-center justify-center gap-6 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-blue-500 rounded" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">访问量</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Visits</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 bg-green-500 rounded" />
-              <span className="text-sm text-gray-600 dark:text-gray-400">攻略发布</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Guides Published</span>
             </div>
           </div>
         </div>
@@ -247,8 +247,8 @@ export function AnalyticsEnhanced() {
               <PieChartIcon className="text-purple-500" size={20} />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">平台分布</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">用户使用设备占比</p>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Platform Distribution</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">User device usage breakdown</p>
             </div>
           </div>
 
@@ -311,8 +311,8 @@ export function AnalyticsEnhanced() {
             <FileText className="text-green-500" size={20} />
           </div>
           <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white">热门文章</h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">阅读量最高的攻略内容</p>
+            <h3 className="font-semibold text-gray-900 dark:text-white">Top Articles</h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Most viewed guide content</p>
           </div>
         </div>
 
@@ -320,11 +320,11 @@ export function AnalyticsEnhanced() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-700">
-                <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">排名</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">标题</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">浏览</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">点赞</th>
-                <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">趋势</th>
+                <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Rank</th>
+                <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Title</th>
+                <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Views</th>
+                <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Likes</th>
+                <th className="text-left py-3 px-4 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Trend</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -361,24 +361,24 @@ export function AnalyticsEnhanced() {
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white">
-          <h4 className="font-semibold mb-2">生成周报</h4>
-          <p className="text-sm text-blue-100 mb-4">自动生成运营周报并发送至邮箱</p>
+          <h4 className="font-semibold mb-2">Generate Weekly Report</h4>
+          <p className="text-sm text-blue-100 mb-4">Automatically generate weekly operations report and email</p>
           <button className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm transition-colors">
-            立即生成
+            Generate Now
           </button>
         </div>
         <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl p-6 text-white">
-          <h4 className="font-semibold mb-2">内容分析</h4>
-          <p className="text-sm text-green-100 mb-4">分析热门内容类型和用户偏好</p>
+          <h4 className="font-semibold mb-2">Content Analysis</h4>
+          <p className="text-sm text-green-100 mb-4">Analyze popular content types and user preferences</p>
           <button className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm transition-colors">
-            开始分析
+            Start Analysis
           </button>
         </div>
         <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl p-6 text-white">
-          <h4 className="font-semibold mb-2">用户画像</h4>
-          <p className="text-sm text-purple-100 mb-4">了解用户群体特征和兴趣分布</p>
+          <h4 className="font-semibold mb-2">User Profile</h4>
+          <p className="text-sm text-purple-100 mb-4">Understand user demographic and interest distribution</p>
           <button className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm transition-colors">
-            查看画像
+            View Profile
           </button>
         </div>
       </div>

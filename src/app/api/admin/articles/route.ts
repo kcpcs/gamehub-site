@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
         article_type: article_type as any,
         status: status as any,
         game_id,
-        cover_url: cover_url || 'https://picsum.photos/seed/' + slug + '/800/450',
+        cover_url: cover_url || `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=video%20game%20guide%20cover%20art%20${encodeURIComponent(title)}%20gaming%20dark%20theme%20fantasy%20style&image_size=landscape_16_9`,
         cover_alt: cover_alt || title,
         excerpt: excerpt || content.substring(0, 200) + '...',
         read_time: read_time || Math.ceil(content.split(/\s+/).length / 200),

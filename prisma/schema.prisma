@@ -27,11 +27,12 @@ model Game {
   score_opencritic   Float?
   score_steam_pct    Float?
   score_community    Float?
-  score_review_count Int     @default(0)
+  score_review_count Int      @default(0)
 
   description   String?
   guide_count   Int      @default(0)
   code_count    Int      @default(0)
+  video_count   Int      @default(0)
   has_tier_list Boolean  @default(false)
   last_patch_at DateTime?
 
@@ -40,12 +41,76 @@ model Game {
   tier_lists TierList[]
   likes      Like[]
   favorites  Favorite[]
+  videos     Video[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
   @@index([slug])
   @@index([igdb_id])
+}
+
+// ─────────────────────────────────────────
+// VIDEOS
+// ─────────────────────────────────────────
+model Video {
+  id                String           @id @default(cuid())
+  video_id          String
+  platform          VideoPlatform
+  game_id           String?
+  game              Game?            @relation(fields: [game_id], references: [id])
+
+  title             String
+  description       String?
+  thumbnail_url     String
+  channel_name      String
+  channel_url       String
+  duration          Int?
+  view_count        BigInt?
+  like_count        BigInt?
+  published_at      DateTime?
+
+  video_type        VideoType        @default(GAMEPLAY)
+  video_tags        Json             @default("[]")
+
+  is_live           Boolean          @default(false)
+  is_featured       Boolean          @default(false)
+  is_active         Boolean          @default(true)
+
+  // AI meta data
+  ai_summary        String?
+  ai_relevance_score Float?
+
+  created_at        DateTime         @default(now())
+  updated_at        DateTime         @updatedAt
+
+  favorites         VideoFavorite[]
+  likes             VideoLike[]
+  comments          VideoComment[]
+  view_history      VideoViewHistory[]
+
+  @@unique([platform, video_id])
+  @@index([game_id])
+  @@index([platform])
+  @@index([published_at])
+  @@index([is_featured])
+}
+
+enum VideoPlatform {
+  YOUTUBE
+  TWITCH
+  YOUTUBE_SHORTS
+  TIKTOK
+}
+
+enum VideoType {
+  GAMEPLAY
+  TUTORIAL
+  REVIEW
+  WALKTHROUGH
+  NEWS
+  TRAILER
+  LIVE
 }
 
 // ─────────────────────────────────────────
@@ -141,6 +206,10 @@ model User {
   point_transactions PointTransaction[]
   tier_votes         TierVote[]
   code_submissions   GameCode[]
+  video_favorites    VideoFavorite[]
+  video_likes        VideoLike[]
+  video_comments     VideoComment[]
+  video_view_history VideoViewHistory[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -566,3 +635,81 @@ model Subscriber {
   @@index([status])
   @@index([token])
 }
+
+// ─────────────────────────────────────────
+// 系统设置
+// ─────────────────────────────────────────
+model SystemSetting {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       String
+  value_type  String   @default("string") // string | boolean | number | json
+  description String?
+  group       String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@index([key])
+  @@index([group])
+}
+
+// ─────────────────────────────────────────
+// VIDEO INTERACTION (Phase 2)
+// ─────────────────────────────────────────
+model VideoFavorite {
+  id         String   @id @default(cuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  video_id   String
+  video      Video    @relation(fields: [video_id], references: [id], onDelete: Cascade)
+  created_at DateTime @default(now())
+
+  @@unique([user_id, video_id])
+  @@index([user_id])
+  @@index([video_id])
+}
+
+model VideoLike {
+  id         String   @id @default(cuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  video_id   String
+  video      Video    @relation(fields: [video_id], references: [id], onDelete: Cascade)
+  created_at DateTime @default(now())
+
+  @@unique([user_id, video_id])
+  @@index([user_id])
+  @@index([video_id])
+}
+
+model VideoComment {
+  id         String          @id @default(cuid())
+  video_id   String
+  video      Video           @relation(fields: [video_id], references: [id], onDelete: Cascade)
+  user_id    String
+  user       User            @relation(fields: [user_id], references: [id])
+  content    String
+  likes      Int             @default(0)
+  parent_id  String?
+  parent     VideoComment?   @relation("VideoCommentReplies", fields: [parent_id], references: [id])
+  replies    VideoComment[]  @relation("VideoCommentReplies")
+  created_at DateTime        @default(now())
+  updated_at DateTime        @updatedAt
+
+  @@index([video_id])
+  @@index([parent_id])
+}
+
+model VideoViewHistory {
+  id         String   @id @default(cuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  video_id   String
+  video      Video    @relation(fields: [video_id], references: [id], onDelete: Cascade)
+  watched_at DateTime @default(now())
+
+  @@index([user_id, watched_at])
+  @@index([video_id])
+}
+
+

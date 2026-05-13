@@ -94,7 +94,7 @@ const articlesData = [
     article_type: 'guide' as const,
     status: 'published' as const,
     source_type: 'ai' as const,
-    cover_url: 'https://picsum.photos/seed/genshin/1200/630',
+    cover_url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=genshin%20impact%20guide%20cover%20dark%20theme&image_size=landscape_16_9',
     cover_alt: 'Genshin Impact Guide',
     content: `# Genshin Impact Beginner Guide
 
@@ -128,7 +128,7 @@ Welcome to Teyvat! This guide will help you get started in Genshin Impact.
     article_type: 'guide' as const,
     status: 'published' as const,
     source_type: 'ai' as const,
-    cover_url: 'https://picsum.photos/seed/valorant/1200/630',
+    cover_url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=valorant%20guide%20cover%20dark%20theme&image_size=landscape_16_9',
     cover_alt: 'Valorant Agents',
     content: `# Valorant Agent Guide
 
@@ -162,7 +162,7 @@ Self-sufficient duelist with self-healing.
     article_type: 'guide' as const,
     status: 'published' as const,
     source_type: 'ai' as const,
-    cover_url: 'https://picsum.photos/seed/elden/1200/630',
+    cover_url: 'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=elden%20ring%20boss%20guide%20dark%20theme&image_size=landscape_16_9',
     cover_alt: 'Elden Ring Boss',
     content: `# Elden Ring Boss Guide
 

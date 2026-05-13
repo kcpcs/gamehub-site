@@ -33,6 +33,7 @@ export function Header({ currentPath, user }: HeaderProps) {
 
   const NAV_LINKS = [
     { href: '/games',      label: 'games',      translationKey: 'games' },
+    { href: '/videos',     label: 'videos',     translationKey: 'videos' },
     { href: '/guides',     label: 'guides',     translationKey: 'guides' },
     { href: '/codes',      label: 'codes',      translationKey: 'codes' },
     { href: '/tier-list',  label: 'tier_list', translationKey: 'tier_list' },

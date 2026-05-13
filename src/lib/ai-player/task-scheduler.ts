@@ -2,25 +2,84 @@
 import { db } from '@/lib/db'
 import { BehaviorEngine, getActivePlayers } from './behavior-engine'
 import { ContentInteractor, getArticleContent, getCommentContent } from './content-interactor'
+import { RATE_LIMITS, ACTIVITY_RATE_LIMIT_MAP, validateContent, QUALITY_CONTROL, SCHEDULING, applyJitter } from './config'
+import { getGameCoverUrl } from '@/lib/game-images'
 import type { AIPlayer, AIBehaviorConfig, AIActivityType } from '@prisma/client'
 
 const MAX_CONCURRENT_PLAYERS = 10
 const MIN_INTERVAL_MS = 5000
+const MAX_RETRIES = 2
+const RETRY_DELAY_MS = 30000
+const SCHEDULER_STATE_KEY = 'ai_scheduler_state'
 
 let runningPlayers = new Set<string>()
 let schedulerInterval: ReturnType<typeof setInterval> | null = null
+let lastActivityCheck: Map<string, number> = new Map()
 
 export interface SchedulerStatus {
   isRunning: boolean
   activePlayerCount: number
   runningPlayerCount: number
   lastRunTime: Date | null
+  autoStartEnabled: boolean
+}
+
+interface SchedulerState {
+  isRunning: boolean
+  lastRunTime: string | null
+  lastSavedAt: string
+}
+
+async function saveSchedulerState(state: SchedulerState): Promise<void> {
+  try {
+    await db.systemSetting.upsert({
+      where: { key: SCHEDULER_STATE_KEY },
+      create: {
+        key: SCHEDULER_STATE_KEY,
+        value: JSON.stringify(state),
+        value_type: 'json',
+        group: 'ai_scheduler',
+        description: 'AI仿真人调度器状态持久化'
+      },
+      update: {
+        value: JSON.stringify(state),
+      }
+    })
+  } catch (error) {
+    console.warn('[TaskScheduler] Failed to save state:', error)
+  }
+}
+
+async function loadSchedulerState(): Promise<SchedulerState | null> {
+  try {
+    const setting = await db.systemSetting.findUnique({
+      where: { key: SCHEDULER_STATE_KEY }
+    })
+    if (setting && setting.value) {
+      return JSON.parse(setting.value)
+    }
+  } catch (error) {
+    console.warn('[TaskScheduler] Failed to load state:', error)
+  }
+  return null
+}
+
+async function getAutoStartEnabled(): Promise<boolean> {
+  try {
+    const setting = await db.systemSetting.findUnique({
+      where: { key: 'ai_scheduler_auto_start' }
+    })
+    return setting?.value === 'true'
+  } catch {
+    return false
+  }
 }
 
 export class TaskScheduler {
   private static instance: TaskScheduler
   private isRunning = false
   private lastRunTime: Date | null = null
+  private autoStartEnabled = false
 
   private constructor() {}
 
@@ -31,15 +90,32 @@ export class TaskScheduler {
     return TaskScheduler.instance
   }
 
+  async init(): Promise<void> {
+    try {
+      this.autoStartEnabled = await getAutoStartEnabled()
+      const savedState = await loadSchedulerState()
+      if (savedState && savedState.isRunning && this.autoStartEnabled) {
+        console.log('[TaskScheduler] Auto-starting scheduler from saved state...')
+        await this.start()
+      }
+    } catch (error) {
+      console.warn('[TaskScheduler] Init failed:', error)
+    }
+  }
+
   async start(): Promise<void> {
     if (this.isRunning) return
 
     this.isRunning = true
+    console.log('[TaskScheduler] Starting scheduler...')
+    await this.saveState()
     await this.runOnce()
 
     schedulerInterval = setInterval(async () => {
       await this.runOnce()
     }, MIN_INTERVAL_MS)
+
+    console.log('[TaskScheduler] Scheduler started with tick interval:', MIN_INTERVAL_MS, 'ms')
   }
 
   stop(): void {
@@ -49,15 +125,48 @@ export class TaskScheduler {
       schedulerInterval = null
     }
     runningPlayers.clear()
+    this.saveState()
+    console.log('[TaskScheduler] Scheduler stopped')
+  }
+
+  async setAutoStart(enabled: boolean): Promise<void> {
+    this.autoStartEnabled = enabled
+    try {
+      await db.systemSetting.upsert({
+        where: { key: 'ai_scheduler_auto_start' },
+        create: {
+          key: 'ai_scheduler_auto_start',
+          value: String(enabled),
+          value_type: 'boolean',
+          group: 'ai_scheduler',
+          description: 'AI仿真人调度器是否自动启动'
+        },
+        update: {
+          value: String(enabled)
+        }
+      })
+    } catch (error) {
+      console.warn('[TaskScheduler] Failed to set auto-start:', error)
+    }
   }
 
   getStatus(): SchedulerStatus {
     return {
       isRunning: this.isRunning,
-      activePlayerCount: 0,
+      activePlayerCount: runningPlayers.size,
       runningPlayerCount: runningPlayers.size,
       lastRunTime: this.lastRunTime,
+      autoStartEnabled: this.autoStartEnabled,
     }
+  }
+
+  private async saveState(): Promise<void> {
+    const state: SchedulerState = {
+      isRunning: this.isRunning,
+      lastRunTime: this.lastRunTime?.toISOString() || null,
+      lastSavedAt: new Date().toISOString()
+    }
+    await saveSchedulerState(state)
   }
 
   private async runOnce(): Promise<void> {
@@ -74,7 +183,13 @@ export class TaskScheduler {
         const engine = new BehaviorEngine(player, config)
         if (!engine.isActiveTime()) continue
 
+        const interval = engine.getRandomInterval()
+        const lastActivity = lastActivityCheck.get(player.id) || 0
+        if (Date.now() - lastActivity < interval) continue
+
         runningPlayers.add(player.id)
+        lastActivityCheck.set(player.id, Date.now())
+
         this.executePlayerAction(player, config).then(() => {
           runningPlayers.delete(player.id)
         }).catch(() => {
@@ -82,36 +197,85 @@ export class TaskScheduler {
         })
       }
     } catch (error) {
-      console.error('Scheduler run error:', error)
+      console.error('[TaskScheduler] Scheduler run error:', error)
     }
+  }
+
+  private async checkRateLimit(playerId: string, activityType: AIActivityType): Promise<boolean> {
+    const limitKey = ACTIVITY_RATE_LIMIT_MAP[activityType]
+    if (!limitKey) return true
+
+    const limit = RATE_LIMITS[limitKey]
+    const windowStart = Date.now() - limit.windowMs
+
+    const recentCount = await db.aIActivityLog.count({
+      where: {
+        player_id: playerId,
+        activity_type: activityType,
+        created_at: { gte: new Date(windowStart) },
+      },
+    })
+
+    if (recentCount >= limit.maxActions) {
+      console.log(`[TaskScheduler] Rate limit reached for player ${playerId}: ${activityType} (${recentCount}/${limit.maxActions})`)
+      return false
+    }
+
+    return true
   }
 
   private async executePlayerAction(player: AIPlayer, config: AIBehaviorConfig): Promise<void> {
     const engine = new BehaviorEngine(player, config)
     const decision = engine.decideAction()
 
-    await delay(decision.delay * 1000)
+    const delayWithJitter = applyJitter(decision.delay * 1000)
+    await delay(delayWithJitter)
 
     try {
-      switch (decision.action) {
-        case 'post':
-          await this.executePost(player)
-          break
-        case 'comment':
-          await this.executeComment(player)
-          break
-        case 'reply':
-          await this.executeReply(player)
-          break
-        case 'like':
-          await this.executeLike(player)
-          break
-        case 'view':
-          await this.executeView(player)
-          break
+      if (!(await this.checkRateLimit(player.id, decision.action))) {
+        return
+      }
+
+      let success = false
+      let retries = 0
+
+      while (!success && retries < MAX_RETRIES) {
+        try {
+          switch (decision.action) {
+            case 'post':
+              await this.executePost(player)
+              success = true
+              break
+            case 'comment':
+              await this.executeComment(player)
+              success = true
+              break
+            case 'reply':
+              await this.executeReply(player)
+              success = true
+              break
+            case 'like':
+              await this.executeLike(player)
+              success = true
+              break
+            case 'view':
+              await this.executeView(player)
+              success = true
+              break
+            default:
+              console.warn(`[TaskScheduler] Unknown action type: ${decision.action}`)
+              return
+          }
+        } catch (error) {
+          retries++
+          console.error(`[TaskScheduler] Action ${decision.action} failed (attempt ${retries}/${MAX_RETRIES}):`, error)
+          if (retries < MAX_RETRIES) {
+            await delay(RETRY_DELAY_MS)
+          }
+        }
       }
     } catch (error) {
-      console.error(`Action ${decision.action} failed for ${player.username}:`, error)
+      console.error(`[TaskScheduler] Action ${decision.action} failed for ${player.username}:`, error)
     }
   }
 
@@ -119,29 +283,76 @@ export class TaskScheduler {
     const interactor = new ContentInteractor(player)
     const generated = await interactor.generatePost()
 
-    await db.aIActivityLog.create({
-      data: {
-        player_id: player.id,
-        activity_type: 'post',
-        target_type: 'article',
-        content: generated.content,
-      },
+    const validation = validateContent(generated.content, 'post', generated.confidence)
+    if (!validation.valid) {
+      console.log(`[TaskScheduler] Post content rejected: ${validation.reason}`)
+      return
+    }
+
+    const targetGame = await this.selectGameByInterests(player)
+    if (!targetGame) {
+      console.log('[TaskScheduler] No suitable game found for post')
+      return
+    }
+
+    const slug = generateSlug(player.username)
+    const title = this.generatePostTitle(generated.content)
+
+    await db.$transaction(async (tx) => {
+      const article = await tx.article.create({
+        data: {
+          slug,
+          title,
+          article_type: 'guide',
+          status: 'published',
+          source_type: 'ai',
+          game_id: targetGame.id,
+          cover_url: player.avatar || getGameCoverUrl(title),
+          cover_alt: title,
+          content: generated.content,
+          excerpt: generated.content.substring(0, 150) + '...',
+          read_time: Math.max(1, Math.ceil(generated.content.length / 1000)),
+          seo_title: title + ' | GameHub',
+          seo_description: generated.content.substring(0, 160),
+          seo_keywords: JSON.stringify(this.extractKeywords(generated.content)),
+          quality_score: generated.confidence,
+          published_at: new Date(),
+        },
+      })
+
+      await tx.aIActivityLog.create({
+        data: {
+          player_id: player.id,
+          activity_type: 'post',
+          target_type: 'article',
+          target_id: article.slug,
+          content: generated.content,
+          success: true,
+        },
+      })
+
+      await tx.aIPlayer.update({
+        where: { id: player.id },
+        data: {
+          total_posts: { increment: 1 },
+          last_activity_at: new Date(),
+        },
+      })
+
+      console.log(`[TaskScheduler] Post created: "${title}" by ${player.username}`)
     })
 
-    await db.aIPlayer.update({
-      where: { id: player.id },
-      data: {
-        total_posts: { increment: 1 },
-        last_activity_at: new Date(),
-      },
-    })
+    await this.updateDailyStats(player.id, 'post', 5)
   }
 
   private async executeComment(player: AIPlayer): Promise<void> {
     const engine = new BehaviorEngine(player, player.behavior_config!)
     const targetSlug = await engine.getRandomTarget('article')
-    
-    if (!targetSlug) return
+
+    if (!targetSlug) {
+      console.log('[TaskScheduler] No target article found for comment')
+      return
+    }
 
     const articleContent = await getArticleContent(targetSlug)
     if (!articleContent) return
@@ -149,44 +360,62 @@ export class TaskScheduler {
     const interactor = new ContentInteractor(player)
     const generated = await interactor.generateComment(articleContent)
 
+    const validation = validateContent(generated.content, 'comment', generated.confidence)
+    if (!validation.valid) {
+      console.log(`[TaskScheduler] Comment content rejected: ${validation.reason}`)
+      return
+    }
+
     const typingDelay = engine.getTypingTime(generated.content.length)
     await delay(typingDelay * 1000)
 
-    await db.comment.create({
-      data: {
-        article_slug: targetSlug,
-        author_username: player.username,
-        author_avatar: player.avatar,
-        content: generated.content,
-      },
+    await db.$transaction(async (tx) => {
+      await tx.comment.create({
+        data: {
+          article_slug: targetSlug,
+          author_username: player.username,
+          author_avatar: player.avatar,
+          content: generated.content,
+        },
+      })
+
+      await tx.aIActivityLog.create({
+        data: {
+          player_id: player.id,
+          activity_type: 'comment',
+          target_type: 'article',
+          target_id: targetSlug,
+          content: generated.content,
+          success: true,
+        },
+      })
+
+      await tx.aIPlayer.update({
+        where: { id: player.id },
+        data: {
+          total_comments: { increment: 1 },
+          last_activity_at: new Date(),
+        },
+      })
+
+      await tx.article.update({
+        where: { slug: targetSlug },
+        data: { updated_at: new Date() },
+      }).catch(() => {})
     })
 
-    await db.aIActivityLog.create({
-      data: {
-        player_id: player.id,
-        activity_type: 'comment',
-        target_type: 'article',
-        target_id: targetSlug,
-        content: generated.content,
-      },
-    })
-
-    await db.aIPlayer.update({
-      where: { id: player.id },
-      data: {
-        total_comments: { increment: 1 },
-        last_activity_at: new Date(),
-      },
-    })
+    await this.updateDailyStats(player.id, 'comment', 2)
   }
 
   private async executeReply(player: AIPlayer): Promise<void> {
     const engine = new BehaviorEngine(player, player.behavior_config!)
     const targetId = await engine.getRandomTarget('comment')
-    
-    if (!targetId) return
 
-    // Fetch the parent comment to get its article_slug and content
+    if (!targetId) {
+      console.log('[TaskScheduler] No target comment found for reply')
+      return
+    }
+
     const parentComment = await db.comment.findUnique({
       where: { id: targetId },
       select: { content: true, article_slug: true },
@@ -194,59 +423,75 @@ export class TaskScheduler {
     if (!parentComment || !parentComment.article_slug) return
 
     const interactor = new ContentInteractor(player)
-    const generated = await interactor.generateReply(parentComment.content)
+    const generated = await interactor.generateReply(parentComment.content, undefined, parentComment.article_slug)
 
-    await db.comment.create({
-      data: {
-        article_slug: parentComment.article_slug,
-        author_username: player.username,
-        author_avatar: player.avatar,
-        content: generated.content,
-        parent_id: targetId,
-      },
+    const validation = validateContent(generated.content, 'reply', generated.confidence)
+    if (!validation.valid) {
+      console.log(`[TaskScheduler] Reply content rejected: ${validation.reason}`)
+      return
+    }
+
+    await db.$transaction(async (tx) => {
+      await tx.comment.create({
+        data: {
+          article_slug: parentComment.article_slug,
+          author_username: player.username,
+          author_avatar: player.avatar,
+          content: generated.content,
+          parent_id: targetId,
+        },
+      })
+
+      await tx.aIActivityLog.create({
+        data: {
+          player_id: player.id,
+          activity_type: 'reply',
+          target_type: 'comment',
+          target_id: targetId,
+          content: generated.content,
+          success: true,
+        },
+      })
     })
 
-    await db.aIActivityLog.create({
-      data: {
-        player_id: player.id,
-        activity_type: 'reply',
-        target_type: 'comment',
-        target_id: targetId,
-        content: generated.content,
-      },
-    })
+    await this.updateDailyStats(player.id, 'reply', 1)
   }
 
   private async executeLike(player: AIPlayer): Promise<void> {
     const engine = new BehaviorEngine(player, player.behavior_config!)
     const targetSlug = await engine.getRandomTarget('article')
-    
+
     if (!targetSlug) return
 
     const article = await db.article.findUnique({ where: { slug: targetSlug } })
     if (!article) return
 
-    await db.like.create({
-      data: {
-        user_id: player.id,
-        article_id: article.id,
-      },
-    }).catch(() => {})
+    await db.$transaction(async (tx) => {
+      await tx.like.create({
+        data: {
+          user_id: player.id,
+          article_id: article.id,
+        },
+      }).catch(() => {})
 
-    await db.aIActivityLog.create({
-      data: {
-        player_id: player.id,
-        activity_type: 'like',
-        target_type: 'article',
-        target_id: targetSlug,
-      },
+      await tx.aIActivityLog.create({
+        data: {
+          player_id: player.id,
+          activity_type: 'like',
+          target_type: 'article',
+          target_id: targetSlug,
+          success: true,
+        },
+      })
     })
+
+    await this.updateDailyStats(player.id, 'like', 1)
   }
 
   private async executeView(player: AIPlayer): Promise<void> {
     const engine = new BehaviorEngine(player, player.behavior_config!)
     const targetSlug = await engine.getRandomTarget('article')
-    
+
     if (!targetSlug) return
 
     await db.aIActivityLog.create({
@@ -255,9 +500,151 @@ export class TaskScheduler {
         activity_type: 'view',
         target_type: 'article',
         target_id: targetSlug,
+        success: true,
       },
     })
+
+    await this.updateDailyStats(player.id, 'view', 1)
   }
+
+  private async selectGameByInterests(player: AIPlayer): Promise<{ id: string; name: string } | null> {
+    try {
+      const interests = typeof player.interests === 'string'
+        ? JSON.parse(player.interests)
+        : player.interests
+
+      if (!Array.isArray(interests) || interests.length === 0) {
+        return await db.game.findFirst({
+          where: { articles: { some: {} } },
+          select: { id: true, name: true },
+        })
+      }
+
+      const randomInterest = interests[Math.floor(Math.random() * interests.length)]
+      const game = await db.game.findFirst({
+        where: {
+          OR: [
+            { name: { contains: randomInterest } },
+            { tags: { contains: randomInterest } },
+          ],
+        },
+        select: { id: true, name: true },
+      })
+
+      return game || await db.game.findFirst({
+        where: { articles: { some: {} } },
+        select: { id: true, name: true },
+      })
+    } catch {
+      return await db.game.findFirst({
+        where: { articles: { some: {} } },
+        select: { id: true, name: true },
+      })
+    }
+  }
+
+  private generatePostTitle(content: string): string {
+    const firstLine = content.split('\n')[0].trim()
+    const title = firstLine.replace(/^[#*]+/, '').trim()
+    return title.length > 10 ? title : `My thoughts on gaming: ${title}`
+  }
+
+  private extractKeywords(content: string): string[] {
+    const words = content.toLowerCase().match(/\b[a-z]{4,}\b/g) || []
+    const freq: Record<string, number> = {}
+    words.forEach(w => { freq[w] = (freq[w] || 0) + 1 })
+    return Object.entries(freq)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([word]) => word)
+  }
+
+  private async updateDailyStats(
+    playerId: string,
+    activityType: AIActivityType,
+    activityMinutes: number = 1
+  ): Promise<void> {
+    try {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      const todayStart = new Date(today)
+      const todayEnd = new Date(today)
+      todayEnd.setHours(23, 59, 59, 999)
+
+      const todayLogs = await db.aIActivityLog.count({
+        where: {
+          player_id: playerId,
+          created_at: { gte: todayStart, lte: todayEnd },
+        },
+      })
+
+      const todayPosts = await db.aIActivityLog.count({
+        where: {
+          player_id: playerId,
+          activity_type: 'post',
+          created_at: { gte: todayStart, lte: todayEnd },
+        },
+      })
+
+      const todayComments = await db.aIActivityLog.count({
+        where: {
+          player_id: playerId,
+          activity_type: 'comment',
+          created_at: { gte: todayStart, lte: todayEnd },
+        },
+      })
+
+      const todayReplies = await db.aIActivityLog.count({
+        where: {
+          player_id: playerId,
+          activity_type: 'reply',
+          created_at: { gte: todayStart, lte: todayEnd },
+        },
+      })
+
+      const todayLikes = await db.aIActivityLog.count({
+        where: {
+          player_id: playerId,
+          activity_type: 'like',
+          created_at: { gte: todayStart, lte: todayEnd },
+        },
+      })
+
+      await db.aIStats.upsert({
+        where: {
+          player_id_date: {
+            player_id: playerId,
+            date: today,
+          },
+        },
+        create: {
+          player_id: playerId,
+          date: today,
+          posts_count: todayPosts,
+          comments_count: todayComments,
+          replies_count: todayReplies,
+          likes_count: todayLikes,
+          active_minutes: activityMinutes,
+        },
+        update: {
+          posts_count: todayPosts,
+          comments_count: todayComments,
+          replies_count: todayReplies,
+          likes_count: todayLikes,
+          active_minutes: { increment: activityMinutes },
+        },
+      })
+    } catch (error) {
+      console.error('[TaskScheduler] Failed to update daily stats:', error)
+    }
+  }
+}
+
+function generateSlug(username: string): string {
+  const timestamp = Date.now().toString(36)
+  const random = Math.random().toString(36).substring(2, 8)
+  return `ai-post-${username.toLowerCase()}-${timestamp}-${random}`
 }
 
 function delay(ms: number): Promise<void> {
@@ -267,6 +654,16 @@ function delay(ms: number): Promise<void> {
 export async function startScheduler(): Promise<void> {
   const scheduler = TaskScheduler.getInstance()
   await scheduler.start()
+}
+
+export async function initScheduler(): Promise<void> {
+  const scheduler = TaskScheduler.getInstance()
+  await scheduler.init()
+}
+
+export async function setSchedulerAutoStart(enabled: boolean): Promise<void> {
+  const scheduler = TaskScheduler.getInstance()
+  await scheduler.setAutoStart(enabled)
 }
 
 export function stopScheduler(): void {
