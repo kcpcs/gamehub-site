@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { CopyButton } from '../codes/CopyButton'
 import { Loader2 } from 'lucide-react'
+import { useLanguage } from '@/lib/language-context'
 
 interface Code {
   id: string
@@ -17,6 +18,7 @@ interface GameCodesListProps {
 }
 
 export function GameCodesList({ gameSlug }: GameCodesListProps) {
+  const { t } = useLanguage()
   const [codes, setCodes] = useState<Code[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -51,7 +53,7 @@ export function GameCodesList({ gameSlug }: GameCodesListProps) {
   if (codes.length === 0) {
     return (
       <div className="text-center py-12">
-        <p style={{ color: 'var(--text-secondary)' }}>No codes available yet.</p>
+        <p style={{ color: 'var(--text-secondary)' }}>{t('no_codes_available')}</p>
       </div>
     )
   }

@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -57,8 +56,8 @@ export function SystemSettings() {
       if (!data.success) throw new Error(data.error || 'Failed to fetch settings')
       setSettings(data.data)
       setKeywordsInput((data.data.seo?.defaultKeywords || []).join(', '))
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch settings')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch settings')
     } finally {
       setLoading(false)
     }
@@ -92,23 +91,28 @@ export function SystemSettings() {
 
       setSaveMessage({ type: 'success', text: 'Settings saved successfully!' })
       setTimeout(() => setSaveMessage(null), 4000)
-    } catch (err: any) {
-      setSaveMessage({ type: 'error', text: err.message || 'Failed to save settings' })
+    } catch (err) {
+      setSaveMessage({ type: 'error', text: err instanceof Error ? err.message : 'Failed to save settings' })
     } finally {
       setSaving(false)
     }
   }
 
-  const updateField = (path: string, value: any) => {
+  type SettingsFieldValue = string | number | boolean | string[] | object
+
+  const updateField = (path: string, value: SettingsFieldValue) => {
     setSettings(prev => {
       if (!prev) return prev
       const parts = path.split('.')
       const result = { ...prev }
-      let current: any = result
+      let current: Record<string, unknown> = result
 
       for (let i = 0; i < parts.length - 1; i++) {
-        current[parts[i]] = { ...current[parts[i]] }
-        current = current[parts[i]]
+        const next = current[parts[i]]
+        if (typeof next === 'object' && next !== null) {
+          current[parts[i]] = { ...(next as Record<string, unknown>) }
+          current = next as Record<string, unknown>
+        }
       }
 
       current[parts[parts.length - 1]] = value
@@ -315,23 +319,23 @@ export function SystemSettings() {
             <div className="space-y-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Feature Toggles</h3>
               <div className="space-y-4">
-                {[
+                {([
                   {
-                    key: 'aiPlayersEnabled',
+                    key: 'aiPlayersEnabled' as const,
                     label: 'AI Players',
                     description: 'Enable AI-simulated player activity (comments, likes, community engagement)',
                   },
                   {
-                    key: 'commentsEnabled',
+                    key: 'commentsEnabled' as const,
                     label: 'Comments System',
                     description: 'Allow users to post comments on articles and guides',
                   },
                   {
-                    key: 'codeSubmissionEnabled',
+                    key: 'codeSubmissionEnabled' as const,
                     label: 'Code Submission',
                     description: 'Allow users to submit game redemption codes',
                   },
-                ].map((feature) => (
+                ] as const).map((feature) => (
                   <div key={feature.key} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white">{feature.label}</p>
@@ -422,11 +426,11 @@ export function SystemSettings() {
                 API keys are configured via environment variables. This panel shows their current status.
               </p>
               <div className="space-y-3">
-                {[
-                  { key: 'igdbConfigured', label: 'IGDB API', description: 'Used for fetching game metadata', envVars: 'IGDB_CLIENT_ID, IGDB_CLIENT_SECRET' },
-                  { key: 'steamConfigured', label: 'Steam Web API', description: 'Used for Steam game data and reviews', envVars: 'STEAM_API_KEY' },
-                  { key: 'openaiConfigured', label: 'OpenAI API', description: 'Used for AI content generation and AI players', envVars: 'OPENAI_API_KEY' },
-                ].map((api) => (
+                {([
+                  { key: 'igdbConfigured' as const, label: 'IGDB API', description: 'Used for fetching game metadata', envVars: 'IGDB_CLIENT_ID, IGDB_CLIENT_SECRET' },
+                  { key: 'steamConfigured' as const, label: 'Steam Web API', description: 'Used for Steam game data and reviews', envVars: 'STEAM_API_KEY' },
+                  { key: 'openaiConfigured' as const, label: 'OpenAI API', description: 'Used for AI content generation and AI players', envVars: 'OPENAI_API_KEY' },
+                ] as const).map((api) => (
                   <div key={api.key} className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white">{api.label}</p>

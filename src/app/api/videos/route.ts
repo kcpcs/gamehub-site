@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
           channel_url: video.channel_url,
           duration: video.duration || null,
           view_count: video.view_count || null,
-          like_count: video.like_count || null,
+          like_count: ('like_count' in video) ? video.like_count : null,
           published_at: video.published_at || null,
           video_type: video.video_type as any,
           video_tags: [],

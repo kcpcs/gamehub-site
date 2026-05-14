@@ -20,6 +20,40 @@
     },
     {
       "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 3,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "code-check-schedule",
+      "name": "Code Expiry Check Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 600]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "release-notify-schedule",
+      "name": "Release Notification Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [250, 900]
+    },
+    {
+      "parameters": {
         "functionCode": "const games = [\n  'genshin-impact',\n  'honkai-star-rail',\n  'valorant',\n  'elden-ring',\n  'minecraft',\n  'zelda-tears-of-the-kingdom',\n  'baldurs-gate-3',\n  'apex-legends',\n  'fortnite',\n  'cyberpunk-2077'\n];\n\nconst randomGame = games[Math.floor(Math.random() * games.length)];\nconst topics = [\n  'Complete Beginners Guide',\n  'Best Tips and Tricks',\n  'How to Farm Resources',\n  'Secret Locations',\n  'Best Build Guide',\n  'Tier List Analysis'\n];\nconst randomTopic = topics[Math.floor(Math.random() * topics.length)];\n\nreturn {\n  gameSlug: randomGame,\n  topic: randomTopic,\n  timestamp: new Date().toISOString()\n};"
       },
       "id": "content-request-generator",
@@ -27,6 +61,63 @@
       "type": "n8n-nodes-base.function",
       "typeVersion": 1,
       "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.WEBSITE_API_URL}}/api/internal/codes/check-expired",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "INTERNAL_API_SECRET",
+              "value": "{{$env.INTERNAL_API_SECRET}}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "dryRun",
+              "value": false
+            }
+          ]
+        }
+      },
+      "id": "check-expired-codes",
+      "name": "Check Expired Codes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [500, 600]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.WEBSITE_API_URL}}/api/internal/releases/notify",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "INTERNAL_API_SECRET",
+              "value": "{{$env.INTERNAL_API_SECRET}}"
+            }
+          ]
+        }
+      },
+      "id": "send-release-notifications",
+      "name": "Send Release Notifications",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [500, 900]
     },
     {
       "parameters": {
@@ -155,6 +246,26 @@
       "type": "n8n-nodes-base.function",
       "typeVersion": 1,
       "position": [1000, 400]
+    },
+    {
+      "parameters": {
+        "message": "=Code Expiry Check Completed\n\nTotal Checked: {{$json.data.totalChecked}}\nExpired: {{$json.data.expiredCount}}\nValid: {{$json.data.validCount}}\nErrors: {{$json.data.errorCount}}"
+      },
+      "id": "code-check-notification",
+      "name": "Code Check Notification",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [750, 600]
+    },
+    {
+      "parameters": {
+        "message": "=Release Notifications Sent\n\nTotal Games: {{$json.data.totalGames}}\nEmails Sent: {{$json.data.emailsSent}}\nDiscord Notifications: {{$json.data.discordNotifications}}"
+      },
+      "id": "release-notification-summary",
+      "name": "Release Notification Summary",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [750, 900]
     }
   ],
   "connections": {
@@ -169,11 +280,55 @@
         ]
       ]
     },
+    "Code Expiry Check Schedule": {
+      "main": [
+        [
+          {
+            "node": "Check Expired Codes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Release Notification Schedule": {
+      "main": [
+        [
+          {
+            "node": "Send Release Notifications",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Generate Content Request": {
       "main": [
         [
           {
             "node": "Call Claude API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Expired Codes": {
+      "main": [
+        [
+          {
+            "node": "Code Check Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Release Notifications": {
+      "main": [
+        [
+          {
+            "node": "Release Notification Summary",
             "type": "main",
             "index": 0
           }
@@ -238,8 +393,8 @@
     "timezone": "UTC"
   },
   "staticData": null,
-  "tags": ["automated", "content", "ai", "gamehub"],
-  "triggerCount": 1,
+  "tags": ["automated", "content", "ai", "gamehub", "codes", "releases"],
+  "triggerCount": 3,
   "updatedAt": "2026-01-20T00:00:00.000Z",
-  "versionId": "1"
+  "versionId": "2"
 }

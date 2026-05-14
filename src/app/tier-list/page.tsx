@@ -1,6 +1,31 @@
+import type { Metadata } from 'next'
 import { db } from '@/lib/db'
 import Link from 'next/link'
 import { Breadcrumb } from '@/components/Breadcrumb'
+
+export const metadata: Metadata = {
+  title: 'Tier Lists | GameHub',
+  description: 'Community-voted tier lists for characters, weapons, and more. Find the best rankings for your favorite games.',
+  openGraph: {
+    title: 'Tier Lists | GameHub',
+    description: 'Community-voted tier lists for characters, weapons, and more. Find the best rankings for your favorite games.',
+    type: 'website',
+    images: [
+      {
+        url: 'https://picsum.photos/seed/tierlist/1200/630',
+        width: 1200,
+        height: 630,
+        alt: 'Tier Lists - GameHub',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Tier Lists | GameHub',
+    description: 'Community-voted tier lists for characters, weapons, and more.',
+    images: ['https://picsum.photos/seed/tierlist/1200/630'],
+  },
+}
 
 interface GameWithTierList {
   id: string

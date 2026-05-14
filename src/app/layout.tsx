@@ -1,8 +1,16 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
+import { Inter } from 'next/font/google'
 import { ClientLayout } from '@/components/ClientLayout'
 import { auth } from '@/lib/auth'
+import { JsonLdScript, getWebsiteSchema } from '@/components/seo/JsonLd'
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
@@ -70,7 +78,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   }
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={inter.variable}>
+      <head>
+        <JsonLdScript data={getWebsiteSchema()} />
+      </head>
       <ClientLayout user={session?.user || null}>{children}</ClientLayout>
     </html>
   )

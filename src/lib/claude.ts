@@ -15,22 +15,23 @@ export interface ClaudeResponse {
   usage: {
     input_tokens: number
     output_tokens: number
+    cache_read_input_tokens?: number
   }
 }
 
 export const MODEL_CONFIG = {
   sonnet: {
-    id: process.env.DEFAULT_CLAUDE_MODEL || 'claude-sonnet-4-20250514',
+    id: process.env.DEFAULT_CLAUDE_MODEL || 'claude-sonnet-4-6',
     name: 'Claude Sonnet 4',
     description: '平衡速度与质量，适合日常开发和内容生成',
   },
   opus: {
-    id: process.env.DEFAULT_OPUS_MODEL || 'claude-opus-4-1-20250805',
+    id: process.env.DEFAULT_OPUS_MODEL || 'claude-opus-4-7',
     name: 'Claude Opus 4',
     description: '最强推理能力，适合复杂任务和架构设计',
   },
   haiku: {
-    id: process.env.DEFAULT_HAIKU_MODEL || 'claude-3-5-haiku',
+    id: process.env.DEFAULT_HAIKU_MODEL || 'claude-haiku-4-5-20251001',
     name: 'Claude Haiku',
     description: '快速响应，适合简单任务和批量处理',
   },
@@ -40,7 +41,8 @@ export async function createClaudeCompletion(
   messages: ClaudeMessage[],
   systemPrompt?: string,
   maxTokens: number = 4096,
-  model: keyof typeof MODEL_CONFIG = 'sonnet'
+  model: keyof typeof MODEL_CONFIG = 'sonnet',
+  cacheControl?: { type: 'ephemeral' }
 ): Promise<ClaudeResponse> {
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new Error('ANTHROPIC_API_KEY is not configured')
@@ -67,6 +69,7 @@ export async function createClaudeCompletion(
     usage: {
       input_tokens: response.usage.input_tokens,
       output_tokens: response.usage.output_tokens,
+      cache_read_input_tokens: response.usage.cache_read_input_tokens ?? undefined,
     },
   }
 }

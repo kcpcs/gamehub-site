@@ -1,5 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { z } from 'zod'
+
+const articleUpdateSchema = z.object({
+  title: z.string().min(1).max(200).optional(),
+  slug: z.string().min(1).max(200).optional(),
+  content: z.string().max(50000).optional(),
+  article_type: z.enum(['guide', 'news', 'review', 'tierlist']).optional(),
+  status: z.enum(['draft', 'published', 'archived']).optional(),
+  game_id: z.string().optional(),
+  cover_url: z.string().url().optional(),
+  cover_alt: z.string().max(200).optional(),
+  excerpt: z.string().max(500).optional(),
+  read_time: z.number().int().min(1).max(300).optional(),
+  seo_title: z.string().max(60).optional(),
+  seo_description: z.string().max(160).optional(),
+})
+
+const batchActionSchema = z.object({
+  ids: z.array(z.string()).min(1),
+  action: z.enum(['update', 'delete']),
+  data: articleUpdateSchema.optional(),
+})
 
 // GET /api/admin/articles - 获取所有文章
 export async function GET(request: NextRequest) {
@@ -146,37 +168,45 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json()
-    const { ids, action, data } = body
-
-    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+    
+    const validation = batchActionSchema.safeParse(body)
+    if (!validation.success) {
       return NextResponse.json(
-        { success: false, error: 'ids is required and must be a non-empty array' },
+        {
+          success: false,
+          error: 'Validation failed',
+          code: 'VALIDATION_ERROR',
+          details: validation.error.issues.map(issue => ({
+            field: issue.path.join('.'),
+            message: issue.message,
+          })),
+        },
         { status: 400 }
       )
     }
 
-    if (!action) {
-      return NextResponse.json(
-        { success: false, error: 'action is required' },
-        { status: 400 }
-      )
-    }
+    const { ids, action, data } = validation.data
 
     let result
 
     switch (action) {
       case 'update':
-        if (!data) {
+        if (!data || Object.keys(data).length === 0) {
           return NextResponse.json(
             { success: false, error: 'data is required for update action' },
             { status: 400 }
           )
         }
+        // 添加字段白名单过滤
+        const ALLOWED_ARTICLE_UPDATE_FIELDS = ['title', 'slug', 'content', 'article_type', 'status', 'game_id', 'cover_url', 'cover_alt', 'excerpt', 'read_time', 'seo_title', 'seo_description']
+        const sanitizedData = Object.fromEntries(
+          Object.entries(data).filter(([key]) => ALLOWED_ARTICLE_UPDATE_FIELDS.includes(key))
+        )
         result = await db.article.updateMany({
           where: { id: { in: ids } },
           data: {
-            ...data,
-            ...(data.status === 'published' && { published_at: new Date() }),
+            ...sanitizedData,
+            ...(sanitizedData.status === 'published' && { published_at: new Date() }),
           },
         })
         break
@@ -186,12 +216,6 @@ export async function PATCH(request: NextRequest) {
           where: { id: { in: ids } },
         })
         break
-
-      default:
-        return NextResponse.json(
-          { success: false, error: `Unknown action: ${action}` },
-          { status: 400 }
-        )
     }
 
     return NextResponse.json({

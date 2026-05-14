@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Loader2 } from 'lucide-react'
+import { useLanguage } from '@/lib/language-context'
 
 interface Guide {
   id: string
@@ -19,6 +20,7 @@ interface GameGuideListProps {
 }
 
 export function GameGuideList({ gameSlug }: GameGuideListProps) {
+  const { t } = useLanguage()
   const [guides, setGuides] = useState<Guide[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -53,7 +55,7 @@ export function GameGuideList({ gameSlug }: GameGuideListProps) {
   if (guides.length === 0) {
     return (
       <div className="text-center py-12">
-        <p style={{ color: 'var(--text-secondary)' }}>No guides available yet.</p>
+        <p style={{ color: 'var(--text-secondary)' }}>{t('no_guides_available')}</p>
       </div>
     )
   }

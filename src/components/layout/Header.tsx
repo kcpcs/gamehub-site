@@ -2,12 +2,18 @@
 
 import Link from 'next/link'
 import { Search, Menu, X, Zap } from 'lucide-react'
-import { useState } from 'react'
-import { SearchModal } from '@/components/SearchModal'
+import { useState, Suspense } from 'react'
+import dynamic from 'next/dynamic'
 import { UserButton } from '@/components/UserButton'
 import { ThemeToggle } from '@/components/ThemeToggle'
 import { LanguageSelector } from '@/components/LanguageSelector'
+import { NotificationCenter } from '@/components/NotificationCenter'
 import { useLanguage } from '@/lib/language-context'
+
+const SearchModal = dynamic(() => import('@/components/SearchModal').then(mod => ({ default: mod.SearchModal })), {
+  ssr: false,
+  loading: () => null,
+})
 
 // ─── INTERFACE (DO NOT MODIFY) ────────────────────────────────
 export interface HeaderProps {
@@ -100,6 +106,9 @@ export function Header({ currentPath, user }: HeaderProps) {
               {t('start_creating')}
             </Link>
           )}
+
+          {/* Notifications */}
+          {user && <NotificationCenter />}
 
           {/* User */}
           <UserButton user={user || null} />

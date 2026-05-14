@@ -1,5 +1,6 @@
 const { PrismaClient } = require('@prisma/client');
 const { PrismaLibSql } = require('@prisma/adapter-libsql');
+const { ensureAchievements } = require('./achievements.cjs');
 require('dotenv').config();
 
 const adapter = new PrismaLibSql({
@@ -629,6 +630,10 @@ async function seed() {
   }
 
   console.log('🎉 Seeding complete!');
+  
+  console.log('\n🌱 Seeding achievements...');
+  const achievementResult = await ensureAchievements();
+  console.log(`✅ Achievement seeding complete! Created: ${achievementResult.created}, Existed: ${achievementResult.existed}`);
 }
 
 seed()

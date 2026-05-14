@@ -4,16 +4,34 @@ import { db } from '@/lib/db'
 // GET /api/admin/users/[id] - 获取单个用户详情
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
 
     const user = await db.user.findUnique({
       where: { id },
-      include: {
-        articles: true,
-        comments: true,
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        avatar: true,
+        membership: true,
+        creator_level: true,
+        points: true,
+        article_count: true,
+        total_views: true,
+        created_at: true,
+        updated_at: true,
+        articles: {
+          select: {
+            id: true,
+            title: true,
+            slug: true,
+            status: true,
+            created_at: true,
+          },
+        },
       },
     })
 
@@ -37,10 +55,10 @@ export async function GET(
 // PATCH /api/admin/users/[id] - 更新单个用户
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
     const body = await request.json()
 
     const user = await db.user.update({
@@ -52,6 +70,19 @@ export async function PATCH(
         membership: body.membership,
         creator_level: body.creator_level,
         points: body.points,
+      },
+      select: {
+        id: true,
+        email: true,
+        username: true,
+        avatar: true,
+        membership: true,
+        creator_level: true,
+        points: true,
+        article_count: true,
+        total_views: true,
+        created_at: true,
+        updated_at: true,
       },
     })
 
@@ -68,10 +99,10 @@ export async function PATCH(
 // DELETE /api/admin/users/[id] - 删除单个用户
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
 
     await db.user.delete({
       where: { id },

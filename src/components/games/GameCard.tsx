@@ -27,8 +27,8 @@ function safeJsonParse<T = any>(value: any, defaultValue: T): T {
   return defaultValue
 }
 
-function getScoreColor(score?: number): string {
-  if (!score || score < 50) return 'var(--danger)'
+function getScoreColor(score?: number | null): string {
+  if (score == null || score < 50) return 'var(--danger)'
   if (score < 75) return 'var(--warning)'
   return 'var(--success)'
 }
@@ -36,11 +36,10 @@ function getScoreColor(score?: number): string {
 export function GameCard({ game }: GameCardProps) {
   // 安全获取数据
   const scores = game.scores || {}
-  const displayScore = scores.opencritic || scores.community || scores.steam_positive_pct || 
-                      game.score_opencritic || game.score_community || game.score_steam_pct
+  const displayScore = scores.opencritic || scores.community || scores.steam_positive_pct
   const scoreColor = getScoreColor(displayScore)
   
-  const coverUrl = game.cover?.url || game.cover?.igdb_url || game.cover_url || ''
+  const coverUrl = game.cover?.url || game.cover?.igdb_url || ''
   
   const platforms = safeJsonParse(game.platforms, [])
   const safePlatforms = Array.isArray(platforms) ? platforms : []

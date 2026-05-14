@@ -27,21 +27,23 @@ model Game {
   score_opencritic   Float?
   score_steam_pct    Float?
   score_community    Float?
-  score_review_count Int      @default(0)
+  score_review_count Int    @default(0)
 
   description   String?
-  guide_count   Int      @default(0)
-  code_count    Int      @default(0)
-  video_count   Int      @default(0)
-  has_tier_list Boolean  @default(false)
+  guide_count   Int       @default(0)
+  code_count    Int       @default(0)
+  video_count   Int       @default(0)
+  has_tier_list Boolean   @default(false)
   last_patch_at DateTime?
 
-  articles   Article[]
-  codes      GameCode[]
-  tier_lists TierList[]
-  likes      Like[]
-  favorites  Favorite[]
-  videos     Video[]
+  articles            Article[]
+  codes               GameCode[]
+  tier_lists          TierList[]
+  likes               Like[]
+  favorites           Favorite[]
+  videos              Video[]
+  ratings             GameRating[]
+  content_submissions ContentSubmission[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -54,40 +56,40 @@ model Game {
 // VIDEOS
 // ─────────────────────────────────────────
 model Video {
-  id                String           @id @default(cuid())
-  video_id          String
-  platform          VideoPlatform
-  game_id           String?
-  game              Game?            @relation(fields: [game_id], references: [id])
+  id       String        @id @default(cuid())
+  video_id String
+  platform VideoPlatform
+  game_id  String?
+  game     Game?         @relation(fields: [game_id], references: [id])
 
-  title             String
-  description       String?
-  thumbnail_url     String
-  channel_name      String
-  channel_url       String
-  duration          Int?
-  view_count        BigInt?
-  like_count        BigInt?
-  published_at      DateTime?
+  title         String
+  description   String?
+  thumbnail_url String
+  channel_name  String
+  channel_url   String
+  duration      Int?
+  view_count    BigInt?
+  like_count    BigInt?
+  published_at  DateTime?
 
-  video_type        VideoType        @default(GAMEPLAY)
-  video_tags        Json             @default("[]")
+  video_type VideoType @default(GAMEPLAY)
+  video_tags Json      @default("[]")
 
-  is_live           Boolean          @default(false)
-  is_featured       Boolean          @default(false)
-  is_active         Boolean          @default(true)
+  is_live     Boolean @default(false)
+  is_featured Boolean @default(false)
+  is_active   Boolean @default(true)
 
   // AI meta data
-  ai_summary        String?
+  ai_summary         String?
   ai_relevance_score Float?
 
-  created_at        DateTime         @default(now())
-  updated_at        DateTime         @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  favorites         VideoFavorite[]
-  likes             VideoLike[]
-  comments          VideoComment[]
-  view_history      VideoViewHistory[]
+  favorites    VideoFavorite[]
+  likes        VideoLike[]
+  comments     VideoComment[]
+  view_history VideoViewHistory[]
 
   @@unique([platform, video_id])
   @@index([game_id])
@@ -148,6 +150,9 @@ model Article {
   view_count      Int    @default(0)
   share_count     Int    @default(0)
 
+  ai_generated Boolean @default(false)
+  ai_player_id String?
+
   published_at DateTime?
   created_at   DateTime  @default(now())
   updated_at   DateTime  @updatedAt
@@ -188,18 +193,18 @@ enum SourceType {
 // USERS
 // ─────────────────────────────────────────
 model User {
-  id             String         @id @default(cuid())
-  email          String         @unique
-  username       String         @unique
-  avatar         String?
-  password_hash  String?
-  membership     MembershipType @default(free)
-  creator_level  CreatorLevel   @default(reader)
-  points         Int            @default(0)
-  earned_cents   Int            @default(0)
-  pending_cents  Int            @default(0)
-  total_views    Int            @default(0)
-  article_count  Int            @default(0)
+  id              String         @id @default(cuid())
+  email           String         @unique
+  username        String         @unique
+  avatar          String?
+  password_hash   String?
+  membership      MembershipType @default(free)
+  creator_level   CreatorLevel   @default(reader)
+  points          Int            @default(0)
+  earned_cents    Int            @default(0)
+  pending_cents   Int            @default(0)
+  total_views     Int            @default(0)
+  article_count   Int            @default(0)
   preferred_games Json           @default("[]")
 
   articles           Article[]
@@ -210,6 +215,13 @@ model User {
   video_likes        VideoLike[]
   video_comments     VideoComment[]
   video_view_history VideoViewHistory[]
+  ratings            GameRating[]
+  notifications      Notification[]
+  achievements       UserAchievement[]
+  comment_votes      CommentVote[]
+
+  creator_applications CreatorApplication[]
+  creator_profiles     CreatorProfile[]
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -291,9 +303,9 @@ model TierList {
 }
 
 model TierEntry {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   tier_list_id String
-  tier_list    TierList @relation(fields: [tier_list_id], references: [id])
+  tier_list    TierList  @relation(fields: [tier_list_id], references: [id])
   name         String
   image_url    String
   grade        TierGrade
@@ -321,6 +333,11 @@ model TierVote {
 }
 
 enum TierGrade {
+  T0
+  T1
+  T2
+  T3
+  T4
   S
   A
   B
@@ -383,16 +400,21 @@ model PointTransaction {
 // COMMENTS
 // ─────────────────────────────────────────
 model Comment {
-  id             String   @id @default(cuid())
-  article_slug   String
-  article        Article  @relation(fields: [article_slug], references: [slug])
+  id              String        @id @default(cuid())
+  article_slug    String
+  article         Article       @relation(fields: [article_slug], references: [slug])
   author_username String
-  author_avatar  String?
-  content        String
-  likes          Int      @default(0)
-  parent_id      String?
-  parent         Comment?  @relation("CommentReplies", fields: [parent_id], references: [id])
-  replies        Comment[] @relation("CommentReplies")
+  author_avatar   String?
+  content         String
+  likes           Int           @default(0)
+  vote_score      Int           @default(0)
+  parent_id       String?
+  parent          Comment?      @relation("CommentReplies", fields: [parent_id], references: [id])
+  replies         Comment[]     @relation("CommentReplies")
+  votes           CommentVote[]
+
+  ai_generated Boolean @default(false)
+  ai_player_id String?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -401,18 +423,98 @@ model Comment {
   @@index([parent_id])
 }
 
+model GameRating {
+  id            String  @id @default(cuid())
+  user_id       String
+  user          User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  game_id       String
+  game          Game    @relation(fields: [game_id], references: [id], onDelete: Cascade)
+  score         Int
+  review        String?
+  helpful_count Int     @default(0)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([user_id, game_id])
+  @@index([game_id])
+  @@index([score])
+}
+
+model Notification {
+  id         String  @id @default(cuid())
+  user_id    String
+  user       User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  type       String
+  title      String
+  message    String
+  read       Boolean @default(false)
+  action_url String?
+  data       Json?
+
+  created_at DateTime @default(now())
+
+  @@index([user_id])
+  @@index([read])
+  @@index([created_at])
+}
+
+model Achievement {
+  id          String  @id @default(cuid())
+  slug        String  @unique
+  title       String
+  description String
+  icon_url    String?
+  points      Int     @default(10)
+  category    String?
+  condition   Json
+  is_active   Boolean @default(true)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user_achievements UserAchievement[]
+}
+
+model UserAchievement {
+  id             String      @id @default(cuid())
+  user_id        String
+  user           User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  achievement_id String
+  achievement    Achievement @relation(fields: [achievement_id], references: [id], onDelete: Cascade)
+  unlocked_at    DateTime    @default(now())
+  progress       Json?
+
+  @@unique([user_id, achievement_id])
+  @@index([user_id])
+}
+
+model CommentVote {
+  id         String  @id @default(cuid())
+  user_id    String
+  user       User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  comment_id String
+  comment    Comment @relation(fields: [comment_id], references: [id], onDelete: Cascade)
+  value      Int
+
+  created_at DateTime @default(now())
+
+  @@unique([user_id, comment_id])
+  @@index([comment_id])
+}
+
 // ─────────────────────────────────────────
 // LIKES / FAVORITES
 // ─────────────────────────────────────────
 model Like {
-  id         String   @id @default(cuid())
+  id         String  @id @default(cuid())
   user_id    String
   article_id String?
   game_id    String?
 
-  article    Article? @relation(fields: [article_id], references: [id])
-  game       Game?    @relation(fields: [game_id], references: [id])
-  
+  article Article? @relation(fields: [article_id], references: [id])
+  game    Game?    @relation(fields: [game_id], references: [id])
+
   created_at DateTime @default(now())
 
   @@unique([user_id, article_id])
@@ -426,7 +528,7 @@ model Favorite {
   id         String   @id @default(cuid())
   user_id    String
   game_id    String
-  game       Game      @relation(fields: [game_id], references: [id])
+  game       Game     @relation(fields: [game_id], references: [id])
   created_at DateTime @default(now())
 
   @@unique([user_id, game_id])
@@ -438,25 +540,31 @@ model Favorite {
 // AI PLAYERS (AI仿真实玩家)
 // ─────────────────────────────────────────
 model AIPlayer {
-  id             String     @id @default(cuid())
-  username       String     @unique
-  email          String     @unique
-  avatar         String?
-  age            Int?
-  occupation     String?
-  personality    Json       @default("{}")
-  interests      Json       @default("[]")
-  activity_level Float      @default(0.5)
-  status         AIPlayerStatus @default(inactive)
-  created_at     DateTime   @default(now())
-  updated_at     DateTime   @updatedAt
-  last_activity_at DateTime?
-  total_posts    Int        @default(0)
-  total_comments Int        @default(0)
+  id                  String         @id @default(cuid())
+  username            String         @unique
+  email               String         @unique
+  avatar              String?
+  avatar_url          String?
+  age                 Int?
+  occupation          String?
+  bio                 String?
+  region              String?
+  personality         Json           @default("{}")
+  interests           Json           @default("[]")
+  activity_level      Float          @default(0.5)
+  status              AIPlayerStatus @default(inactive)
+  created_at          DateTime       @default(now())
+  updated_at          DateTime       @updatedAt
+  last_activity_at    DateTime?
+  joined_at_simulated DateTime?
+  total_posts         Int            @default(0)
+  total_comments      Int            @default(0)
+  follower_ids        Json           @default("[]")
 
-  behavior_config AIBehaviorConfig?
-  activity_logs   AIActivityLog[]
-  stats           AIStats[]
+  behavior_config       AIBehaviorConfig?
+  activity_logs         AIActivityLog[]
+  stats                 AIStats[]
+  aicontentReviewQueues AIContentReviewQueue[]
 
   @@index([status])
   @@index([created_at])
@@ -469,39 +577,39 @@ enum AIPlayerStatus {
 }
 
 model AIBehaviorConfig {
-  id                   String   @id @default(cuid())
-  player_id            String   @unique
-  player               AIPlayer @relation(fields: [player_id], references: [id], onDelete: Cascade)
-  
-  wake_up_time         String   @default("08:00")
-  sleep_time           String   @default("23:00")
-  activity_interval_min Int     @default(300)
-  activity_interval_max Int     @default(1800)
-  post_probability     Float    @default(0.1)
-  comment_probability  Float    @default(0.3)
-  reply_probability    Float    @default(0.5)
-  typing_speed_min     Int      @default(30)
-  typing_speed_max     Int      @default(60)
-  thinking_time_min    Int      @default(2)
-  thinking_time_max    Int      @default(10)
-  
-  updated_at           DateTime @updatedAt
+  id        String   @id @default(cuid())
+  player_id String   @unique
+  player    AIPlayer @relation(fields: [player_id], references: [id], onDelete: Cascade)
+
+  wake_up_time          String @default("08:00")
+  sleep_time            String @default("23:00")
+  activity_interval_min Int    @default(300)
+  activity_interval_max Int    @default(1800)
+  post_probability      Float  @default(0.1)
+  comment_probability   Float  @default(0.3)
+  reply_probability     Float  @default(0.5)
+  typing_speed_min      Int    @default(30)
+  typing_speed_max      Int    @default(60)
+  thinking_time_min     Int    @default(2)
+  thinking_time_max     Int    @default(10)
+
+  updated_at DateTime @updatedAt
 
   @@index([player_id])
 }
 
 model AIActivityLog {
-  id            String          @id @default(cuid())
+  id            String         @id @default(cuid())
   player_id     String
-  player        AIPlayer        @relation(fields: [player_id], references: [id], onDelete: Cascade)
+  player        AIPlayer       @relation(fields: [player_id], references: [id], onDelete: Cascade)
   activity_type AIActivityType
   target_type   String
   target_id     String
   content       String?
-  success       Boolean         @default(true)
+  success       Boolean        @default(true)
   error_message String?
-  
-  created_at    DateTime        @default(now())
+
+  created_at DateTime @default(now())
 
   @@index([player_id])
   @@index([activity_type])
@@ -515,6 +623,37 @@ enum AIActivityType {
   like
   view
   share
+}
+
+// ─────────────────────────────────────────
+// AI CONTENT REVIEW QUEUE (AI内容复审队列)
+// ─────────────────────────────────────────
+model AIContentReviewQueue {
+  id                  String               @id @default(cuid())
+  ai_player_id        String
+  ai_player           AIPlayer             @relation(fields: [ai_player_id], references: [id], onDelete: Cascade)
+  action_type         AIActivityType
+  target_type         String
+  target_id           String?
+  generated_content   String
+  confidence_score    Float
+  quality_check_result Json                @default("{}")
+  status              ReviewStatus         @default(pending)
+  reviewed_by         String?
+  reviewed_at         DateTime?
+  created_at          DateTime             @default(now())
+  updated_at          DateTime             @updatedAt
+
+  @@index([ai_player_id])
+  @@index([status])
+  @@index([created_at])
+}
+
+enum ReviewStatus {
+  pending
+  approved
+  rejected
+  auto_published
 }
 
 model AIStats {
@@ -537,22 +676,22 @@ model AIStats {
 // ADMINISTRATION (管理员系统)
 // ─────────────────────────────────────────
 model AdminUser {
-  id            String      @id @default(cuid())
-  email         String      @unique
-  username      String      @unique
+  id            String        @id @default(cuid())
+  email         String        @unique
+  username      String        @unique
   avatar        String?
   password_hash String
   role          AdminRoleType @default(editor)
-  
-  last_login_at DateTime?
-  failed_attempts Int @default(0)
-  locked_until   DateTime?
-  
-  created_at    DateTime    @default(now())
-  updated_at    DateTime    @updatedAt
+
+  last_login_at   DateTime?
+  failed_attempts Int       @default(0)
+  locked_until    DateTime?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   audit_logs AuditLog[]
-  
+
   @@index([email])
   @@index([role])
 }
@@ -565,10 +704,10 @@ enum AdminRoleType {
 }
 
 model AdminRole {
-  id          String        @id @default(cuid())
-  name        String        @unique
+  id          String  @id @default(cuid())
+  name        String  @unique
   description String?
-  
+
   can_manage_users      Boolean @default(false)
   can_manage_games      Boolean @default(false)
   can_manage_articles   Boolean @default(false)
@@ -579,26 +718,26 @@ model AdminRole {
   can_manage_settings   Boolean @default(false)
   can_manage_roles      Boolean @default(false)
   can_manage_ai_players Boolean @default(false)
-  
-  created_at  DateTime     @default(now())
-  updated_at  DateTime     @updatedAt
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
 model AuditLog {
-  id            String        @id @default(cuid())
-  admin_id      String?
-  admin         AdminUser?    @relation(fields: [admin_id], references: [id], onDelete: SetNull)
-  
+  id       String     @id @default(cuid())
+  admin_id String?
+  admin    AdminUser? @relation(fields: [admin_id], references: [id], onDelete: SetNull)
+
   action        AuditAction
   resource_type String
   resource_id   String?
-  details       Json          @default("{}")
+  details       Json        @default("{}")
   ip_address    String?
   user_agent    String?
-  success       Boolean       @default(true)
+  success       Boolean     @default(true)
   error_message String?
-  
-  created_at    DateTime      @default(now())
+
+  created_at DateTime @default(now())
 
   @@index([admin_id])
   @@index([action])
@@ -621,16 +760,116 @@ enum AuditAction {
 }
 
 // ─────────────────────────────────────────
+// CREATOR PARTNERSHIP PROGRAM
+// ─────────────────────────────────────────
+enum CreatorApplicationPlatform {
+  YOUTUBE
+  TWITCH
+  TIKTOK
+  OTHER
+}
+
+enum CreatorApplicationStatus {
+  pending
+  approved
+  rejected
+}
+
+enum CreatorProfileTier {
+  bronze
+  silver
+  gold
+  platinum
+}
+
+enum CreatorPaymentMethod {
+  PAYPAL
+  BANK_TRANSFER
+  CRYPTO
+}
+
+enum ContentSubmissionType {
+  VIDEO
+  GUIDE
+  CODE
+}
+
+enum ContentSubmissionStatus {
+  pending
+  approved
+  rejected
+}
+
+model CreatorApplication {
+  id               String                     @id @default(cuid())
+  user_id          String
+  user             User                       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  platform         CreatorApplicationPlatform
+  channel_url      String
+  channel_name     String
+  subscriber_count Int                        @default(0)
+  content_type     Json                       @default("[]")
+  experience       String?
+  status           CreatorApplicationStatus   @default(pending)
+  rejection_reason String?
+  created_at       DateTime                   @default(now())
+  updated_at       DateTime                   @updatedAt
+
+  @@index([user_id])
+  @@index([status])
+}
+
+model CreatorProfile {
+  id               String                @id @default(cuid())
+  user_id          String                @unique
+  user             User                  @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  tier             CreatorProfileTier    @default(bronze)
+  total_views      Int                   @default(0)
+  total_earnings   Float                 @default(0)
+  pending_earnings Float                 @default(0)
+  payment_email    String?
+  payment_method   CreatorPaymentMethod?
+  created_at       DateTime              @default(now())
+  updated_at       DateTime              @updatedAt
+
+  submissions ContentSubmission[]
+
+  @@index([user_id])
+}
+
+model ContentSubmission {
+  id           String                  @id @default(cuid())
+  creator_id   String
+  creator      CreatorProfile          @relation(fields: [creator_id], references: [id], onDelete: Cascade)
+  content_type ContentSubmissionType
+  title        String
+  description  String?
+  url          String?
+  game_id      String?
+  game         Game?                   @relation(fields: [game_id], references: [id], onDelete: SetNull)
+  status       ContentSubmissionStatus @default(pending)
+  review_notes String?
+  earnings     Float?
+  created_at   DateTime                @default(now())
+  updated_at   DateTime                @updatedAt
+
+  @@index([creator_id])
+  @@index([status])
+}
+
+// ─────────────────────────────────────────
 // 邮件订阅者
 // ─────────────────────────────────────────
 model Subscriber {
-  id         String   @id @default(cuid())
-  email      String   @unique
-  status     String   @default("active") // active | unsubscribed
-  games      String?  // JSON array of game slugs
-  token      String?
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+  id                  String   @id @default(cuid())
+  email               String   @unique
+  status              String   @default("active") // active | unsubscribed
+  games               String? // JSON array of game slugs (legacy)
+  game_subscriptions  Json     @default("[]") // JSON array of subscribed game IDs
+  token               String?
+  discord_webhook_url String?
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
 
   @@index([status])
   @@index([token])
@@ -683,18 +922,18 @@ model VideoLike {
 }
 
 model VideoComment {
-  id         String          @id @default(cuid())
+  id         String         @id @default(cuid())
   video_id   String
-  video      Video           @relation(fields: [video_id], references: [id], onDelete: Cascade)
+  video      Video          @relation(fields: [video_id], references: [id], onDelete: Cascade)
   user_id    String
-  user       User            @relation(fields: [user_id], references: [id])
+  user       User           @relation(fields: [user_id], references: [id])
   content    String
-  likes      Int             @default(0)
+  likes      Int            @default(0)
   parent_id  String?
-  parent     VideoComment?   @relation("VideoCommentReplies", fields: [parent_id], references: [id])
-  replies    VideoComment[]  @relation("VideoCommentReplies")
-  created_at DateTime        @default(now())
-  updated_at DateTime        @updatedAt
+  parent     VideoComment?  @relation("VideoCommentReplies", fields: [parent_id], references: [id])
+  replies    VideoComment[] @relation("VideoCommentReplies")
+  created_at DateTime       @default(now())
+  updated_at DateTime       @updatedAt
 
   @@index([video_id])
   @@index([parent_id])
@@ -711,5 +950,3 @@ model VideoViewHistory {
   @@index([user_id, watched_at])
   @@index([video_id])
 }
-
-

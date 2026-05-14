@@ -4,10 +4,10 @@ import { db } from '@/lib/db'
 // GET /api/admin/comments/[id] - 获取单个评论详情
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
 
     const comment = await db.comment.findUnique({
       where: { id },
@@ -37,10 +37,10 @@ export async function GET(
 // PATCH /api/admin/comments/[id] - 更新单个评论
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
     const body = await request.json()
 
     const comment = await db.comment.update({
@@ -63,10 +63,10 @@ export async function PATCH(
 // DELETE /api/admin/comments/[id] - 删除单个评论
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
 
     await db.comment.deleteMany({
       where: { OR: [{ id }, { parent_id: id }] },

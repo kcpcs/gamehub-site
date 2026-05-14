@@ -2,19 +2,20 @@
 import { db } from '@/lib/db'
 import { BehaviorEngine, getActivePlayers } from './behavior-engine'
 import { ContentInteractor, getArticleContent, getCommentContent } from './content-interactor'
-import { RATE_LIMITS, ACTIVITY_RATE_LIMIT_MAP, validateContent, QUALITY_CONTROL, SCHEDULING, applyJitter } from './config'
+import { RATE_LIMITS, ACTIVITY_RATE_LIMIT_MAP, QUALITY_CONTROL, SCHEDULING, applyJitter } from './config'
 import { getGameCoverUrl } from '@/lib/game-images'
-import type { AIPlayer, AIBehaviorConfig, AIActivityType } from '@prisma/client'
+import type { AIPlayer, AIBehaviorConfig, AIActivityType, ReviewStatus } from '@prisma/client'
 
 const MAX_CONCURRENT_PLAYERS = 10
 const MIN_INTERVAL_MS = 5000
 const MAX_RETRIES = 2
 const RETRY_DELAY_MS = 30000
 const SCHEDULER_STATE_KEY = 'ai_scheduler_state'
+const AUTO_PUBLISH_THRESHOLD = 0.85
 
-let runningPlayers = new Set<string>()
+const runningPlayers = new Set<string>()
 let schedulerInterval: ReturnType<typeof setInterval> | null = null
-let lastActivityCheck: Map<string, number> = new Map()
+const lastActivityCheck: Map<string, number> = new Map()
 
 export interface SchedulerStatus {
   isRunning: boolean
@@ -73,6 +74,240 @@ async function getAutoStartEnabled(): Promise<boolean> {
   } catch {
     return false
   }
+}
+
+function checkBannedWordsFuzzy(content: string): string[] {
+  const matches: string[] = []
+  const lowerContent = content.toLowerCase()
+  for (const banned of QUALITY_CONTROL.bannedWords) {
+    const bannedLower = banned.toLowerCase()
+    const regex = new RegExp(bannedLower.replace(/\s+/g, '\\s*'), 'gi')
+    if (regex.test(content)) {
+      matches.push(banned)
+    } else if (lowerContent.includes(bannedLower)) {
+      matches.push(banned)
+    }
+  }
+  return matches
+}
+
+interface QualityCheckResult {
+  passed: boolean
+  reason?: string
+  bannedWordsFound: string[]
+  confidenceScore: number
+}
+
+function checkContentQuality(content: string, confidence: number): QualityCheckResult {
+  const bannedWordsFound = checkBannedWordsFuzzy(content)
+  
+  if (confidence < QUALITY_CONTROL.minConfidenceScore) {
+    return {
+      passed: false,
+      reason: `Confidence ${confidence} below threshold ${QUALITY_CONTROL.minConfidenceScore}`,
+      bannedWordsFound: [],
+      confidenceScore: confidence
+    }
+  }
+
+  if (bannedWordsFound.length > 0) {
+    return {
+      passed: false,
+      reason: `Contains banned phrases: ${bannedWordsFound.join(', ')}`,
+      bannedWordsFound,
+      confidenceScore: confidence
+    }
+  }
+
+  return {
+    passed: true,
+    bannedWordsFound: [],
+    confidenceScore: confidence
+  }
+}
+
+async function queueForReview(
+  player: AIPlayer,
+  actionType: AIActivityType,
+  targetType: string,
+  targetId: string | null,
+  generatedContent: string,
+  confidence: number,
+  qualityResult: QualityCheckResult
+): Promise<string> {
+  const reviewRecord = await db.aIContentReviewQueue.create({
+    data: {
+      ai_player_id: player.id,
+      action_type: actionType,
+      target_type: targetType,
+      target_id: targetId,
+      generated_content: generatedContent,
+      confidence_score: confidence,
+      quality_check_result: JSON.stringify({
+        passed: qualityResult.passed,
+        reason: qualityResult.reason,
+        bannedWordsFound: qualityResult.bannedWordsFound
+      }),
+      status: 'pending' as ReviewStatus
+    }
+  })
+  console.log(`[TaskScheduler] Content queued for review: ${reviewRecord.id} (${actionType})`)
+  return reviewRecord.id
+}
+
+async function publishFromQueue(reviewId: string, reviewedBy?: string): Promise<boolean> {
+  const review = await db.aIContentReviewQueue.findUnique({
+    where: { id: reviewId },
+    include: { ai_player: true }
+  })
+
+  if (!review || review.status !== 'approved') {
+    return false
+  }
+
+  try {
+    await db.$transaction(async (tx) => {
+      switch (review.action_type) {
+        case 'post':
+          await executePostFromReview(tx, review)
+          break
+        case 'comment':
+          await executeCommentFromReview(tx, review)
+          break
+        case 'reply':
+          await executeReplyFromReview(tx, review)
+          break
+      }
+
+      await tx.aIContentReviewQueue.update({
+        where: { id: reviewId },
+        data: {
+          reviewed_by: reviewedBy,
+          reviewed_at: new Date()
+        }
+      })
+    })
+    return true
+  } catch (error) {
+    console.error('[TaskScheduler] Failed to publish from queue:', error)
+    return false
+  }
+}
+
+async function executePostFromReview(tx: any, review: any): Promise<void> {
+  const player = review.ai_player
+  const targetGame = await tx.game.findFirst({
+    where: { articles: { some: {} } },
+    select: { id: true, name: true }
+  })
+
+  if (!targetGame) return
+
+  const slug = generateSlug(player.username)
+  const title = generatePostTitle(review.generated_content)
+
+  const article = await tx.article.create({
+    data: {
+      slug,
+      title,
+      article_type: 'guide',
+      status: 'published',
+      source_type: 'ai',
+      game_id: targetGame.id,
+      cover_url: player.avatar_url || player.avatar || getGameCoverUrl(title),
+      cover_alt: title,
+      content: review.generated_content,
+      excerpt: review.generated_content.substring(0, 150) + '...',
+      read_time: Math.max(1, Math.ceil(review.generated_content.length / 1000)),
+      seo_title: title + ' | GameHub',
+      seo_description: review.generated_content.substring(0, 160),
+      seo_keywords: JSON.stringify(extractKeywords(review.generated_content)),
+      quality_score: review.confidence_score,
+      ai_generated: true,
+      ai_player_id: player.id,
+      published_at: new Date(),
+    },
+  })
+
+  await tx.aIActivityLog.create({
+    data: {
+      player_id: player.id,
+      activity_type: 'post',
+      target_type: 'article',
+      target_id: article.slug,
+      content: review.generated_content,
+      success: true,
+    },
+  })
+
+  await tx.aIPlayer.update({
+    where: { id: player.id },
+    data: {
+      total_posts: { increment: 1 },
+      last_activity_at: new Date(),
+    },
+  })
+}
+
+async function executeCommentFromReview(tx: any, review: any): Promise<void> {
+  const player = review.ai_player
+
+  await tx.comment.create({
+    data: {
+      article_slug: review.target_id || '',
+      author_username: player.username,
+      author_avatar: player.avatar_url || player.avatar,
+      content: review.generated_content,
+      ai_generated: true,
+      ai_player_id: player.id,
+    },
+  })
+
+  await tx.aIActivityLog.create({
+    data: {
+      player_id: player.id,
+      activity_type: 'comment',
+      target_type: 'article',
+      target_id: review.target_id,
+      content: review.generated_content,
+      success: true,
+    },
+  })
+
+  await tx.aIPlayer.update({
+    where: { id: player.id },
+    data: {
+      total_comments: { increment: 1 },
+      last_activity_at: new Date(),
+    },
+  })
+}
+
+async function executeReplyFromReview(tx: any, review: any): Promise<void> {
+  const player = review.ai_player
+
+  await tx.comment.create({
+    data: {
+      article_slug: '',
+      author_username: player.username,
+      author_avatar: player.avatar_url || player.avatar,
+      content: review.generated_content,
+      parent_id: review.target_id,
+      ai_generated: true,
+      ai_player_id: player.id,
+    },
+  })
+
+  await tx.aIActivityLog.create({
+    data: {
+      player_id: player.id,
+      activity_type: 'reply',
+      target_type: 'comment',
+      target_id: review.target_id,
+      content: review.generated_content,
+      success: true,
+    },
+  })
 }
 
 export class TaskScheduler {
@@ -283,9 +518,18 @@ export class TaskScheduler {
     const interactor = new ContentInteractor(player)
     const generated = await interactor.generatePost()
 
-    const validation = validateContent(generated.content, 'post', generated.confidence)
-    if (!validation.valid) {
-      console.log(`[TaskScheduler] Post content rejected: ${validation.reason}`)
+    const qualityCheck = checkContentQuality(generated.content, generated.confidence)
+    
+    if (!qualityCheck.passed || generated.confidence < AUTO_PUBLISH_THRESHOLD) {
+      await queueForReview(
+        player,
+        'post',
+        'article',
+        null,
+        generated.content,
+        generated.confidence,
+        qualityCheck
+      )
       return
     }
 
@@ -307,7 +551,7 @@ export class TaskScheduler {
           status: 'published',
           source_type: 'ai',
           game_id: targetGame.id,
-          cover_url: player.avatar || getGameCoverUrl(title),
+          cover_url: player.avatar_url || player.avatar || getGameCoverUrl(title),
           cover_alt: title,
           content: generated.content,
           excerpt: generated.content.substring(0, 150) + '...',
@@ -316,6 +560,8 @@ export class TaskScheduler {
           seo_description: generated.content.substring(0, 160),
           seo_keywords: JSON.stringify(this.extractKeywords(generated.content)),
           quality_score: generated.confidence,
+          ai_generated: true,
+          ai_player_id: player.id,
           published_at: new Date(),
         },
       })
@@ -360,9 +606,18 @@ export class TaskScheduler {
     const interactor = new ContentInteractor(player)
     const generated = await interactor.generateComment(articleContent)
 
-    const validation = validateContent(generated.content, 'comment', generated.confidence)
-    if (!validation.valid) {
-      console.log(`[TaskScheduler] Comment content rejected: ${validation.reason}`)
+    const qualityCheck = checkContentQuality(generated.content, generated.confidence)
+    
+    if (!qualityCheck.passed || generated.confidence < AUTO_PUBLISH_THRESHOLD) {
+      await queueForReview(
+        player,
+        'comment',
+        'article',
+        targetSlug,
+        generated.content,
+        generated.confidence,
+        qualityCheck
+      )
       return
     }
 
@@ -374,8 +629,10 @@ export class TaskScheduler {
         data: {
           article_slug: targetSlug,
           author_username: player.username,
-          author_avatar: player.avatar,
+          author_avatar: player.avatar_url || player.avatar,
           content: generated.content,
+          ai_generated: true,
+          ai_player_id: player.id,
         },
       })
 
@@ -425,9 +682,18 @@ export class TaskScheduler {
     const interactor = new ContentInteractor(player)
     const generated = await interactor.generateReply(parentComment.content, undefined, parentComment.article_slug)
 
-    const validation = validateContent(generated.content, 'reply', generated.confidence)
-    if (!validation.valid) {
-      console.log(`[TaskScheduler] Reply content rejected: ${validation.reason}`)
+    const qualityCheck = checkContentQuality(generated.content, generated.confidence)
+    
+    if (!qualityCheck.passed || generated.confidence < AUTO_PUBLISH_THRESHOLD) {
+      await queueForReview(
+        player,
+        'reply',
+        'comment',
+        targetId,
+        generated.content,
+        generated.confidence,
+        qualityCheck
+      )
       return
     }
 
@@ -436,9 +702,11 @@ export class TaskScheduler {
         data: {
           article_slug: parentComment.article_slug,
           author_username: player.username,
-          author_avatar: player.avatar,
+          author_avatar: player.avatar_url || player.avatar,
           content: generated.content,
           parent_id: targetId,
+          ai_generated: true,
+          ai_player_id: player.id,
         },
       })
 
@@ -675,3 +943,5 @@ export function getSchedulerStatus(): SchedulerStatus {
   const scheduler = TaskScheduler.getInstance()
   return scheduler.getStatus()
 }
+
+export { publishFromQueue }

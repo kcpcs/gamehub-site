@@ -1,0 +1,1 @@
+﻿src/app/api/search/suggest/route.ts(92,27): error TS1005: '}' expected.

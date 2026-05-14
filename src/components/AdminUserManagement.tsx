@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -25,6 +24,8 @@ const roleLabels: Record<string, { label: string; className: string }> = {
   editor: { label: '编辑', className: 'bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300' },
 }
 
+type AdminRole = 'super_admin' | 'admin' | 'moderator' | 'editor'
+
 export function AdminUserManagement() {
   const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
@@ -32,11 +33,16 @@ export function AdminUserManagement() {
   const [searchTerm, setSearchTerm] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    email: string
+    username: string
+    password: string
+    role: AdminRole
+  }>({
     email: '',
     username: '',
     password: '',
-    role: 'editor' as const,
+    role: 'editor',
   })
   const [showPassword, setShowPassword] = useState(false)
   const [operationSuccess, setOperationSuccess] = useState('')
@@ -52,7 +58,7 @@ export function AdminUserManagement() {
       } else {
         setError(result.error || 'Failed to fetch users')
       }
-    } catch (err) {
+    } catch {
       setError('Failed to fetch users')
     } finally {
       setLoading(false)
@@ -82,7 +88,7 @@ export function AdminUserManagement() {
       email: user.email,
       username: user.username,
       password: '',
-      role: user.role as const,
+      role: user.role as AdminRole,
     })
     setShowModal(true)
     setOperationSuccess('')
@@ -113,7 +119,7 @@ export function AdminUserManagement() {
       } else {
         setError(result.error)
       }
-    } catch (err) {
+    } catch {
       setError('操作失败')
     }
   }
@@ -130,7 +136,7 @@ export function AdminUserManagement() {
       } else {
         setError(result.error)
       }
-    } catch (err) {
+    } catch {
       setError('删除失败')
     }
   }
@@ -372,7 +378,7 @@ export function AdminUserManagement() {
                 </label>
                 <select
                   value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value as 'super_admin' | 'admin' | 'moderator' | 'editor' })}
+                  onChange={(e) => setFormData({ ...formData, role: e.target.value as AdminRole })}
                   className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="super_admin">超级管理员</option>

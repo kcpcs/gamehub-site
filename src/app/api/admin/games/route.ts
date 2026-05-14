@@ -1,5 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { z } from 'zod'
+
+const gameUpdateSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  slug: z.string().min(1).max(200).optional(),
+  cover_url: z.string().url().optional(),
+  platforms: z.array(z.string()).optional(),
+  genres: z.array(z.string()).optional(),
+  description: z.string().max(5000).optional(),
+  developer: z.string().max(100).optional(),
+  publisher: z.string().max(100).optional(),
+  release_date: z.string().optional(),
+  status: z.enum(['active', 'inactive']).optional(),
+})
+
+const batchActionSchema = z.object({
+  ids: z.array(z.string()).min(1),
+  action: z.enum(['update', 'delete']),
+  data: gameUpdateSchema.optional(),
+})
 
 // GET /api/admin/games - 获取所有游戏
 export async function GET(request: NextRequest) {
@@ -108,35 +128,43 @@ export async function POST(request: NextRequest) {
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json()
-    const { ids, action, data } = body
-
-    if (!ids || !Array.isArray(ids) || ids.length === 0) {
+    
+    const validation = batchActionSchema.safeParse(body)
+    if (!validation.success) {
       return NextResponse.json(
-        { success: false, error: 'ids is required and must be a non-empty array' },
+        {
+          success: false,
+          error: 'Validation failed',
+          code: 'VALIDATION_ERROR',
+          details: validation.error.issues.map(issue => ({
+            field: issue.path.join('.'),
+            message: issue.message,
+          })),
+        },
         { status: 400 }
       )
     }
 
-    if (!action) {
-      return NextResponse.json(
-        { success: false, error: 'action is required' },
-        { status: 400 }
-      )
-    }
+    const { ids, action, data } = validation.data
 
     let result
 
     switch (action) {
       case 'update':
-        if (!data) {
+        if (!data || Object.keys(data).length === 0) {
           return NextResponse.json(
             { success: false, error: 'data is required for update action' },
             { status: 400 }
           )
         }
+        // 添加字段白名单过滤
+        const ALLOWED_GAME_UPDATE_FIELDS = ['name', 'slug', 'cover_url', 'platforms', 'genres', 'description', 'developer', 'publisher', 'release_date', 'status']
+        const sanitizedData = Object.fromEntries(
+          Object.entries(data).filter(([key]) => ALLOWED_GAME_UPDATE_FIELDS.includes(key))
+        )
         result = await db.game.updateMany({
           where: { id: { in: ids } },
-          data,
+          data: sanitizedData,
         })
         break
 
@@ -145,12 +173,6 @@ export async function PATCH(request: NextRequest) {
           where: { id: { in: ids } },
         })
         break
-
-      default:
-        return NextResponse.json(
-          { success: false, error: `Unknown action: ${action}` },
-          { status: 400 }
-        )
     }
 
     return NextResponse.json({

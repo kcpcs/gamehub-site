@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import Image from 'next/image'
 
 interface ResponsiveImageProps {
   src: string
@@ -9,6 +10,9 @@ interface ResponsiveImageProps {
   placeholderColor?: string
   aspectRatio?: string
   onLoad?: () => void
+  priority?: boolean
+  width?: number
+  height?: number
 }
 
 export function ResponsiveImage({
@@ -18,12 +22,17 @@ export function ResponsiveImage({
   placeholderColor = 'var(--bg-overlay)',
   aspectRatio = 'auto',
   onLoad,
+  priority = false,
+  width,
+  height,
 }: ResponsiveImageProps) {
   const [isLoaded, setIsLoaded] = useState(false)
-  const [isInView, setIsInView] = useState(false)
+  const [isInView, setIsInView] = useState(priority)
   const imgRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    if (priority) return
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -34,7 +43,7 @@ export function ResponsiveImage({
         })
       },
       {
-        rootMargin: '100px',
+        rootMargin: '200px',
         threshold: 0.1,
       }
     )
@@ -44,25 +53,9 @@ export function ResponsiveImage({
     }
 
     return () => observer.disconnect()
-  }, [])
+  }, [priority])
 
-  const getSrcSet = () => {
-    const baseUrl = src.replace(/t_[^/]+\/(\w+\.\w+)$/, 't_')
-    const fileName = src.match(/t_[^/]+\/(\w+\.\w+)$/)?.[1] || ''
-    
-    if (!fileName) return src
-    
-    return [
-      `${baseUrl}cover_small/${fileName} 480w`,
-      `${baseUrl}cover_big/${fileName} 720w`,
-      `${baseUrl}1080p/${fileName} 1080w`,
-      `${baseUrl}original/${fileName} 1920w`,
-    ].join(', ')
-  }
-
-  const getSizes = () => {
-    return '(max-width: 640px) 480px, (max-width: 1024px) 720px, (max-width: 1280px) 1080px, 1920px'
-  }
+  const isExternal = src.startsWith('http') || src.startsWith('//')
 
   return (
     <div
@@ -86,20 +79,38 @@ export function ResponsiveImage({
 
       {/* Responsive image */}
       {isInView && (
-        <img
-          src={src}
-          srcSet={getSrcSet()}
-          sizes={getSizes()}
-          alt={alt}
-          className={`w-full h-full object-cover transition-all duration-500 ${
-            isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
-          }`}
-          onLoad={() => {
-            setIsLoaded(true)
-            onLoad?.()
-          }}
-          loading="lazy"
-        />
+        isExternal ? (
+          <img
+            src={src}
+            alt={alt}
+            className={`w-full h-full object-cover transition-all duration-500 ${
+              isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+            }`}
+            onLoad={() => {
+              setIsLoaded(true)
+              onLoad?.()
+            }}
+            loading={priority ? 'eager' : 'lazy'}
+            decoding={priority ? 'sync' : 'async'}
+            width={width}
+            height={height}
+          />
+        ) : (
+          <Image
+            src={src}
+            alt={alt}
+            fill
+            className={`object-cover transition-all duration-500 ${
+              isLoaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+            }`}
+            onLoad={() => {
+              setIsLoaded(true)
+              onLoad?.()
+            }}
+            priority={priority}
+            sizes="(max-width: 640px) 480px, (max-width: 1024px) 720px, (max-width: 1280px) 1080px, 1920px"
+          />
+        )
       )}
     </div>
   )

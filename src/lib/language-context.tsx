@@ -13,15 +13,18 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 const LANGUAGE_KEY = 'gamehub_language'
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<LanguageCode>(defaultLanguage)
-
-  useEffect(() => {
-    const savedLang = typeof window !== 'undefined' ? localStorage.getItem(LANGUAGE_KEY) : null
+const getInitialLanguage = (): LanguageCode => {
+  if (typeof window !== 'undefined') {
+    const savedLang = localStorage.getItem(LANGUAGE_KEY)
     if (savedLang && languages.some(l => l.code === savedLang)) {
-      setLangState(savedLang as LanguageCode)
+      return savedLang as LanguageCode
     }
-  }, [])
+  }
+  return defaultLanguage
+}
+
+export function LanguageProvider({ children }: { children: ReactNode }) {
+  const [lang, setLangState] = useState<LanguageCode>(getInitialLanguage)
 
   const setLang = (newLang: LanguageCode) => {
     setLangState(newLang)

@@ -4,10 +4,10 @@ import { db } from '@/lib/db'
 // GET /api/admin/codes/[id] - 获取单个兑换码详情
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
 
     const code = await db.gameCode.findUnique({
       where: { id },
@@ -37,10 +37,10 @@ export async function GET(
 // PATCH /api/admin/codes/[id] - 更新单个兑换码
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
     const body = await request.json()
 
     const code = await db.gameCode.update({
@@ -69,10 +69,10 @@ export async function PATCH(
 // DELETE /api/admin/codes/[id] - 删除单个兑换码
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
 
     const code = await db.gameCode.findUnique({ where: { id } })
     if (!code) {

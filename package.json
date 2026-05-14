@@ -11,11 +11,15 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "node prisma/seed.cjs",
+    "db:seed:achievements": "npx tsx prisma/seed-achievements.ts",
     "db:studio": "prisma studio",
     "ai:run": "node scripts/ai-workflow.cjs --run-once",
     "ai:monitor": "node scripts/ai-workflow.cjs --monitor",
     "ai:check-codes": "node scripts/ai-workflow.cjs --check-codes",
-    "ai:update-games": "node scripts/ai-workflow.cjs --update-games"
+    "codes:check": "node scripts/check-expired-codes.mjs",
+    "ai:update-games": "node scripts/ai-workflow.cjs --update-games",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.1",
@@ -50,13 +54,17 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^20.19.40",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "sqlite3": "^6.0.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.6"
   }
 }

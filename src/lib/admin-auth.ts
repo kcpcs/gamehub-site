@@ -195,6 +195,19 @@ export interface AuditLogEntry {
 
 export type AuditAction = 'login' | 'logout' | 'create' | 'update' | 'delete' | 'view' | 'export' | 'import' | 'backup' | 'restore' | 'settings_change'
 
+export async function requireAdmin(request: NextRequest): Promise<{ admin: AdminUser; permissions: AdminPermission } | null> {
+  const authResult = await adminAuth(request)
+  
+  if (!authResult.authorized || !authResult.admin) {
+    return null
+  }
+  
+  return {
+    admin: authResult.admin,
+    permissions: authResult.permissions!
+  }
+}
+
 export async function createAuditLog(
   entry: Omit<AuditLogEntry, 'id' | 'created_at'>,
   request?: NextRequest

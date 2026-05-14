@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
@@ -12,6 +11,11 @@ interface TierEntry {
   vote_count: number
   avg_score: number
   description: string | null
+}
+
+interface GameBasic {
+  id: string
+  name: string
 }
 
 interface TierList {
@@ -81,7 +85,7 @@ export function TierListManagement() {
   const [formEntries, setFormEntries] = useState<Array<{ id?: string; name: string; image_url: string; grade: string; description: string }>>([])
 
   // Games list for dropdown
-  const [games, setGames] = useState<Array<{ id: string; name: string }>>([])
+  const [games, setGames] = useState<GameBasic[]>([])
 
   const fetchTierLists = useCallback(async () => {
     setLoading(true)
@@ -103,8 +107,8 @@ export function TierListManagement() {
 
       setTierLists(data.data)
       setPagination(data.pagination)
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch tier lists')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch tier lists')
     } finally {
       setLoading(false)
     }
@@ -115,7 +119,7 @@ export function TierListManagement() {
       const res = await fetch('/api/admin/games?limit=100')
       const data = await res.json()
       if (data.success) {
-        setGames(data.data.map((g: any) => ({ id: g.id, name: g.name })))
+        setGames(data.data.map((g: { id: string; name: string }) => ({ id: g.id, name: g.name })))
       }
     } catch (err) {
       console.error('Failed to fetch games:', err)
@@ -138,8 +142,8 @@ export function TierListManagement() {
       const data = await res.json()
       if (!data.success) throw new Error(data.error)
       setTierLists(prev => prev.filter(t => t.id !== id))
-    } catch (err: any) {
-      alert('Failed to delete: ' + (err.message || 'Unknown error'))
+    } catch (err) {
+      alert('Failed to delete: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
   }
 
@@ -209,8 +213,8 @@ export function TierListManagement() {
 
       setShowCreateModal(false)
       fetchTierLists()
-    } catch (err: any) {
-      alert('Failed to create: ' + (err.message || 'Unknown error'))
+    } catch (err) {
+      alert('Failed to create: ' + (err instanceof Error ? err.message : 'Unknown error'))
     } finally {
       setSaving(false)
     }
@@ -235,8 +239,8 @@ export function TierListManagement() {
 
       setShowEditModal(false)
       fetchTierLists()
-    } catch (err: any) {
-      alert('Failed to update: ' + (err.message || 'Unknown error'))
+    } catch (err) {
+      alert('Failed to update: ' + (err instanceof Error ? err.message : 'Unknown error'))
     } finally {
       setSaving(false)
     }

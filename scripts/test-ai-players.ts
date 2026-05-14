@@ -10,7 +10,7 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-const adapter = new PrismaLibSQL({
+const adapter = new PrismaLibSql({
   url: process.env.DATABASE_URL || 'file:./dev.db',
 })
 const db = new PrismaClient({ adapter })

@@ -50,7 +50,7 @@ export function ArticleEditor({ initialContent = '', onSave, onCancel }: Article
   }
 
   const renderPreview = () => {
-    let html = content
+    const html = content
       .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold mt-6 mb-3">$1</h1>')
       .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold mt-5 mb-2">$1</h2>')
       .replace(/^### (.*$)/gim, '<h3 class="text-lg font-semibold mt-4 mb-2">$1</h3>')

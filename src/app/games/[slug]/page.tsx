@@ -1,106 +1,148 @@
-'use client'
-
-import { useState, useEffect, use } from 'react'
-import Link from 'next/link'
-import type { Game, CodeSource } from '@/types'
-import { addToHistory } from '@/components/RecentHistory'
-import { LikeButton, ShareButton } from '@/components/LikeShareButtons'
+import type { Metadata } from 'next'
+import { db } from '@/lib/db'
+import { GameDetailClient } from '@/components/games/GameDetailClient'
 import { Breadcrumb } from '@/components/Breadcrumb'
-import { PlatformIcon } from '@/components/PlatformIcon'
-import { GameDetailTabs } from '@/components/games/GameDetailTabs'
+import { JsonLdScript, getVideoGameSchema } from '@/components/seo/JsonLd'
+import type { Platform, Genre } from '@/types'
 
-interface GameGuide {
-  id: string
-  slug: string
-  title: string
-  excerpt: string
-  cover_url: string
-  view_count: number
-  created_at: string
-  article_type: string
-}
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  
+  try {
+    const game = await db.game.findUnique({
+      where: { slug },
+    })
 
-interface GameTierList {
-  id: string
-  slug: string
-  title: string
-  version: string
-  updated_at: string
-}
-
-export default function GameDetailPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = use(params)
-  const [game, setGame] = useState<Game | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [isFavorite, setIsFavorite] = useState(false)
-  const [tierList, setTierList] = useState<GameTierList | null>(null)
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const gameRes = await fetch(`/api/games/${slug}`)
-
-        if (gameRes.ok) {
-          const gameResponse = await gameRes.json()
-          if (gameResponse.success && gameResponse.data) {
-            const data = gameResponse.data
-            const gameData: Game = {
-              ...data,
-              cover: { url: data.cover_url },
-              screenshots: (data.screenshots as string[]) || [],
-              platforms: (data.platforms as string[]) || [],
-              genres: (data.genres as string[]) || [],
-              tags: (data.tags as string[]) || [],
-              scores: data.scores || { opencritic: 0, community: 0, review_count: 0 }
-            }
-            setGame(gameData)
-            addToHistory({
-              type: 'game',
-              slug: data.slug,
-              title: data.name,
-              image_url: data.cover_url
-            })
-          }
-        }
-
-        const tierListRes = await fetch(`/api/tier-list/${slug}`)
-        if (tierListRes.ok) {
-          const tierListData = await tierListRes.json()
-          if (tierListData.success && tierListData.data) {
-            setTierList(tierListData.data)
-          }
-        }
-      } catch {
-      } finally {
-        setLoading(false)
+    if (game) {
+      return {
+        title: `${game.name} | GameHub`,
+        description: game.description || `Find guides, codes, and tier lists for ${game.name} on GameHub.`,
+        openGraph: {
+          title: game.name,
+          description: game.description || `Find guides, codes, and tier lists for ${game.name} on GameHub.`,
+          type: 'website',
+          images: [
+            {
+              url: game.cover_url,
+              width: 1200,
+              height: 630,
+              alt: game.name,
+            },
+          ],
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title: game.name,
+          description: game.description || `Find guides, codes, and tier lists for ${game.name} on GameHub.`,
+          images: [game.cover_url],
+        },
       }
     }
-
-    fetchData()
-  }, [slug])
-
-  const toggleFavorite = () => {
-    setIsFavorite(!isFavorite)
+  } catch {
+    // Fall through to default metadata
   }
 
-  const getScoreColor = (score?: number | null) => {
-    if (!score) return 'var(--text-muted)'
-    if (score >= 80) return 'var(--success)'
-    if (score >= 60) return 'var(--warning)'
-    return 'var(--danger)'
+  // Fallback metadata
+  return {
+    title: 'Game Details | GameHub',
+    description: 'Find guides, codes, and tier lists for your favorite games on GameHub.',
   }
+}
 
-  if (loading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 py-12 flex items-center justify-center min-h-[50vh]">
-        <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-          <span style={{ color: 'var(--text-secondary)' }}>Loading game details...</span>
-        </div>
-      </div>
+async function getGame(slug: string) {
+  try {
+    const game = await db.game.findUnique({
+      where: { slug },
+    })
+    if (!game) return null
+
+    let platforms: string[] = []
+    let genres: string[] = []
+    
+    try {
+      platforms = typeof game.platforms === 'string' 
+        ? JSON.parse(game.platforms) 
+        : Array.isArray(game.platforms) 
+          ? game.platforms 
+          : []
+    } catch {
+      platforms = []
+    }
+    
+    try {
+      genres = typeof game.genres === 'string' 
+        ? JSON.parse(game.genres) 
+        : Array.isArray(game.genres) 
+          ? game.genres 
+          : []
+    } catch {
+      genres = []
+    }
+
+    const validPlatforms = platforms.filter((p): p is Platform => 
+      ['PC', 'PS5', 'PS4', 'Xbox', 'Switch', 'Mobile', 'iOS', 'Android'].includes(p)
     )
-  }
+    
+    const validGenres = genres.filter((g): g is Genre => 
+      ['RPG', 'FPS', 'Strategy', 'Indie', 'MMO', 'Action', 'Adventure', 'Sports', 'Racing', 'Puzzle', 'Horror', 'Simulation'].includes(g)
+    )
 
+    return {
+      id: game.id,
+      slug: game.slug,
+      name: game.name,
+      cover: { url: game.cover_url, igdb_url: '' },
+      screenshots: safeJsonParse(game.screenshots, []),
+      platforms: validPlatforms,
+      genres: validGenres,
+      tags: safeJsonParse(game.tags, []),
+      developer: game.developer || '',
+      publisher: game.publisher || '',
+      release_date: game.release_date?.toISOString() || '',
+      scores: {
+        opencritic: game.score_opencritic,
+        steam_positive_pct: game.score_steam_pct,
+        community: game.score_community,
+        review_count: game.score_review_count,
+      },
+      score_opencritic: game.score_opencritic,
+      score_steam_pct: game.score_steam_pct,
+      score_community: game.score_community,
+      score_review_count: game.score_review_count,
+      description: game.description || '',
+      guide_count: game.guide_count || 0,
+      code_count: game.code_count || 0,
+      has_tier_list: game.has_tier_list || false,
+      created_at: game.created_at?.toISOString() || new Date().toISOString(),
+      updated_at: game.updated_at?.toISOString() || new Date().toISOString(),
+    }
+  } catch (error) {
+    console.error('Error fetching game:', error)
+    return null
+  }
+}
+
+function safeJsonParse<T = any>(value: any, defaultValue: T): T {
+  if (value === null || value === undefined) {
+    return defaultValue
+  }
+  if (typeof value === 'string') {
+    try {
+      return JSON.parse(value)
+    } catch {
+      return defaultValue
+    }
+  }
+  if (Array.isArray(value) || typeof value === 'object') {
+    return value
+  }
+  return defaultValue
+}
+
+export default async function GameDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const game = await getGame(slug)
+  
   if (!game) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-12 text-center">
@@ -110,177 +152,35 @@ export default function GameDetailPage({ params }: { params: Promise<{ slug: str
         <p className="mb-6" style={{ color: 'var(--text-secondary)' }}>
           The game you're looking for doesn't exist or couldn't be loaded.
         </p>
-        <Link
-          href="/games"
-          className="inline-block px-6 py-3 rounded-lg font-semibold"
-          style={{ backgroundColor: 'var(--accent)', color: 'white' }}
-        >
+        <a href="/games" className="inline-block px-6 py-3 rounded-lg font-semibold" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
           Browse All Games
-        </Link>
+        </a>
       </div>
     )
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-12">
-      <div className="mb-8">
-        <Breadcrumb items={[
-          { label: 'Games', href: '/games' },
-          { label: game?.name || 'Loading...' }
-        ]} />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
-          <div className="relative rounded-xl overflow-hidden">
-            <img
-              src={game.cover.url}
-              alt={game.name}
-              className="w-full aspect-video object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-            <div className="absolute bottom-6 left-6 right-6">
-              <div className="flex items-center gap-4 mb-2">
-                {game.platforms.slice(0, 3).map((platform) => (
-                  <span
-                    key={platform}
-                    className="flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-white/20 backdrop-blur-sm"
-                    style={{ color: 'white' }}
-                  >
-                    <PlatformIcon platform={platform} size="sm" />
-                    {platform}
-                  </span>
-                ))}
-              </div>
-              <h1 className="text-4xl font-bold text-white mb-2">{game.name}</h1>
-              <p className="text-white/80">{game.developer || 'Unknown Developer'}</p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={toggleFavorite}
-                className="p-2 rounded-lg transition-colors hover:scale-105"
-                style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }}
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill={isFavorite ? 'currentColor' : 'none'}
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  style={{ color: isFavorite ? 'var(--accent-light)' : 'var(--text-secondary)' }}
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                </svg>
-              </button>
-              <ShareButton
-                title={game.name}
-                description={`Check out ${game.name} on GameHub!`}
-              />
-            </div>
-            <div className="flex items-center gap-4 ml-auto">
-              {game.scores?.opencritic && (
-                <div className="flex items-center gap-2 px-4 py-2 rounded-lg" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-                  <span className="text-2xl font-bold" style={{ color: getScoreColor(game.scores.opencritic) }}>
-                    {game.scores.opencritic}
-                  </span>
-                  <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>OpenCritic</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <GameDetailTabs 
-            gameSlug={game.slug}
-            hasGuides={game.guide_count > 0}
-            hasCodes={game.code_count > 0}
-            hasTierList={game.has_tier_list}
-          />
+    <>
+      <JsonLdScript data={getVideoGameSchema({
+        name: game.name,
+        slug: game.slug,
+        description: game.description,
+        image: game.cover?.url,
+        genres: game.genres,
+        platforms: game.platforms,
+        developer: game.developer,
+        publisher: game.publisher,
+        releaseDate: game.release_date,
+      })} />
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        <div className="mb-8">
+          <Breadcrumb items={[
+            { label: 'Games', href: '/games' },
+            { label: game.name }
+          ]} />
         </div>
-
-        <div className="space-y-6">
-          <div className="rounded-xl p-5 sticky top-4" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
-              Quick Links
-            </h2>
-            <div className="space-y-3">
-              {game.guide_count > 0 && (
-                <Link
-                  href="/guides"
-                  className="flex items-center justify-between p-3 rounded-lg transition-colors hover:bg-opacity-50"
-                  style={{ backgroundColor: 'var(--bg-raised)' }}
-                >
-                  <span style={{ color: 'var(--text-primary)' }}>Guides</span>
-                  <span className="font-bold" style={{ color: 'var(--accent-light)' }}>{game.guide_count}</span>
-                </Link>
-              )}
-              {game.code_count > 0 && (
-                <Link
-                  href={`/codes/${game.slug}`}
-                  className="flex items-center justify-between p-3 rounded-lg transition-colors hover:bg-opacity-50"
-                  style={{ backgroundColor: 'var(--bg-raised)' }}
-                >
-                  <span style={{ color: 'var(--text-primary)' }}>Redeem Codes</span>
-                  <span className="font-bold" style={{ color: 'var(--accent-light)' }}>{game.code_count}</span>
-                </Link>
-              )}
-              {tierList && (
-                <Link
-                  href={`/tier-list/${game.slug}`}
-                  className="flex items-center justify-between p-3 rounded-lg transition-colors hover:bg-opacity-50"
-                  style={{ backgroundColor: 'var(--bg-raised)' }}
-                >
-                  <span style={{ color: 'var(--text-primary)' }}>Tier List</span>
-                  <span className="text-xs px-2 py-0.5 rounded" style={{ backgroundColor: 'var(--accent)', color: 'white' }}>
-                    {tierList.version}
-                  </span>
-                </Link>
-              )}
-            </div>
-          </div>
-
-          <div className="rounded-xl p-5" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
-              Tags
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {game.tags.slice(0, 8).map((tag) => (
-                <span
-                  key={tag}
-                  className="px-3 py-1 rounded-full text-sm"
-                  style={{ backgroundColor: 'var(--bg-overlay)', color: 'var(--text-secondary)' }}
-                >
-                  {tag}
-                </span>
-              ))}
-              {game.tags.length > 8 && (
-                <span className="px-3 py-1 rounded-full text-sm" style={{ backgroundColor: 'var(--bg-overlay)', color: 'var(--text-secondary)' }}>
-                  +{game.tags.length - 8}
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="rounded-xl p-5" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
-            <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
-              Platforms
-            </h2>
-            <div className="flex flex-wrap gap-2">
-              {game.platforms.map((platform) => (
-                <span
-                  key={platform}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium"
-                  style={{ backgroundColor: 'var(--bg-overlay)', color: 'var(--text-secondary)' }}
-                >
-                  <PlatformIcon platform={platform} size="sm" />
-                  {platform}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
+        <GameDetailClient game={game} />
       </div>
-    </div>
+    </>
   )
 }

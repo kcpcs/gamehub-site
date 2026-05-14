@@ -36,8 +36,8 @@ interface CreatorCenterProps {
 
 export function CreatorCenter({ initialApplication, initialProfile }: CreatorCenterProps) {
   const { data: session } = useSession()
-  const [application, setApplication] = useState<CreatorApplication | null>(initialApplication)
-  const [profile, setProfile] = useState<CreatorProfile | null>(initialProfile)
+  const [application, setApplication] = useState<CreatorApplication | null>(initialApplication ?? null)
+  const [profile, setProfile] = useState<CreatorProfile | null>(initialProfile ?? null)
   const [submissions, setSubmissions] = useState<ContentSubmission[]>([])
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<'status' | 'submit' | 'earnings'>('status')

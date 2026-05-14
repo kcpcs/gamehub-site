@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
@@ -57,8 +56,8 @@ export function CommentManagement() {
 
       setComments(data.data)
       setPagination(data.pagination)
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch comments')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch comments')
     } finally {
       setLoading(false)
     }
@@ -90,8 +89,8 @@ export function CommentManagement() {
         next.delete(id)
         return next
       })
-    } catch (err: any) {
-      alert('Failed to delete: ' + (err.message || 'Unknown error'))
+    } catch (err) {
+      alert('Failed to delete: ' + (err instanceof Error ? err.message : 'Unknown error'))
     }
   }
 
@@ -110,8 +109,8 @@ export function CommentManagement() {
       if (!data.success) throw new Error(data.error)
       setSelectedIds(new Set())
       fetchComments()
-    } catch (err: any) {
-      alert('Failed to delete: ' + (err.message || 'Unknown error'))
+    } catch (err) {
+      alert('Failed to delete: ' + (err instanceof Error ? err.message : 'Unknown error'))
     } finally {
       setDeleting(false)
     }

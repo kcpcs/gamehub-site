@@ -50,8 +50,8 @@ async function localSearch(query: string, type: string): Promise<{ hits: SearchH
           title: game.name,
           image_url: game.cover_url || '',
           excerpt: game.description?.slice(0, 150) + '...',
-          platform: game.platforms,
-          genre: game.genres,
+          platform: (typeof game.platforms === 'string' ? JSON.parse(game.platforms) : game.platforms) as string[],
+          genre: (typeof game.genres === 'string' ? JSON.parse(game.genres) : game.genres) as string[],
         })
       })
     }

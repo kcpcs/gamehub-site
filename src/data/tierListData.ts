@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { TierEntry, TierGrade } from '@/types'
 import { getCharactersByGame } from './gameCharacters'
 
@@ -31,11 +30,7 @@ const generateDefaultTierEntries = (gameSlug: string): TierEntry[] => {
       grade,
       avg_score: Math.round(baseScore * 10) / 10,
       vote_count: Math.floor(Math.random() * 500),
-      description: '',
-      pros: [],
-      cons: [],
-      tier_list_id: `default-tier-${gameSlug}`,
-      updated_at: new Date().toISOString()
+      description: ''
     })
   })
 

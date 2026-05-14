@@ -1,10 +1,24 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { TierMaker } from '@/components/TierMaker'
+import { useState, useEffect, Suspense } from 'react'
+import dynamic from 'next/dynamic'
 import { Sparkles } from 'lucide-react'
 import { getGameImageUrl } from '@/lib/game-images'
 import type { TierEntry, TierGrade } from '@/types'
+
+const TierMaker = dynamic(() => import('@/components/TierMaker').then(mod => ({ default: mod.TierMaker })), {
+  ssr: false,
+  loading: () => (
+    <div className="space-y-4">
+      {['S', 'A', 'B', 'C', 'D', 'F'].map(grade => (
+        <div key={grade} className="flex gap-4 p-4 rounded-xl" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)', minHeight: '120px' }}>
+          <div className="w-16 h-full rounded-lg" style={{ backgroundColor: 'var(--bg-overlay)' }} />
+          <div className="flex-1" />
+        </div>
+      ))}
+    </div>
+  ),
+})
 
 export default function TierMakerPage() {
   const [entries, setEntries] = useState<TierEntry[]>([])
@@ -116,7 +130,18 @@ export default function TierMakerPage() {
           </div>
         </div>
 
-        <TierMaker initialEntries={entries} onSave={handleSave} />
+        <Suspense fallback={
+          <div className="space-y-4">
+            {['S', 'A', 'B', 'C', 'D', 'F'].map(grade => (
+              <div key={grade} className="flex gap-4 p-4 rounded-xl" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)', minHeight: '120px' }}>
+                <div className="w-16 h-full rounded-lg" style={{ backgroundColor: 'var(--bg-overlay)' }} />
+                <div className="flex-1" />
+              </div>
+            ))}
+          </div>
+        }>
+          <TierMaker initialEntries={entries} onSave={handleSave} />
+        </Suspense>
 
         <div className="mt-8 p-6 rounded-xl" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
           <h3 className="font-semibold mb-3" style={{ color: 'var(--text-primary)' }}>How to Use</h3>

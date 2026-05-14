@@ -4,10 +4,10 @@ import { db } from '@/lib/db'
 // GET /api/admin/games/[id] - 获取单个游戏详情
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
 
     const game = await db.game.findUnique({
       where: { id },
@@ -38,10 +38,10 @@ export async function GET(
 // PATCH /api/admin/games/[id] - 更新单个游戏
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
     const body = await request.json()
 
     const game = await db.game.update({
@@ -72,10 +72,10 @@ export async function PATCH(
 // DELETE /api/admin/games/[id] - 删除单个游戏
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
 
     await db.game.delete({
       where: { id },

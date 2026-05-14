@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 type NotificationType = 'success' | 'info' | 'warning' | 'error'
 
@@ -11,36 +11,58 @@ interface Notification {
   message: string
   timestamp: number
   read: boolean
+  action_url: string | null
 }
 
 export function NotificationCenter() {
   const [isOpen, setIsOpen] = useState(false)
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: '1',
-      type: 'success',
-      title: 'New Guide!',
-      message: 'New guide for Genshin Impact has been published',
-      timestamp: Date.now() - 300000,
-      read: false
-    },
-    {
-      id: '2',
-      type: 'info',
-      title: 'New Codes Available',
-      message: 'New redeem codes for Honkai: Star Rail are now available',
-      timestamp: Date.now() - 3600000,
-      read: false
-    },
-    {
-      id: '3',
-      type: 'success',
-      title: 'Guide Updated',
-      message: 'Elden Ring guide has been updated with new content',
-      timestamp: Date.now() - 86400000,
-      read: true
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [loading, setLoading] = useState(true)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    fetchNotifications()
+  }, [])
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
     }
-  ])
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await fetch('/api/notifications')
+      const data = await res.json()
+      if (data.success) {
+        const transformed = data.data.map((n: any) => ({
+          ...n,
+          timestamp: new Date(n.created_at).getTime(),
+          type: mapType(n.type)
+        }))
+        setNotifications(transformed)
+      }
+    } catch (err) {
+      console.error('Failed to fetch notifications:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const mapType = (type: string): NotificationType => {
+    const typeMap: Record<string, NotificationType> = {
+      success: 'success',
+      info: 'info',
+      warning: 'warning',
+      error: 'error'
+    }
+    return typeMap[type] || 'info'
+  }
 
   const unreadCount = notifications.filter(n => !n.read).length
 
@@ -70,14 +92,39 @@ export function NotificationCenter() {
     }
   }
 
-  const markAsRead = (id: string) => {
-    setNotifications(notifications.map(n =>
-      n.id === id ? { ...n, read: true } : n
-    ))
+  const markAsRead = async (id: string) => {
+    try {
+      await fetch('/api/notifications', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      })
+      setNotifications(notifications.map(n =>
+        n.id === id ? { ...n, read: true } : n
+      ))
+    } catch (err) {
+      console.error('Failed to mark notification as read:', err)
+    }
   }
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })))
+  const markAllAsRead = async () => {
+    try {
+      await fetch('/api/notifications', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ readAll: true })
+      })
+      setNotifications(notifications.map(n => ({ ...n, read: true })))
+    } catch (err) {
+      console.error('Failed to mark all as read:', err)
+    }
+  }
+
+  const handleNotificationClick = (notification: Notification) => {
+    markAsRead(notification.id)
+    if (notification.action_url) {
+      window.location.href = notification.action_url
+    }
   }
 
   const formatTime = (timestamp: number) => {
@@ -93,10 +140,10 @@ export function NotificationCenter() {
   }
 
   return (
-    <div className="relative">
+    <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-lg transition-colors hover:bg-opacity-50"
+        className="relative p-2 rounded-lg transition-all duration-200 hover:scale-105"
         style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }}
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" style={{ color: 'var(--text-secondary)' }}>
@@ -123,7 +170,11 @@ export function NotificationCenter() {
           </div>
 
           <div className="max-h-96 overflow-y-auto">
-            {notifications.length === 0 ? (
+            {loading ? (
+              <div className="p-8 text-center" style={{ color: 'var(--text-muted)' }}>
+                <p>Loading...</p>
+              </div>
+            ) : notifications.length === 0 ? (
               <div className="p-8 text-center" style={{ color: 'var(--text-muted)' }}>
                 <p>No notifications</p>
               </div>
@@ -131,7 +182,7 @@ export function NotificationCenter() {
               notifications.map(notification => (
                 <div
                   key={notification.id}
-                  onClick={() => markAsRead(notification.id)}
+                  onClick={() => handleNotificationClick(notification)}
                   className="p-4 cursor-pointer transition-colors hover:bg-opacity-10"
                   style={{
                     borderBottom: '1px solid var(--border)', backgroundColor: !notification.read ? 'var(--bg-overlay)' : 'transparent'

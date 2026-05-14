@@ -4,10 +4,10 @@ import { db } from '@/lib/db'
 // GET /api/admin/tierlists/[id] - 获取单个Tier List详情
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
 
     const tierList = await db.tierList.findUnique({
       where: { id },
@@ -37,10 +37,10 @@ export async function GET(
 // PATCH /api/admin/tierlists/[id] - 更新单个Tier List
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
     const body = await request.json()
 
     const tierList = await db.tierList.update({
@@ -65,10 +65,10 @@ export async function PATCH(
 // DELETE /api/admin/tierlists/[id] - 删除单个Tier List
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
 
     const tierList = await db.tierList.findUnique({ where: { id } })
     if (!tierList) {

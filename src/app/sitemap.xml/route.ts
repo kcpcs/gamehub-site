@@ -5,7 +5,7 @@ export async function GET() {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
   
   const [games, articles] = await Promise.all([
-    db.game.findMany({ select: { slug: true, updated_at: true } }),
+    db.game.findMany({ select: { slug: true, updated_at: true, has_tier_list: true } }),
     db.article.findMany({ 
       where: { status: 'published' },
       select: { slug: true, updated_at: true }
@@ -25,6 +25,24 @@ export async function GET() {
       <loc>${baseUrl}/guides/${article.slug}</loc>
       <lastmod>${new Date(article.updated_at).toISOString()}</lastmod>
       <priority>0.9</priority>
+    </url>
+  `).join('')
+
+  const codesUrls = games.map(game => `
+    <url>
+      <loc>${baseUrl}/codes/${game.slug}</loc>
+      <lastmod>${new Date(game.updated_at).toISOString()}</lastmod>
+      <priority>0.75</priority>
+    </url>
+  `).join('')
+
+  const tierListUrls = games
+    .filter(game => game.has_tier_list)
+    .map(game => `
+    <url>
+      <loc>${baseUrl}/tier-list/${game.slug}</loc>
+      <lastmod>${new Date(game.updated_at).toISOString()}</lastmod>
+      <priority>0.7</priority>
     </url>
   `).join('')
 
@@ -57,6 +75,8 @@ export async function GET() {
   </url>
   ${gameUrls}
   ${articleUrls}
+  ${codesUrls}
+  ${tierListUrls}
 </urlset>`
 
   return new NextResponse(sitemap, {

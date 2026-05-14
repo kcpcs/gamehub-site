@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { 
   LayoutDashboard, Users, Gamepad2, FileText, Gift, BarChart3, 
-  MessageSquare, TrendingUp, Settings, LogOut, Menu, X, Shield
+  MessageSquare, TrendingUp, Settings, LogOut, Menu, X, Shield, Bot
 } from 'lucide-react'
 import { DashboardReal } from './DashboardReal'
 import { UserManagement } from './UserManagement'
@@ -14,6 +14,7 @@ import { TierListManagement } from './TierListManagement'
 import { CommentManagement } from './CommentManagement'
 import { Analytics } from './Analytics'
 import { SystemSettings } from './SystemSettings'
+import { AIReviewQueue } from './AIReviewQueue'
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, component: DashboardReal, description: 'Overview & Statistics' },
@@ -23,6 +24,7 @@ const navItems = [
   { id: 'codes', label: 'Codes', icon: Gift, component: CodeManagement, description: 'Redeem Code Management' },
   { id: 'tierlists', label: 'Tier Lists', icon: BarChart3, component: TierListManagement, description: 'Tier List Management' },
   { id: 'comments', label: 'Comments', icon: MessageSquare, component: CommentManagement, description: 'Comment Moderation' },
+  { id: 'ai-review', label: 'AI Review', icon: Bot, component: AIReviewQueue, description: 'AI Content Review Queue' },
   { id: 'analytics', label: 'Analytics', icon: TrendingUp, component: Analytics, description: 'Business Analytics' },
   { id: 'settings', label: 'Settings', icon: Settings, component: SystemSettings, description: 'Site Configuration' },
 ]

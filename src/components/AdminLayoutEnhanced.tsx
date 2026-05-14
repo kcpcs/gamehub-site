@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -22,6 +21,10 @@ import { AIPlayerManagement } from './AIPlayerManagement'
 import { AdminUserManagement } from './AdminUserManagement'
 import { AdminRoleManagement } from './AdminRoleManagement'
 
+function BatchOperationsWrapper() {
+  return <BatchOperations type="games" />
+}
+
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, component: DashboardReal, description: 'Overview & Statistics' },
   { id: 'users', label: 'Users', icon: Users, component: UserManagementReal, description: 'User Management' },
@@ -35,7 +38,7 @@ const navItems = [
   { id: 'comments', label: 'Comments', icon: MessageSquare, component: CommentManagement, description: 'Comment Moderation' },
   { id: 'analytics', label: 'Analytics', icon: TrendingUp, component: AnalyticsEnhanced, description: 'Analytics & Reporting' },
   { id: 'backup', label: 'Backup', icon: RefreshCw, component: BackupManagement, description: 'Data Backup & Restore' },
-  { id: 'batch', label: 'Batch Ops', icon: FileText, component: BatchOperations, description: 'Import/Export Data' },
+  { id: 'batch', label: 'Batch Ops', icon: FileText, component: BatchOperationsWrapper, description: 'Import/Export Data' },
   { id: 'settings', label: 'Settings', icon: Settings, component: SystemSettings, description: 'Site Configuration' },
 ]
 

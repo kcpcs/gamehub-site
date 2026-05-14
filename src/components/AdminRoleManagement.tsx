@@ -1,4 +1,3 @@
-// @ts-nocheck
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -43,8 +42,26 @@ export function AdminRoleManagement() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [showModal, setShowModal] = useState(false)
+  const permissionKeys = [
+    'can_manage_users',
+    'can_manage_games',
+    'can_manage_articles',
+    'can_manage_codes',
+    'can_manage_tierlists',
+    'can_manage_comments',
+    'can_view_analytics',
+    'can_manage_settings',
+    'can_manage_roles',
+    'can_manage_ai_players',
+  ] as const
+
+  type PermissionKey = typeof permissionKeys[number]
+
   const [editingRole, setEditingRole] = useState<AdminRole | null>(null)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    name: string
+    description: string
+  } & Record<PermissionKey, boolean>>({
     name: '',
     description: '',
     can_manage_users: false,
@@ -71,7 +88,7 @@ export function AdminRoleManagement() {
       } else {
         setError(result.error || 'Failed to fetch roles')
       }
-    } catch (err) {
+    } catch {
       setError('Failed to fetch roles')
     } finally {
       setLoading(false)
@@ -144,7 +161,7 @@ export function AdminRoleManagement() {
       } else {
         setError(result.error)
       }
-    } catch (err) {
+    } catch {
       setError('Operation failed')
     }
   }
@@ -161,7 +178,7 @@ export function AdminRoleManagement() {
       } else {
         setError(result.error)
       }
-    } catch (err) {
+    } catch {
       setError('Delete failed')
     }
   }
@@ -363,14 +380,14 @@ export function AdminRoleManagement() {
                     <label
                       key={key}
                       className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
-                        formData[key as keyof typeof formData]
+                        formData[key as PermissionKey]
                           ? 'bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800'
                           : 'bg-gray-50 dark:bg-gray-700 border border-transparent hover:border-gray-200 dark:hover:border-gray-600'
                       }`}
                     >
                       <input
                         type="checkbox"
-                        checked={formData[key as keyof typeof formData]}
+                        checked={formData[key as PermissionKey]}
                         onChange={(e) =>
                           setFormData({
                             ...formData,

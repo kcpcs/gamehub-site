@@ -71,7 +71,7 @@ const YOUTUBE_API_BASE = 'https://www.googleapis.com/youtube/v3'
  */
 function parseDuration(duration?: string): number | undefined {
   if (!duration) return undefined
-  const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?/)
+  const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/)
   if (!match) return undefined
   const hours = parseInt(match[1] || '0')
   const minutes = parseInt(match[2] || '0')

@@ -84,7 +84,7 @@ export async function getUserPreferences(userId: string): Promise<UserPreference
  * Calculate relevance score for a video based on user preferences
  */
 function calculateRelevanceScore(
-  video: { game_id?: string; video_type: string; platform: string; view_count?: bigint },
+  video: { game_id?: string | null; video_type: string; platform: string; view_count?: bigint | null },
   preferences: UserPreferences
 ): number {
   let score = 0
@@ -175,6 +175,7 @@ export async function getVideoRecommendations(
         published_at: video.published_at || undefined,
         video_type: video.video_type,
         is_live: video.is_live,
+        game_id: video.game_id || undefined,
         relevance_score: score,
         recommendation_reason: reason
       }

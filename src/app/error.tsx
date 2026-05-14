@@ -1,6 +1,7 @@
 'use client'
  
 import { useEffect } from 'react'
+import { captureError } from '@/lib/monitoring'
  
 export default function Error({
   error,
@@ -10,7 +11,8 @@ export default function Error({
   reset: () => void
 }) {
   useEffect(() => {
-    console.error('Global error:', error)
+    const context = error.digest ? { digest: error.digest } : undefined
+    captureError(error, context)
   }, [error])
  
   return (

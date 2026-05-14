@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get('search')
     const status = searchParams.get('status')
 
-    let where: any = {}
+    const where: any = {}
 
     if (status && status !== 'all') {
       where.status = status

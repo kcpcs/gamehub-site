@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    let result = { created: 0, updated: 0, skipped: 0, errors: [] as string[] }
+    const result = { created: 0, updated: 0, skipped: 0, errors: [] as string[] }
 
     switch (type) {
       case 'games':

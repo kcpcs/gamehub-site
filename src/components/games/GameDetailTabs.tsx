@@ -6,6 +6,7 @@ import { GameGuideList } from './GameGuideList'
 import { GameCodesList } from './GameCodesList'
 import { GameTierList } from './GameTierList'
 import { GameVideosSection } from './GameVideosSection'
+import { useLanguage } from '@/lib/language-context'
 
 interface GameDetailTabsProps {
   gameSlug: string
@@ -16,19 +17,20 @@ interface GameDetailTabsProps {
 
 type TabType = 'overview' | 'guides' | 'codes' | 'videos' | 'tierlist'
 
-export function GameDetailTabs({ 
+export function GameDetailTabs({
   gameSlug,
   hasGuides = true,
   hasCodes = true,
   hasTierList = true
 }: GameDetailTabsProps) {
+  const { t } = useLanguage()
   const [activeTab, setActiveTab] = useState<TabType>('videos')
 
-  const tabs: { id: TabType; label: string }[] = [
-    { id: 'videos', label: 'Videos' },
-    { id: 'guides', label: 'Guides' },
-    { id: 'codes', label: 'Codes' },
-    ...(hasTierList ? [{ id: 'tierlist' as TabType, label: 'Tier List' }] : []),
+  const tabs: { id: TabType; labelKey: string }[] = [
+    { id: 'videos', labelKey: 'videos' },
+    { id: 'guides', labelKey: 'guides' },
+    { id: 'codes', labelKey: 'codes' },
+    ...(hasTierList ? [{ id: 'tierlist' as TabType, labelKey: 'tier_list' }] : []),
   ]
 
   return (
@@ -54,7 +56,7 @@ export function GameDetailTabs({
                 : { color: 'var(--text-secondary)' }
             }
           >
-            {tab.label}
+            {t(tab.labelKey)}
           </button>
         ))}
       </div>
@@ -72,7 +74,7 @@ export function GameDetailTabs({
                 className="text-sm font-medium"
                 style={{ color: 'var(--accent-light)' }}
               >
-                View All Guides →
+                {t('view_all_guides')}
               </Link>
             </div>
             <GameGuideList gameSlug={gameSlug} />
@@ -86,7 +88,7 @@ export function GameDetailTabs({
                 className="text-sm font-medium"
                 style={{ color: 'var(--accent-light)' }}
               >
-                View All Codes →
+                {t('view_all_codes')}
               </Link>
             </div>
             <GameCodesList gameSlug={gameSlug} />

@@ -4,10 +4,10 @@ import { db } from '@/lib/db'
 // GET /api/admin/articles/[id] - 获取单个文章详情
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
 
     const article = await db.article.findUnique({
       where: { id },
@@ -37,10 +37,10 @@ export async function GET(
 // PATCH /api/admin/articles/[id] - 更新单个文章
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
     const body = await request.json()
 
     const article = await db.article.update({
@@ -75,10 +75,10 @@ export async function PATCH(
 // DELETE /api/admin/articles/[id] - 删除单个文章
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
 
     await db.article.delete({
       where: { id },

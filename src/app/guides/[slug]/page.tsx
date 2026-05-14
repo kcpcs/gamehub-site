@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { db } from '@/lib/db'
 import { Breadcrumb } from '@/components/Breadcrumb'
 import { VideoEmbed, LiveStreamsSection } from '@/components/VideoEmbed'
@@ -9,6 +10,51 @@ import { FAQSchema } from '@/components/FAQSchema'
 import { Clock, Star } from 'lucide-react'
 import { JsonLdScript, getArticleSchema, getBreadcrumbSchema } from '@/components/seo/JsonLd'
 import { getGameCoverUrl } from '@/lib/game-images'
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params
+  
+  try {
+    const article = await db.article.findUnique({
+      where: { slug },
+      include: { game: true },
+    })
+
+    if (article) {
+      return {
+        title: `${article.title} | GameHub`,
+        description: article.excerpt || `Read this guide about ${article.game?.name || 'games'} on GameHub.`,
+        openGraph: {
+          title: article.title,
+          description: article.excerpt || `Read this guide about ${article.game?.name || 'games'} on GameHub.`,
+          type: 'article',
+          images: [
+            {
+              url: article.cover_url || getGameCoverUrl(article.title),
+              width: 1200,
+              height: 630,
+              alt: article.title,
+            },
+          ],
+        },
+        twitter: {
+          card: 'summary_large_image',
+          title: article.title,
+          description: article.excerpt || `Read this guide about ${article.game?.name || 'games'} on GameHub.`,
+          images: [article.cover_url || getGameCoverUrl(article.title)],
+        },
+      }
+    }
+  } catch {
+    // Fall through to default metadata
+  }
+
+  // Fallback metadata
+  return {
+    title: 'Game Guide | GameHub',
+    description: 'Read expert game guides and walkthroughs on GameHub.',
+  }
+}
 
 interface GuideDetailPageProps {
   params: {

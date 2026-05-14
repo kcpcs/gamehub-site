@@ -1,8 +1,9 @@
-// @ts-nocheck
 'use client'
 
 import { useState, useEffect } from 'react'
-import { MessageSquare, ThumbsUp, Reply, Send, User } from 'lucide-react'
+import { MessageSquare, Reply, Send, User } from 'lucide-react'
+import { useLanguage } from '@/lib/language-context'
+import { CommentVoteButtons } from '@/components/CommentVoteButtons'
 
 interface Comment {
   id: string
@@ -11,6 +12,7 @@ interface Comment {
   content: string
   created_at: string
   likes: number
+  vote_score: number
   is_liked: boolean
   replies?: Comment[]
 }
@@ -20,6 +22,7 @@ interface CommentSectionProps {
 }
 
 export function CommentSection({ articleId }: CommentSectionProps) {
+  const { t } = useLanguage()
   const [comments, setComments] = useState<Comment[]>([])
   const [newComment, setNewComment] = useState('')
   const [replyingTo, setReplyingTo] = useState<string | null>(null)
@@ -33,9 +36,9 @@ export function CommentSection({ articleId }: CommentSectionProps) {
   const fetchComments = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch(`/api/comments/${articleId}`)
-      if (response.ok) {
-        const data = await response.json()
+      const res = await fetch(`/api/comments/${articleId}`)
+      if (res.ok) {
+        const data = await res.json()
         setComments(data.comments || mockComments)
       } else {
         setComments(mockComments)
@@ -50,7 +53,7 @@ export function CommentSection({ articleId }: CommentSectionProps) {
     if (!newComment.trim()) return
 
     try {
-      const response = await fetch('/api/comments', {
+      const res = await fetch('/api/comments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -59,7 +62,7 @@ export function CommentSection({ articleId }: CommentSectionProps) {
         }),
       })
 
-      if (response.ok) {
+      if (res.ok) {
         setNewComment('')
         fetchComments()
       }
@@ -72,7 +75,7 @@ export function CommentSection({ articleId }: CommentSectionProps) {
     if (!replyContent.trim()) return
 
     try {
-      const response = await fetch('/api/comments/reply', {
+      const res = await fetch('/api/comments/reply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -82,27 +85,13 @@ export function CommentSection({ articleId }: CommentSectionProps) {
         }),
       })
 
-      if (response.ok) {
+      if (res.ok) {
         setReplyContent('')
         setReplyingTo(null)
         fetchComments()
       }
     } catch {
       console.error('Failed to submit reply')
-    }
-  }
-
-  const handleLike = async (commentId: string) => {
-    try {
-      const response = await fetch(`/api/comments/${commentId}/like`, {
-        method: 'POST',
-      })
-
-      if (response.ok) {
-        fetchComments()
-      }
-    } catch {
-      console.error('Failed to like comment')
     }
   }
 
@@ -135,16 +124,11 @@ export function CommentSection({ articleId }: CommentSectionProps) {
           </p>
 
           <div className="flex items-center gap-4">
-            <button
-              onClick={() => handleLike(comment.id)}
-              className={`flex items-center gap-1.5 text-xs transition-colors ${
-                comment.is_liked ? 'text-accent-light' : ''
-              }`}
-              style={{ color: comment.is_liked ? undefined : 'var(--text-muted)' }}
-            >
-              <ThumbsUp className={`w-3.5 h-3.5 ${comment.is_liked ? 'fill-current' : ''}`} />
-              <span>{comment.likes}</span>
-            </button>
+            <CommentVoteButtons 
+              commentId={comment.id} 
+              initialScore={comment.vote_score ?? comment.likes} 
+              initialUserVote={null}
+            />
 
             <button
               onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
@@ -152,7 +136,7 @@ export function CommentSection({ articleId }: CommentSectionProps) {
               style={{ color: 'var(--text-muted)' }}
             >
               <Reply className="w-3.5 h-3.5" />
-              <span>Reply</span>
+              <span>{t('reply')}</span>
             </button>
           </div>
 
@@ -161,13 +145,12 @@ export function CommentSection({ articleId }: CommentSectionProps) {
               <textarea
                 value={replyContent}
                 onChange={(e) => setReplyContent(e.target.value)}
-                placeholder="Write a reply..."
+                placeholder={t('write_reply')}
                 className="w-full p-2 text-sm rounded-lg resize-none focus:outline-none focus:ring-2"
                 style={{
                   backgroundColor: 'var(--bg-overlay)',
                   color: 'var(--text-primary)',
                   border: '1px solid var(--border)',
-                  ringColor: 'var(--accent)',
                 }}
                 rows={2}
               />
@@ -175,14 +158,14 @@ export function CommentSection({ articleId }: CommentSectionProps) {
                 <button
                   onClick={() => handleSubmitReply(comment.id)}
                   disabled={!replyContent.trim()}
-                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-medium transition-all disabled:opacity-50"
                   style={{
                     backgroundColor: 'var(--accent)',
                     color: 'white',
                   }}
                 >
                   <Send className="w-3 h-3" />
-                  <span>Reply</span>
+                  <span>{t('reply')}</span>
                 </button>
               </div>
             </div>
@@ -211,7 +194,7 @@ export function CommentSection({ articleId }: CommentSectionProps) {
       <div className="flex items-center gap-2 mb-6">
         <MessageSquare className="w-5 h-5" style={{ color: 'var(--accent-light)' }} />
         <h3 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
-          Comments ({comments.length})
+          {t('comments_count').replace('{count}', String(comments.length))}
         </h3>
       </div>
 
@@ -220,13 +203,12 @@ export function CommentSection({ articleId }: CommentSectionProps) {
         <textarea
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
-          placeholder="Write a comment..."
+          placeholder={t('write_comment')}
           className="w-full p-3 text-sm rounded-lg resize-none focus:outline-none focus:ring-2"
           style={{
             backgroundColor: 'var(--bg-overlay)',
             color: 'var(--text-primary)',
             border: '1px solid var(--border)',
-            ringColor: 'var(--accent)',
           }}
           rows={3}
         />
@@ -241,7 +223,7 @@ export function CommentSection({ articleId }: CommentSectionProps) {
             }}
           >
             <Send className="w-4 h-4" />
-            <span>Post Comment</span>
+            <span>{t('post_comment')}</span>
           </button>
         </div>
       </div>
@@ -252,7 +234,7 @@ export function CommentSection({ articleId }: CommentSectionProps) {
       ) : (
         <div className="text-center py-8 rounded-xl" style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }}>
           <MessageSquare className="w-12 h-12 mx-auto mb-3" style={{ color: 'var(--text-muted)' }} />
-          <p style={{ color: 'var(--text-muted)' }}>No comments yet. Be the first to comment!</p>
+          <p style={{ color: 'var(--text-muted)' }}>{t('no_comments_yet')}</p>
         </div>
       )}
     </div>
@@ -266,6 +248,7 @@ const mockComments: Comment[] = [
     content: 'Great guide! The tips helped me beat the boss on my first try. Thanks!',
     created_at: '2 hours ago',
     likes: 24,
+    vote_score: 24,
     is_liked: false,
     replies: [
       {
@@ -274,6 +257,7 @@ const mockComments: Comment[] = [
         content: 'Glad it helped! The parry timing is tricky but once you get it...',
         created_at: '1 hour ago',
         likes: 8,
+        vote_score: 8,
         is_liked: false,
       },
     ],
@@ -284,6 +268,7 @@ const mockComments: Comment[] = [
     content: 'Just started playing this game. This guide is exactly what I needed!',
     created_at: '5 hours ago',
     likes: 12,
+    vote_score: 12,
     is_liked: true,
   },
   {
@@ -292,6 +277,7 @@ const mockComments: Comment[] = [
     content: 'Nice breakdown of the strategies. Would love to see a follow-up with advanced tactics.',
     created_at: '1 day ago',
     likes: 35,
+    vote_score: 35,
     is_liked: false,
     replies: [
       {
@@ -300,6 +286,7 @@ const mockComments: Comment[] = [
         content: 'Thanks for the suggestion! We\'re working on an advanced guide.',
         created_at: '12 hours ago',
         likes: 15,
+        vote_score: 15,
         is_liked: false,
       },
     ],

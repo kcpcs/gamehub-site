@@ -12,6 +12,107 @@ export type PlayerType =
   | 'news_enthusiast'
   | 'community_helper'
 
+// ─────────────────────────────────────────
+// Preset Usernames and Avatars by Player Type
+// ─────────────────────────────────────────
+
+export const PLAYER_PRESETS: Record<PlayerType, Array<{ username: string; seed: string }>> = {
+  hardcore_gamer: [
+    { username: 'ProSlayer99', seed: 'ProSlayer99' },
+    { username: 'GameBeast_X', seed: 'GameBeast_X' },
+    { username: 'RankedMaster', seed: 'RankedMaster' },
+    { username: 'NoobSlayer42', seed: 'NoobSlayer42' },
+    { username: 'EliteGamer88', seed: 'EliteGamer88' },
+    { username: 'DiamondRank', seed: 'DiamondRank' },
+    { username: 'SkillzMaster', seed: 'SkillzMaster' },
+    { username: 'ClutchPlayer', seed: 'ClutchPlayer' },
+    { username: 'GG_EZ_PZ', seed: 'GG_EZ_PZ' },
+    { username: 'FPS_Beast', seed: 'FPS_Beast' },
+    { username: 'MetaHunter', seed: 'MetaHunter' },
+    { username: 'SoloQueueKing', seed: 'SoloQueueKing' },
+    { username: 'ProGamer69', seed: 'ProGamer69' },
+  ],
+  casual_player: [
+    { username: 'CozyGamer', seed: 'CozyGamer' },
+    { username: 'LazyGamer88', seed: 'LazyGamer88' },
+    { username: 'ChillPlayer', seed: 'ChillPlayer' },
+    { username: 'GameNerd42', seed: 'GameNerd42' },
+    { username: 'HappyGamer', seed: 'HappyGamer' },
+    { username: 'RelaxedPlay', seed: 'RelaxedPlay' },
+    { username: 'CuteGamerGirl', seed: 'CuteGamerGirl' },
+    { username: 'SleepyGamer', seed: 'SleepyGamer' },
+    { username: 'LunaPlayz', seed: 'LunaPlayz' },
+    { username: 'SunshineGamer', seed: 'SunshineGamer' },
+    { username: 'MellowPlayer', seed: 'MellowPlayer' },
+    { username: 'CozyGamerBabe', seed: 'CozyGamerBabe' },
+    { username: 'GamerMom', seed: 'GamerMom' },
+  ],
+  guide_writer: [
+    { username: 'GuideMaster', seed: 'GuideMaster' },
+    { username: 'ProTutorial', seed: 'ProTutorial' },
+    { username: 'HowToGamer', seed: 'HowToGamer' },
+    { username: 'StrategyNerd', seed: 'StrategyNerd' },
+    { username: 'GameProfessor', seed: 'GameProfessor' },
+    { username: 'TipsExpert', seed: 'TipsExpert' },
+    { username: 'WalkthroughKing', seed: 'WalkthroughKing' },
+    { username: 'GameMentor', seed: 'GameMentor' },
+    { username: 'TutorialGuru', seed: 'TutorialGuru' },
+    { username: 'StrategyGuide', seed: 'StrategyGuide' },
+    { username: 'ProGuideMaker', seed: 'ProGuideMaker' },
+    { username: 'GameCoach', seed: 'GameCoach' },
+    { username: 'ExpertGamer', seed: 'ExpertGamer' },
+  ],
+  code_hunter: [
+    { username: 'CodeHunter_X', seed: 'CodeHunter_X' },
+    { username: 'FreebieFinder', seed: 'FreebieFinder' },
+    { username: 'RedeemMaster', seed: 'RedeemMaster' },
+    { username: 'PromoHunter', seed: 'PromoHunter' },
+    { username: 'CodeNinja', seed: 'CodeNinja' },
+    { username: 'GiveawayKing', seed: 'GiveawayKing' },
+    { username: 'FreeCodeGuy', seed: 'FreeCodeGuy' },
+    { username: 'RewardHunter', seed: 'RewardHunter' },
+    { username: 'CodeFinder', seed: 'CodeFinder' },
+    { username: 'GiftCodePro', seed: 'GiftCodePro' },
+    { username: 'FreeStuffPro', seed: 'FreeStuffPro' },
+    { username: 'DealHunter', seed: 'DealHunter' },
+    { username: 'CodeMaster', seed: 'CodeMaster' },
+  ],
+  news_enthusiast: [
+    { username: 'NewsJunkie', seed: 'NewsJunkie' },
+    { username: 'PatchNotesPro', seed: 'PatchNotesPro' },
+    { username: 'GameReporter', seed: 'GameReporter' },
+    { username: 'EsportsFan', seed: 'EsportsFan' },
+    { username: 'LeakHunter', seed: 'LeakHunter' },
+    { username: 'GameNewsGuy', seed: 'GameNewsGuy' },
+    { username: 'UpdateWatcher', seed: 'UpdateWatcher' },
+    { username: 'DevTracker', seed: 'DevTracker' },
+    { username: 'RoadmapFan', seed: 'RoadmapFan' },
+    { username: 'NewsGeek', seed: 'NewsGeek' },
+    { username: 'GamingReporter', seed: 'GamingReporter' },
+    { username: 'PatchTracker', seed: 'PatchTracker' },
+    { username: 'GameJournalist', seed: 'GameJournalist' },
+  ],
+  community_helper: [
+    { username: 'HelpfulGamer', seed: 'HelpfulGamer' },
+    { username: 'CommunityHero', seed: 'CommunityHero' },
+    { username: 'NewPlayerHelper', seed: 'NewPlayerHelper' },
+    { username: 'FriendlyMod', seed: 'FriendlyMod' },
+    { username: 'SupportGuy', seed: 'SupportGuy' },
+    { username: 'HelpDeskGamer', seed: 'HelpDeskGamer' },
+    { username: 'CommunityHelper', seed: 'CommunityHelper' },
+    { username: 'GameAdvisor', seed: 'GameAdvisor' },
+    { username: 'NiceGamer', seed: 'NiceGamer' },
+    { username: 'SupportHero', seed: 'SupportHero' },
+    { username: 'FriendlyHelper', seed: 'FriendlyHelper' },
+    { username: 'CommunityNurse', seed: 'CommunityNurse' },
+    { username: 'HelpingHand', seed: 'HelpingHand' },
+  ],
+}
+
+export function getAvatarUrl(seed: string): string {
+  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(seed)}`
+}
+
 export interface BehaviorConfigDefaults {
   wake_up_time: string
   sleep_time: string

@@ -31,12 +31,17 @@ interface LogEntry {
 }
 
 const currentLevel: LogLevel = (process.env.LOG_LEVEL as LogLevel) || 'info'
+const useJsonFormat = process.env.NODE_ENV === 'production'
 
 function shouldLog(level: LogLevel): boolean {
   return LOG_LEVELS[level] <= LOG_LEVELS[currentLevel]
 }
 
 function formatLog(entry: LogEntry): string {
+  if (useJsonFormat) {
+    return JSON.stringify(entry)
+  }
+
   const base = `[${entry.timestamp}] ${entry.level.toUpperCase()}: ${entry.message}`
 
   if (entry.context) {

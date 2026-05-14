@@ -1,0 +1,67 @@
+# Dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Next.js build outputs
+.next
+out
+
+# Git
+.git
+.gitignore
+
+# Environment files (use docker-compose env or runtime env)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.example
+.env.production
+.env.production.example
+.env.ai.example
+.env.local.example
+
+# IDE and editor
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+
+# Testing and development
+coverage
+.nyc_output
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+__tests__
+
+# Scripts and development tools
+scripts/*.cjs
+scripts/*.js
+scripts/*.ts
+
+# Database
+*.db
+*.db.backup
+dev.db
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.travis.yml
+
+# Misc
+*.log
+*.tmp
+.tmp/
+.cache/
+.vercel

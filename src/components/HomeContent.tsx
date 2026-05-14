@@ -327,7 +327,7 @@ export function HomeContent({ featuredGames, stats, latestGuides, trendingGames 
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {latestGuides.length > 0 ? (
-            latestGuides.map((guide) => (
+            latestGuides.map((guide, index) => (
               <Link
                 key={guide.id}
                 href={`/guides/${guide.slug}`}
@@ -339,6 +339,7 @@ export function HomeContent({ featuredGames, stats, latestGuides, trendingGames 
                     src={guide.cover_url && !guide.cover_url.includes('picsum.photos') ? guide.cover_url : getGameCoverUrl(guide.game_name || guide.title)}
                     alt={guide.title}
                     className="transition-transform duration-500 group-hover:scale-105"
+                    priority={index < 2}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">

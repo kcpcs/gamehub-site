@@ -1,8 +1,36 @@
+import type { Metadata } from 'next'
 import { db } from '@/lib/db'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Breadcrumb } from '@/components/Breadcrumb'
 import { Clock, Eye, ThumbsUp, Tag, Sparkles } from 'lucide-react'
 import { getGameCoverUrl } from '@/lib/game-images'
+
+export const revalidate = 60
+
+export const metadata: Metadata = {
+  title: 'Game Guides | GameHub',
+  description: 'Master your favorite games with expert guides, walkthroughs, tips, and strategies. Updated daily with the latest gaming guides.',
+  openGraph: {
+    title: 'Game Guides | GameHub',
+    description: 'Master your favorite games with expert guides, walkthroughs, tips, and strategies. Updated daily.',
+    type: 'website',
+    images: [
+      {
+        url: 'https://picsum.photos/seed/guides/1200/630',
+        width: 1200,
+        height: 630,
+        alt: 'Game Guides - GameHub',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Game Guides | GameHub',
+    description: 'Master your favorite games with expert guides, walkthroughs, tips, and strategies.',
+    images: ['https://picsum.photos/seed/guides/1200/630'],
+  },
+}
 
 interface ArticleWithGame {
   id: string
@@ -156,12 +184,23 @@ export default async function GuidesPage() {
                   style={{ backgroundColor: 'var(--bg-surface)', border: '1px solid var(--border)' }}
                 >
                   <div className="relative aspect-video overflow-hidden">
-                    <img
-                      src={coverUrl}
-                      alt={article.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      loading="lazy"
-                    />
+                    {coverUrl.startsWith('http') || coverUrl.startsWith('//') ? (
+                      <img
+                        src={coverUrl}
+                        alt={article.title}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <Image
+                        src={coverUrl}
+                        alt={article.title}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        priority={index < 3}
+                      />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                     <div className="absolute top-3 left-3 flex flex-wrap gap-2">
                       <span

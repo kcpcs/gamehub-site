@@ -92,7 +92,9 @@ export class ContentInteractor {
     const response = await createClaudeCompletion(
       [{ role: 'user', content: userMessage }],
       systemPrompt,
-      512
+      512,
+      'sonnet',
+      { type: 'ephemeral' }
     )
 
     return {
@@ -165,7 +167,9 @@ export class ContentInteractor {
     const response = await createClaudeCompletion(
       [{ role: 'user', content: userMessage }],
       systemPrompt,
-      512
+      512,
+      'sonnet',
+      { type: 'ephemeral' }
     )
 
     return {
