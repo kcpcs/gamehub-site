@@ -68,10 +68,12 @@ export function CodesClient({ game, codes, currentMonthYear }: CodesClientProps)
   const [formData, setFormData] = useState({ code: '', reward: '', sourceUrl: '' })
   const [submitting, setSubmitting] = useState(false)
   const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitting(true)
+    setErrorMessage(null)
     
     try {
       const res = await fetch(`/api/codes/${game.slug}`, {
@@ -84,11 +86,30 @@ export function CodesClient({ game, codes, currentMonthYear }: CodesClientProps)
         }),
       })
       
+      const data = await res.json()
+      
       if (res.ok) {
         setSubmitSuccess(true)
         setFormData({ code: '', reward: '', sourceUrl: '' })
         setTimeout(() => setSubmitSuccess(false), 3000)
+      } else {
+        // 处理不同的错误类型
+        if (res.status === 409) {
+          setErrorMessage(t('code_already_exists') || 'This code already exists')
+        } else if (res.status === 400 && data.code === 'INVALID_FORMAT') {
+          setErrorMessage(t('invalid_code_format') || 'Invalid code format')
+        } else if (data.error) {
+          setErrorMessage(data.error)
+        } else {
+          setErrorMessage(t('failed_to_submit_code') || 'Failed to submit code')
+        }
+        // 3秒后清除错误消息
+        setTimeout(() => setErrorMessage(null), 3000)
       }
+    } catch (err) {
+      console.error('Failed to submit code:', err)
+      setErrorMessage(t('network_error') || 'Network error, please try again')
+      setTimeout(() => setErrorMessage(null), 3000)
     } finally {
       setSubmitting(false)
     }
@@ -285,6 +306,29 @@ export function CodesClient({ game, codes, currentMonthYear }: CodesClientProps)
         <h2 className="text-lg font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
           {t('submit_new_code')}
         </h2>
+        
+        {/* 成功提示 */}
+        {submitSuccess && (
+          <div 
+            className="mb-4 p-3 rounded-lg flex items-center gap-2"
+            style={{ backgroundColor: 'rgba(40, 167, 69, 0.1)', border: '1px solid var(--success)', color: 'var(--success)' }}
+          >
+            <span className="font-semibold">✓</span>
+            <span>{t('code_submitted_successfully') || 'Code submitted successfully!'}</span>
+          </div>
+        )}
+        
+        {/* 错误提示 */}
+        {errorMessage && (
+          <div 
+            className="mb-4 p-3 rounded-lg flex items-center gap-2"
+            style={{ backgroundColor: 'rgba(220, 53, 69, 0.1)', border: '1px solid var(--error)', color: 'var(--error)' }}
+          >
+            <span className="font-semibold">✕</span>
+            <span>{errorMessage}</span>
+          </div>
+        )}
+        
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>
@@ -295,12 +339,15 @@ export function CodesClient({ game, codes, currentMonthYear }: CodesClientProps)
               value={formData.code}
               onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
               required
+              disabled={submitting}
               className="w-full px-4 py-2.5 rounded-lg text-sm"
               style={{ 
                 backgroundColor: 'var(--bg-overlay)', 
                 border: '1px solid var(--border)',
                 color: 'var(--text-primary)',
-                fontFamily: 'monospace'
+                fontFamily: 'monospace',
+                opacity: submitting ? 0.7 : 1,
+                cursor: submitting ? 'not-allowed' : 'text'
               }}
               placeholder="e.g., FREEGEMS2024"
             />
@@ -314,11 +361,14 @@ export function CodesClient({ game, codes, currentMonthYear }: CodesClientProps)
               value={formData.reward}
               onChange={(e) => setFormData({ ...formData, reward: e.target.value })}
               required
+              disabled={submitting}
               className="w-full px-4 py-2.5 rounded-lg text-sm"
               style={{ 
                 backgroundColor: 'var(--bg-overlay)', 
                 border: '1px solid var(--border)',
-                color: 'var(--text-primary)'
+                color: 'var(--text-primary)',
+                opacity: submitting ? 0.7 : 1,
+                cursor: submitting ? 'not-allowed' : 'text'
               }}
               placeholder="e.g., 50 Primogems + 3 Hero Wit"
             />
@@ -331,11 +381,14 @@ export function CodesClient({ game, codes, currentMonthYear }: CodesClientProps)
               type="url"
               value={formData.sourceUrl}
               onChange={(e) => setFormData({ ...formData, sourceUrl: e.target.value })}
+              disabled={submitting}
               className="w-full px-4 py-2.5 rounded-lg text-sm"
               style={{ 
                 backgroundColor: 'var(--bg-overlay)', 
                 border: '1px solid var(--border)',
-                color: 'var(--text-primary)'
+                color: 'var(--text-primary)',
+                opacity: submitting ? 0.7 : 1,
+                cursor: submitting ? 'not-allowed' : 'text'
               }}
               placeholder="https://discord.gg/example"
             />
@@ -343,14 +396,27 @@ export function CodesClient({ game, codes, currentMonthYear }: CodesClientProps)
           <button
             type="submit"
             disabled={submitting}
-            className="w-full py-3 rounded-lg font-semibold text-sm transition-all duration-200"
+            className="w-full py-3 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2"
             style={{
               backgroundColor: submitSuccess ? 'var(--success)' : 'var(--accent)',
               color: submitSuccess ? 'var(--bg-base)' : 'white',
-              opacity: submitting ? 0.7 : 1
+              opacity: submitting ? 0.7 : 1,
+              cursor: submitting ? 'not-allowed' : 'pointer'
             }}
           >
-            {submitting ? t('submitting') : submitSuccess ? t('submitted_successfully') : t('submit_code')}
+            {submitting ? (
+              <>
+                <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                {t('submitting')}
+              </>
+            ) : submitSuccess ? (
+              <>
+                <span>✓</span>
+                {t('submitted_successfully')}
+              </>
+            ) : (
+              t('submit_code')
+            )}
           </button>
         </form>
       </div>
