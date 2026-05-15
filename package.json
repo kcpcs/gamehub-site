@@ -19,7 +19,9 @@
     "codes:check": "node scripts/check-expired-codes.mjs",
     "ai:update-games": "node scripts/ai-workflow.cjs --update-games",
     "test": "vitest",
-    "test:run": "vitest run"
+    "test:run": "vitest run",
+    "operate:daily": "node scripts/daily-operate.mjs",
+    "operate:start": "node scripts/cron-job.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.1",
@@ -37,6 +39,7 @@
     "lucide-react": "^1.14.0",
     "next": "16.2.6",
     "next-auth": "^5.0.0-beta.31",
+    "node-cron": "^3.0.3",
     "node-fetch": "^3.3.2",
     "pg": "^8.20.0",
     "prisma": "^7.8.0",
