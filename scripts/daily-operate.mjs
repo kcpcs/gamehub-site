@@ -4,9 +4,13 @@
  * Runs daily at 2:00 AM to automate operational tasks
  */
 
-const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Configuration
 const PROJECT_DIR = path.resolve(__dirname, '..');
@@ -54,7 +58,7 @@ const main = async () => {
     // === TASK 1: Auto-approve user-submitted codes
     log(colors.bold('1️⃣ Starting: Auto-approve user-submitted codes...'));
     info('Running database operations...');
-    runCommand('node scripts/db-operations.mjs');
+    runCommand('node scripts/db-operations.mjs', 'DB operations');
     success('Code validation complete!');
     log('');
 

@@ -21,7 +21,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "operate:daily": "node scripts/daily-operate.mjs",
-    "operate:start": "node scripts/cron-job.js"
+    "operate:start": "node scripts/cron-job.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.1",

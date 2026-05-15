@@ -4,8 +4,14 @@
  * Schedules daily auto-operation at 2:00 AM
  */
 
-const cron = require('node-cron');
-const { execSync } = require('child_process');
+import cron from 'node-cron';
+import { execSync } from 'child_process';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_DIR = path.resolve(__dirname, '..');
 
 console.log('🚀 GameHub Cron Job Scheduler Started');
 console.log('⏰ Waiting for scheduled tasks...');
@@ -22,7 +28,7 @@ const task = cron.schedule('0 2 * * *', () => {
     // Run the daily operation script
     execSync('npm run operate:daily', {
       stdio: 'inherit',
-      cwd: __dirname + '/..',
+      cwd: PROJECT_DIR,
     });
 
     const finishTime = new Date().toLocaleString();
@@ -44,7 +50,7 @@ if (process.argv.includes('--run-now')) {
   try {
     execSync('npm run operate:daily', {
       stdio: 'inherit',
-      cwd: __dirname + '/..',
+      cwd: PROJECT_DIR,
     });
     console.log('\n✅ Manual execution complete!');
   } catch (error) {
