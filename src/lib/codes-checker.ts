@@ -27,13 +27,13 @@ const CODE_PATTERNS: Record<string, RegExp[]> = {
 export function validateCodeFormat(code: string, gameSlug?: string): { valid: boolean; message?: string } {
   const cleanCode = code.trim().toUpperCase();
 
-  // 先检查明显无效的
+  // 1. 先检查明显无效的模式
   const obviousInvalid = [
-    /^TEST/i,
-    /^EXPIRE/i,
-    /^INVALID/i,
-    /^PLACEHOLDER/i,
-    /^\s*$/,
+    /^TEST/i,                  // 测试码
+    /^EXPIRE/i,                // 过期标记
+    /^INVALID/i,               // 无效标记
+    /^PLACEHOLDER/i,           // 占位符
+    /^\s*$/,                   // 空白
   ];
   
   for (const pattern of obviousInvalid) {
@@ -42,8 +42,34 @@ export function validateCodeFormat(code: string, gameSlug?: string): { valid: bo
     }
   }
 
-  // 其他的都先允许通过 - 简化逻辑确保基本功能工作
-  return { valid: true };
+  // 2. 获取针对特定游戏的验证规则
+  const patterns = gameSlug ? (CODE_PATTERNS[gameSlug] || CODE_PATTERNS['default']) : CODE_PATTERNS['default'];
+
+  // 3. 如果匹配特定游戏格式，直接通过
+  for (const pattern of patterns) {
+    if (pattern.test(cleanCode)) {
+      return { valid: true };
+    }
+  }
+
+  // 4. 检查是否太短或太长，但比之前更宽松
+  if (cleanCode.length < 3) {
+    return { valid: false, message: 'Code is too short' };
+  }
+  
+  if (cleanCode.length > 40) {
+    return { valid: false, message: 'Code is too long' };
+  }
+
+  // 5. 通用验证：只要是合理的字母数字组合就允许通过
+  // 允许的字符：A-Z, 0-9, 连字符, 下划线
+  const validFormat = /^[A-Z0-9_-]+$/.test(cleanCode);
+  
+  if (validFormat) {
+    return { valid: true };
+  }
+
+  return { valid: false, message: 'Code contains invalid characters' };
 }
 
 /**
