@@ -531,6 +531,10 @@ async function seed() {
     const createdGame = await db.game.create({ 
       data: {
         ...game,
+        screenshots: JSON.stringify(game.screenshots || []),
+        platforms: JSON.stringify(game.platforms || []),
+        genres: JSON.stringify(game.genres || []),
+        tags: JSON.stringify(game.tags || []),
         guide_count: 0,
         code_count: 0,
         has_tier_list: false,

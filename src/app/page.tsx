@@ -95,8 +95,8 @@ async function getFeaturedGames() {
         screenshots: [],
         tags: [],
         has_tier_list: game.has_tier_list || false,
-        created_at: game.created_at?.toISOString() || new Date().toISOString(),
-        updated_at: game.updated_at?.toISOString() || new Date().toISOString(),
+        created_at: game.created_at?.toISOString() || '',
+        updated_at: game.updated_at?.toISOString() || '',
         guide_count: game.guide_count,
         code_count: game.code_count,
       }

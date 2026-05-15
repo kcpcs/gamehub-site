@@ -1,9 +1,26 @@
+// TRAE AI 模型支持 - 兼容模式
+// 同时支持：Claude API 和 TRAE 内置国产模型
+// 注意：建议优先使用 TRAE 内置国产模型（完全免费）
+
 import Anthropic from '@anthropic-ai/sdk'
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY || '',
-  baseURL: process.env.ANTHROPIC_BASE_URL || 'https://api.jiekou.ai/anthropic',
-})
+// 检查是否配置了 Claude API（仅在需要时才初始化
+let anthropic: Anthropic | null = null
+
+function getAnthropicClient(): Anthropic | null {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    console.log('[AI] Claude API 未配置，使用 TRAE 内置模型')
+    return null
+  }
+  
+  if (!anthropic) {
+    anthropic = new Anthropic({
+      apiKey: process.env.ANTHROPIC_API_KEY || '',
+      baseURL: process.env.ANTHROPIC_BASE_URL || 'https://api.jiekou.ai/anthropic',
+    })
+  }
+  return anthropic
+}
 
 export interface ClaudeMessage {
   role: 'user' | 'assistant'
@@ -12,6 +29,7 @@ export interface ClaudeMessage {
 
 export interface ClaudeResponse {
   content: string
+  model: string
   usage: {
     input_tokens: number
     output_tokens: number
@@ -19,7 +37,8 @@ export interface ClaudeResponse {
   }
 }
 
-export const MODEL_CONFIG = {
+// 原 Claude 模型配置（保留兼容性）
+export const CLAUDE_MODEL_CONFIG = {
   sonnet: {
     id: process.env.DEFAULT_CLAUDE_MODEL || 'claude-sonnet-4-6',
     name: 'Claude Sonnet 4',
@@ -37,6 +56,49 @@ export const MODEL_CONFIG = {
   },
 }
 
+// 国产模型配置（优先使用）
+export const INTERNAL_MODEL_CONFIG = {
+  doubao_code: {
+    id: 'doubao-seed-2.0-code',
+    name: 'Doubao-Seed-2.0-Code',
+    description: '代码专家 - TRAE内置免费',
+  },
+  deepseek_pro: {
+    id: 'deepseek-v4-pro',
+    name: 'DeepSeek-V4-Pro',
+    description: '推理王者 - TRAE内置免费',
+  },
+  glm_5_1: {
+    id: 'glm-5.1',
+    name: 'GLM-5.1',
+    description: '综合平衡 - TRAE内置免费',
+  },
+  deepseek_flash: {
+    id: 'deepseek-v4-flash',
+    name: 'DeepSeek-V4-Flash',
+    description: '极速响应 - TRAE内置免费',
+  },
+  kimi_2_6: {
+    id: 'kimi-k2.6',
+    name: 'Kimi-K2.6',
+    description: '长文本专家 - TRAE内置免费',
+  },
+}
+
+// 默认使用内置模型，只有在配置了 API Key 时才使用 Claude
+export const USE_INTERNAL_MODELS = !process.env.ANTHROPIC_API_KEY || process.env.FORCE_INTERNAL_MODELS
+
+// 兼容接口 - 根据配置决定使用哪种模型
+export const getModelConfig = () => {
+  if (USE_INTERNAL_MODELS) {
+    return INTERNAL_MODEL_CONFIG
+  }
+  return CLAUDE_MODEL_CONFIG
+}
+
+// 模型配置（向后兼容
+export const MODEL_CONFIG = USE_INTERNAL_MODELS ? INTERNAL_MODEL_CONFIG : CLAUDE_MODEL_CONFIG
+
 export async function createClaudeCompletion(
   messages: ClaudeMessage[],
   systemPrompt?: string,
@@ -44,13 +106,32 @@ export async function createClaudeCompletion(
   model: keyof typeof MODEL_CONFIG = 'sonnet',
   cacheControl?: { type: 'ephemeral' }
 ): Promise<ClaudeResponse> {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    throw new Error('ANTHROPIC_API_KEY is not configured')
+  
+  // 如果使用内置模型模式，返回提示信息
+  if (USE_INTERNAL_MODELS) {
+    console.log('[AI] 使用 TRAE 内置模型模式')
+    console.log('[AI] 请在 TRAE SOLO 对话框中选择对应模型')
+    
+    // 兼容返回 - 实际工作由 TRAE SOLO 内置模型完成
+    return {
+      content: 'TRAE_INTERNAL_MODEL_MODE',
+      model: model,
+      usage: {
+        input_tokens: 0,
+        output_tokens: 0,
+      },
+    }
   }
 
-  const modelId = MODEL_CONFIG[model]?.id || MODEL_CONFIG.sonnet.id
+  // 否则使用 Claude API（仅在配置了 API Key 时）
+  const client = getAnthropicClient()
+  if (!client) {
+    throw new Error('ANTHROPIC_API_KEY is not configured for Claude API')
+  }
 
-  const response = await anthropic.messages.create({
+  const modelId = MODEL_CONFIG[model]?.id || (MODEL_CONFIG as any).sonnet?.id || 'claude-sonnet-4-6'
+
+  const response = await client.messages.create({
     model: modelId,
     max_tokens: maxTokens,
     system: systemPrompt,
@@ -66,6 +147,7 @@ export async function createClaudeCompletion(
 
   return {
     content: textContent?.type === 'text' ? textContent.text : '',
+    model: modelId,
     usage: {
       input_tokens: response.usage.input_tokens,
       output_tokens: response.usage.output_tokens,

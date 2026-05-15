@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { redis } from '@/lib/redis'
+import { requireAdmin } from '@/lib/admin-auth'
 
-// 空数据回退（数据库未配置时使用）
+const CACHE_TTL = 60 // 1 minute for dashboard
+
 function getEmptyStats() {
   return {
     overview: {
@@ -21,14 +24,20 @@ function getEmptyStats() {
   }
 }
 
-// GET /api/admin/dashboard - 获取仪表盘统计数据
+// GET /api/admin/dashboard - 获取仪表盘统计数�?
 export async function GET(request: NextRequest) {
   try {
-    // 动态导入数据库，避免在无数据库环境中崩溃
+    await requireAdmin(request)
     const { db } = await import('@/lib/db')
     
     const searchParams = request.nextUrl.searchParams
     const days = parseInt(searchParams.get('days') || '7')
+    const cacheKey = `api:admin:dashboard:${days}`
+
+    const cached = await redis.get(cacheKey)
+    if (cached) {
+      return NextResponse.json(typeof cached === 'string' ? JSON.parse(cached) : cached)
+    }
 
     const startDate = new Date()
     startDate.setDate(startDate.getDate() - days)
@@ -53,14 +62,16 @@ export async function GET(request: NextRequest) {
       db.article.findMany({
         take: 5,
         orderBy: { created_at: 'desc' },
-        include: {
+        select: {
+          id: true, title: true, status: true, created_at: true,
           game: { select: { name: true } },
         },
       }),
       db.gameCode.findMany({
         take: 5,
         orderBy: { created_at: 'desc' },
-        include: {
+        select: {
+          id: true, code: true, status: true, created_at: true,
           game: { select: { name: true } },
         },
       }),
@@ -68,12 +79,8 @@ export async function GET(request: NextRequest) {
         take: 10,
         orderBy: { guide_count: 'desc' },
         select: {
-          id: true,
-          name: true,
-          slug: true,
-          cover_url: true,
-          guide_count: true,
-          code_count: true,
+          id: true, name: true, slug: true,
+          cover_url: true, guide_count: true, code_count: true,
         },
       }),
     ])
@@ -111,7 +118,10 @@ export async function GET(request: NextRequest) {
       })),
     }
 
-    return NextResponse.json({ success: true, data: stats })
+    const responseData = { success: true, data: stats }
+    await redis.set(cacheKey, JSON.stringify(responseData), { ex: CACHE_TTL })
+
+    return NextResponse.json(responseData)
   } catch (error) {
     console.error('Dashboard API error (DB may not be configured):', error)
     // 数据库不可用时返回空数据而非错误

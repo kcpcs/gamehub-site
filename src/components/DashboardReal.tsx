@@ -104,10 +104,12 @@ export function DashboardReal() {
 
   if (loading && !stats) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-500" />
-          <p className="text-gray-500 dark:text-gray-400">Loading...</p>
+          <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+            <RefreshCw className="w-8 h-8 animate-spin text-white" />
+          </div>
+          <p className="text-slate-500 dark:text-slate-400 text-lg font-medium">加载中...</p>
         </div>
       </div>
     )
@@ -115,15 +117,17 @@ export function DashboardReal() {
 
   if (error && !stats) {
     return (
-      <div className="flex items-center justify-center h-64">
+      <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <AlertCircle className="w-8 h-8 mx-auto mb-4 text-red-500" />
-          <p className="text-red-500 mb-4">{error}</p>
+          <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center shadow-lg shadow-red-500/30">
+            <AlertCircle className="w-8 h-8 text-white" />
+          </div>
+          <p className="text-red-500 dark:text-red-400 text-lg font-medium mb-6">{error}</p>
           <button
             onClick={fetchStats}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            className="px-6 py-2.5 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-xl hover:from-indigo-600 hover:to-purple-600 transition-all shadow-lg hover:shadow-xl"
           >
-            Retry
+            重试
           </button>
         </div>
       </div>
@@ -135,71 +139,71 @@ export function DashboardReal() {
   const { overview, recent_activity, top_games } = stats
 
   const statCards = [
-    { label: 'Total Games', value: overview.total_games, change: '+5', icon: FileText, color: 'blue' },
-    { label: 'Guides', value: overview.total_articles, change: '+12', icon: FileText, color: 'green' },
-    { label: 'Codes', value: overview.total_codes, change: '+8', icon: Gift, color: 'purple' },
-    { label: 'Users', value: overview.total_users, change: '+25', icon: Users, color: 'orange' },
+    { label: '游戏总数', value: overview.total_games, change: '+5', icon: FileText, color: 'blue' },
+    { label: '攻略总数', value: overview.total_articles, change: '+12', icon: FileText, color: 'green' },
+    { label: '兑换码总数', value: overview.total_codes, change: '+8', icon: Gift, color: 'purple' },
+    { label: '用户总数', value: overview.total_users, change: '+25', icon: Users, color: 'orange' },
   ]
 
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Welcome back! Here's your site overview.
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-white">仪表板</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">
+            欢迎回来！这是您的网站概览。
           </p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <select
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
-            className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-400 transition-all"
           >
-            <option value="7">Last 7 days</option>
-            <option value="30">Last 30 days</option>
-            <option value="90">Last 90 days</option>
+            <option value="7">最近 7 天</option>
+            <option value="30">最近 30 天</option>
+            <option value="90">最近 90 天</option>
           </select>
           <button
             onClick={fetchStats}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
+            刷新
           </button>
           {lastUpdated && (
-            <span className="text-xs text-gray-400">
-              Updated {lastUpdated.toLocaleTimeString('en-US')}
+            <span className="text-xs text-slate-400 hidden sm:block">
+              更新于 {lastUpdated.toLocaleTimeString('zh-CN')}
             </span>
           )}
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         {statCards.map((stat, index) => {
           const Icon = stat.icon
           const colorClasses: Record<string, string> = {
-            blue: 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400',
-            green: 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400',
-            purple: 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400',
-            orange: 'bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400',
+            blue: 'from-blue-500 to-cyan-500 bg-gradient-to-br text-white shadow-blue-500/25',
+            green: 'from-emerald-500 to-teal-500 bg-gradient-to-br text-white shadow-emerald-500/25',
+            purple: 'from-purple-500 to-pink-500 bg-gradient-to-br text-white shadow-purple-500/25',
+            orange: 'from-orange-500 to-amber-500 bg-gradient-to-br text-white shadow-orange-500/25',
           }
           return (
-            <div key={index} className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
-              <div className="flex items-center justify-between">
+            <div key={index} className="group bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-100 dark:border-slate-700 shadow-lg shadow-slate-200/50 dark:shadow-slate-900/30 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+              <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{stat.label}</p>
-                  <p className="text-3xl font-bold text-gray-900 dark:text-white">{stat.value.toLocaleString()}</p>
-                  <div className="flex items-center gap-1 mt-2 text-sm text-green-500">
+                  <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">{stat.label}</p>
+                  <p className="text-4xl font-bold text-slate-800 dark:text-white">{stat.value.toLocaleString()}</p>
+                  <div className="flex items-center gap-1.5 mt-3 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
                     <ArrowUpRight size={16} />
                     <span>{stat.change}%</span>
                   </div>
                 </div>
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${colorClasses[stat.color]}`}>
-                  <Icon size={24} />
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${colorClasses[stat.color]} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                  <Icon size={28} />
                 </div>
               </div>
             </div>
@@ -209,41 +213,41 @@ export function DashboardReal() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
-          <div className="flex items-center gap-2 mb-2">
-            <CheckCircle className="w-4 h-4 text-green-500" />
-            <span className="text-sm font-medium text-green-700 dark:text-green-400">Published Guides</span>
+        <div className="group bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 rounded-2xl p-5 border border-emerald-100 dark:border-emerald-800/50 hover:shadow-lg transition-all">
+          <div className="flex items-center gap-2 mb-3">
+            <CheckCircle className="w-5 h-5 text-emerald-500" />
+            <span className="text-sm font-bold text-emerald-700 dark:text-emerald-300">已发布攻略</span>
           </div>
-          <p className="text-2xl font-bold text-green-600 dark:text-green-400">{overview.published_articles}</p>
+          <p className="text-3xl font-bold text-emerald-700 dark:text-emerald-300">{overview.published_articles}</p>
         </div>
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-4 border border-yellow-200 dark:border-yellow-800">
-          <div className="flex items-center gap-2 mb-2">
-            <AlertCircle className="w-4 h-4 text-yellow-500" />
-            <span className="text-sm font-medium text-yellow-700 dark:text-yellow-400">Drafts</span>
+        <div className="group bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/30 dark:to-yellow-900/30 rounded-2xl p-5 border border-amber-100 dark:border-amber-800/50 hover:shadow-lg transition-all">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertCircle className="w-5 h-5 text-amber-500" />
+            <span className="text-sm font-bold text-amber-700 dark:text-amber-300">草稿攻略</span>
           </div>
-          <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{overview.draft_articles}</p>
+          <p className="text-3xl font-bold text-amber-700 dark:text-amber-300">{overview.draft_articles}</p>
         </div>
-        <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 border border-green-200 dark:border-green-800">
-          <div className="flex items-center gap-2 mb-2">
-            <CheckCircle className="w-4 h-4 text-green-500" />
-            <span className="text-sm font-medium text-green-700 dark:text-green-400">Active Codes</span>
+        <div className="group bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-2xl p-5 border border-green-100 dark:border-green-800/50 hover:shadow-lg transition-all">
+          <div className="flex items-center gap-2 mb-3">
+            <CheckCircle className="w-5 h-5 text-green-500" />
+            <span className="text-sm font-bold text-green-700 dark:text-green-300">有效兑换码</span>
           </div>
-          <p className="text-2xl font-bold text-green-600 dark:text-green-400">{overview.active_codes}</p>
+          <p className="text-3xl font-bold text-green-700 dark:text-green-300">{overview.active_codes}</p>
         </div>
-        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center gap-2 mb-2">
-            <AlertCircle className="w-4 h-4 text-gray-400" />
-            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Expired Codes</span>
+        <div className="group bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 rounded-2xl p-5 border border-slate-200 dark:border-slate-600 hover:shadow-lg transition-all">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertCircle className="w-5 h-5 text-slate-400" />
+            <span className="text-sm font-bold text-slate-600 dark:text-slate-300">过期兑换码</span>
           </div>
-          <p className="text-2xl font-bold text-gray-500 dark:text-gray-400">{overview.expired_codes}</p>
+          <p className="text-3xl font-bold text-slate-500 dark:text-slate-400">{overview.expired_codes}</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Activity */}
-        <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Activity</h3>
+        <div className="lg:col-span-2 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-xl shadow-slate-200/50 dark:shadow-slate-900/30">
+          <div className="p-6 border-b border-slate-100 dark:border-slate-700">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-white">最近活动</h3>
           </div>
           <div className="divide-y divide-gray-200 dark:divide-gray-700 max-h-96 overflow-y-auto">
             {recent_activity.articles.length === 0 && recent_activity.codes.length === 0 ? (

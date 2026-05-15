@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
 
 const db = new PrismaClient();
 
@@ -22,6 +23,26 @@ async function main() {
     },
   });
   console.log('✅ Created test user:', testUser.email);
+
+  // Create default admin user
+  const existingAdmin = await db.adminUser.findUnique({
+    where: { email: 'admin@gamehub.ai' }
+  });
+  
+  if (!existingAdmin) {
+    const hashedPassword = await bcrypt.hash('admin123', 10);
+    const admin = await db.adminUser.create({
+      data: {
+        email: 'admin@gamehub.ai',
+        username: 'admin',
+        password_hash: hashedPassword,
+        role: 'super_admin',
+      },
+    });
+    console.log('✅ Created default admin user:', admin.email);
+  } else {
+    console.log('✅ Admin user already exists:', existingAdmin.email);
+  }
 
   // Create comprehensive game data - 15 games with rich content
   const games = await Promise.all([

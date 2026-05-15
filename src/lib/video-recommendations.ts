@@ -2,6 +2,9 @@
 // Uses view history and preferences to recommend relevant videos
 
 import { db } from './db'
+import { redis } from './redis'
+
+const PREFERENCE_CACHE_TTL = 300
 
 interface VideoRecommendation {
   id: string
@@ -32,6 +35,13 @@ interface UserPreferences {
  */
 export async function getUserPreferences(userId: string): Promise<UserPreferences> {
   try {
+    const cacheKey = `user:prefs:video:${userId}`
+    const cached = await redis.get(cacheKey)
+    if (cached) {
+      const parsed = typeof cached === 'string' ? JSON.parse(cached) : cached
+      return parsed as UserPreferences
+    }
+
     const viewHistory = await db.videoViewHistory.findMany({
       where: { user_id: userId },
       include: { video: true },
@@ -65,11 +75,15 @@ export async function getUserPreferences(userId: string): Promise<UserPreference
       preferredPlatforms.add(fav.video.platform)
     })
 
-    return {
+    const preferences: UserPreferences = {
       preferred_games: Array.from(preferredGames),
       preferred_video_types: Array.from(preferredTypes),
       preferred_platforms: Array.from(preferredPlatforms)
     }
+
+    await redis.set(cacheKey, JSON.stringify(preferences), { ex: PREFERENCE_CACHE_TTL })
+
+    return preferences
   } catch (error) {
     console.error('[getUserPreferences]', error)
     return {

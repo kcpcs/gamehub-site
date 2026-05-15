@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Plus, Search, Edit2, Trash2, Eye, RefreshCw, AlertCircle, Check, X as XIcon, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useLanguage } from '@/lib/language-context'
 
 interface Game {
   id: string
@@ -26,6 +27,7 @@ interface Pagination {
 }
 
 export function GameManagementReal() {
+  const { t } = useLanguage()
   const [games, setGames] = useState<Game[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -267,13 +269,13 @@ export function GameManagementReal() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
-                        <button onClick={() => handleView(game)} className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors" title="View">
+                        <button onClick={() => handleView(game)} className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors" title={t('view')}>
                           <Eye size={18} />
                         </button>
-                        <button onClick={() => handleEdit(game)} className="p-2 text-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 rounded-lg transition-colors" title="Edit">
+                        <button onClick={() => handleEdit(game)} className="p-2 text-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 rounded-lg transition-colors" title={t('edit')}>
                           <Edit2 size={18} />
                         </button>
-                        <button onClick={() => setDeleteConfirm(game.id)} className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors" title="Delete">
+                        <button onClick={() => setDeleteConfirm(game.id)} className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors" title={t('delete')}>
                           <Trash2 size={18} />
                         </button>
                       </div>

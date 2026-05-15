@@ -1,31 +1,33 @@
 import { useState } from 'react'
 import { TrendingUp, Users, FileText, Gift, ArrowUpRight, ArrowDownRight } from 'lucide-react'
-
-const stats = [
-  { label: 'Total Users', value: 12580, change: '+12.5%', positive: true, icon: Users },
-  { label: 'Guides', value: 289, change: '+8.3%', positive: true, icon: FileText },
-  { label: 'Redeem Codes', value: 156, change: '+5.2%', positive: true, icon: Gift },
-  { label: 'Today\'s Visits', value: 3420, change: '-2.1%', positive: false, icon: TrendingUp },
-]
-
-const recentActivity = [
-  { id: 1, type: 'Guide', title: 'Genshin Impact Beginner Guide', author: 'Player Xiao', time: '5 minutes ago', status: 'published' },
-  { id: 2, type: 'Comment', title: 'Great guide!', author: 'GameMaster', time: '12 minutes ago', status: 'approved' },
-  { id: 3, type: 'Code', title: 'GENSHINGIFT', author: 'Admin', time: '30 minutes ago', status: 'active' },
-  { id: 4, type: 'Guide', title: 'Elden Ring Boss Guide', author: 'Hardcore Player', time: '1 hour ago', status: 'pending' },
-  { id: 5, type: 'User', title: 'New User Registration', author: 'NewUser123', time: '2 hours ago', status: 'registered' },
-]
-
-const topGames = [
-  { rank: 1, name: 'Genshin Impact', guides: 156, visits: 125800, trend: '+15%' },
-  { rank: 2, name: 'Elden Ring', guides: 89, visits: 89500, trend: '+8%' },
-  { rank: 3, name: 'Valorant', guides: 67, visits: 76200, trend: '+12%' },
-  { rank: 4, name: 'Zelda: Breath of the Wild', guides: 54, visits: 65800, trend: '-3%' },
-  { rank: 5, name: 'Baldur\'s Gate 3', guides: 43, visits: 45200, trend: '+25%' },
-]
+import { useLanguage } from '@/lib/language-context'
 
 export function Dashboard() {
+  const { t } = useLanguage()
   const [timeRange, setTimeRange] = useState('7days')
+
+  const stats = [
+    { label: t('total_users'), value: 12580, change: '+12.5%', positive: true, icon: Users },
+    { label: t('guides'), value: 289, change: '+8.3%', positive: true, icon: FileText },
+    { label: t('redeem_codes'), value: 156, change: '+5.2%', positive: true, icon: Gift },
+    { label: t('todays_visits'), value: 3420, change: '-2.1%', positive: false, icon: TrendingUp },
+  ]
+
+  const recentActivity = [
+    { id: 1, type: 'Guide', title: 'Genshin Impact Beginner Guide', author: 'Player Xiao', time: '5 minutes ago', status: 'published' },
+    { id: 2, type: 'Comment', title: 'Great guide!', author: 'GameMaster', time: '12 minutes ago', status: 'approved' },
+    { id: 3, type: 'Code', title: 'GENSHINGIFT', author: 'Admin', time: '30 minutes ago', status: 'active' },
+    { id: 4, type: 'Guide', title: 'Elden Ring Boss Guide', author: 'Hardcore Player', time: '1 hour ago', status: 'pending' },
+    { id: 5, type: 'User', title: 'New User Registration', author: 'NewUser123', time: '2 hours ago', status: 'registered' },
+  ]
+
+  const topGames = [
+    { rank: 1, name: 'Genshin Impact', guides: 156, visits: 125800, trend: '+15%' },
+    { rank: 2, name: 'Elden Ring', guides: 89, visits: 89500, trend: '+8%' },
+    { rank: 3, name: 'Valorant', guides: 67, visits: 76200, trend: '+12%' },
+    { rank: 4, name: 'Zelda: Breath of the Wild', guides: 54, visits: 65800, trend: '-3%' },
+    { rank: 5, name: 'Baldur\'s Gate 3', guides: 43, visits: 45200, trend: '+25%' },
+  ]
 
   return (
     <div className="space-y-8">
@@ -58,9 +60,9 @@ export function Dashboard() {
         <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
           <div className="p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Activity</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('recent_activity')}</h3>
               <button className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300">
-                View All
+                {t('view_all')}
               </button>
             </div>
           </div>
@@ -89,10 +91,10 @@ export function Dashboard() {
                       ? 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-600 dark:text-yellow-400'
                       : 'bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
                   }`}>
-                    {activity.status === 'published' ? 'Published' :
-                     activity.status === 'approved' ? 'Approved' :
-                     activity.status === 'active' ? 'Active' :
-                     activity.status === 'pending' ? 'Pending' : 'Registered'}
+                    {activity.status === 'published' ? t('status_published') :
+                     activity.status === 'approved' ? t('status_approved') :
+                     activity.status === 'active' ? t('status_active') :
+                     activity.status === 'pending' ? t('status_pending') : t('status_registered')}
                   </span>
                 </div>
               </div>
@@ -104,15 +106,15 @@ export function Dashboard() {
         <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
           <div className="p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Top Games</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t('top_games')}</h3>
               <select 
                 value={timeRange}
                 onChange={(e) => setTimeRange(e.target.value)}
                 className="text-sm bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-1.5"
               >
-                <option value="7days">Last 7 Days</option>
-                <option value="30days">Last 30 Days</option>
-                <option value="90days">Last 90 Days</option>
+                <option value="7days">{t('last_7_days')}</option>
+                <option value="30days">{t('last_30_days')}</option>
+                <option value="90days">{t('last_90_days')}</option>
               </select>
             </div>
           </div>

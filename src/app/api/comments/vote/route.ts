@@ -6,7 +6,7 @@ import type { ApiResponse } from '@/types'
 // POST /api/comments/vote - 评论投票
 export async function POST(req: NextRequest) {
   try {
-    const session = getSession()
+    const session = await getSession()
     if (!session?.user?.id) {
       return NextResponse.json({
         success: false,

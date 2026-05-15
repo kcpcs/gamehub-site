@@ -150,6 +150,7 @@ export default function CreatorStudioPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null)
   const [hasChanges, setHasChanges] = useState(false)
+  const [filterStatus, setFilterStatus] = useState<string>('All')
 
   const navItems = [
     { id: 'dashboard' as const, icon: LayoutDashboard, label: 'Dashboard' },
@@ -307,7 +308,7 @@ export default function CreatorStudioPage() {
   return (
     <div className="min-h-screen">
       <div className="grid grid-cols-1 lg:grid-cols-[280px,1fr]">
-        <div className="lg:fixed lg:left-0 lg:top-0 lg:h-screen lg:w-70 border-r border-[var(--border)] bg-[var(--bg-base)]">
+        <div className="lg:fixed lg:left-0 lg:top-16 lg:h-[calc(100vh-64px)] lg:w-[280px] border-r border-[var(--border)] bg-[var(--bg-base)] z-10 overflow-y-auto">
           <div className="p-6 border-b border-[var(--border)]">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--accent)] to-purple-600 flex items-center justify-center">
@@ -315,49 +316,70 @@ export default function CreatorStudioPage() {
               </div>
               <div>
                 <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                  Creator Studio
+                  创作者工作室
                 </h1>
                 <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-                  Welcome back, Creator
+                  欢迎回来，创作者
                 </p>
               </div>
             </div>
           </div>
 
           <nav className="p-4 space-y-2">
-            {navItems.map(item => (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                  activeTab === item.id 
-                    ? 'bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/30' 
-                    : 'hover:bg-[var(--bg-surface)] text-[var(--text-secondary)]'
-                }`}
-              >
-                <item.icon className="w-5 h-5" />
-                <span className="text-sm font-medium">{item.label}</span>
-              </button>
-            ))}
+            {navItems.map(item => {
+              if (item.id === 'create') {
+                return (
+                  <div key={item.id} className="space-y-1">
+                    <button
+                      onClick={() => setActiveTab(item.id)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                        activeTab === item.id 
+                          ? 'bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/30' 
+                          : 'hover:bg-[var(--bg-surface)] text-[var(--text-secondary)]'
+                      }`}
+                    >
+                      <item.icon className="w-5 h-5" />
+                      <span className="text-sm font-medium">创建内容</span>
+                    </button>
+                  </div>
+                )
+              }
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => setActiveTab(item.id)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                    activeTab === item.id 
+                      ? 'bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/30' 
+                      : 'hover:bg-[var(--bg-surface)] text-[var(--text-secondary)]'
+                  }`}
+                >
+                  <item.icon className="w-5 h-5" />
+                  <span className="text-sm font-medium">
+                    {item.id === 'dashboard' ? '控制面板' : item.id === 'articles' ? '文章管理' : item.id === 'settings' ? '设置' : item.label}
+                  </span>
+                </button>
+              )
+            })}
           </nav>
 
           <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-[var(--border)]">
             <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-[var(--bg-surface)] text-[var(--text-secondary)] transition-all group">
               <LogOut className="w-5 h-5 group-hover:text-red-400 transition-colors" />
-              <span className="text-sm font-medium">Logout</span>
+              <span className="text-sm font-medium">登出</span>
             </button>
           </div>
         </div>
 
-        <div className="lg:ml-70 p-8">
+        <div className="lg:ml-[280px] lg:pt-16 p-8">
           {activeTab === 'dashboard' && (
             <>
               <header className="mb-8">
                 <h1 className="text-3xl font-bold" style={{ color: 'var(--text-primary)' }}>
-                  Dashboard
+                  控制面板
                 </h1>
                 <p className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>
-                  Overview of your content performance
+                  查看您的内容表现概览
                 </p>
               </header>
 
@@ -539,13 +561,14 @@ export default function CreatorStudioPage() {
                       {['All', 'Published', 'Draft', 'Pending'].map(status => (
                         <button
                           key={status}
+                          onClick={() => setFilterStatus(status)}
                           className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                            status === 'All'
+                            filterStatus === status
                               ? 'bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/30'
                               : 'hover:bg-[var(--bg-overlay)] text-[var(--text-secondary)]'
                           }`}
                         >
-                          {status}
+                          {status === 'All' ? '所有' : status === 'Published' ? '已发表' : status === 'Draft' ? '草稿' : '待审核'}
                         </button>
                       ))}
                     </div>
@@ -584,7 +607,9 @@ export default function CreatorStudioPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[var(--border)]">
-                      {mockArticles.map(article => (
+                      {mockArticles
+                        .filter(article => filterStatus === 'All' || article.status === filterStatus.toLowerCase())
+                        .map(article => (
                         <tr key={article.id} className="hover:bg-[var(--bg-overlay)] transition-colors">
                           <td className="px-6 py-4">
                             <span className="font-medium" style={{ color: 'var(--text-primary)' }}>
@@ -616,13 +641,26 @@ export default function CreatorStudioPage() {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
-                              <button className="p-2.5 rounded-xl hover:bg-[var(--bg-raised)] text-[var(--text-secondary)] transition-all group">
+                              <button 
+                                onClick={() => setToast({ type: 'info', message: `Viewing article: ${article.title}` })}
+                                className="p-2.5 rounded-xl hover:bg-[var(--bg-raised)] text-[var(--text-secondary)] transition-all group cursor-pointer"
+                              >
                                 <Eye className="w-4 h-4 group-hover:text-[var(--accent)]" />
                               </button>
-                              <button className="p-2.5 rounded-xl hover:bg-[var(--bg-raised)] text-[var(--text-secondary)] transition-all group">
+                              <button 
+                                onClick={() => setToast({ type: 'info', message: `Editing article: ${article.title}` })}
+                                className="p-2.5 rounded-xl hover:bg-[var(--bg-raised)] text-[var(--text-secondary)] transition-all group cursor-pointer"
+                              >
                                 <Edit className="w-4 h-4 group-hover:text-[var(--accent)]" />
                               </button>
-                              <button className="p-2.5 rounded-xl hover:bg-red-500/20 text-[var(--text-secondary)] transition-all group">
+                              <button 
+                                onClick={() => {
+                                  if (confirm(`Are you sure you want to delete "${article.title}"?`)) {
+                                    setToast({ type: 'success', message: `Article deleted: ${article.title}` })
+                                  }
+                                }}
+                                className="p-2.5 rounded-xl hover:bg-red-500/20 text-[var(--text-secondary)] transition-all group cursor-pointer"
+                              >
                                 <Trash2 className="w-4 h-4 group-hover:text-red-400" />
                               </button>
                             </div>

@@ -7,21 +7,15 @@ const globalForPrisma = globalThis as unknown as {
 
 function getDb(): PrismaClient {
   if (!globalForPrisma.prisma) {
-    try {
-      const isRemote = (process.env.DATABASE_URL || '').startsWith('libsql://');
-      const adapter = new PrismaLibSql({
-        url: process.env.DATABASE_URL || 'file:./dev.db',
-        authToken: isRemote ? process.env.TURSO_AUTH_TOKEN : undefined,
-      });
-      globalForPrisma.prisma = new PrismaClient({
-        adapter,
-        log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-      });
-    } catch {
-      globalForPrisma.prisma = new PrismaClient({
-        log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-      });
-    }
+    const isRemote = (process.env.DATABASE_URL || '').startsWith('libsql://');
+    const adapter = new PrismaLibSql({
+      url: process.env.DATABASE_URL || 'file:./dev.db',
+      authToken: isRemote ? process.env.TURSO_AUTH_TOKEN : undefined,
+    });
+    globalForPrisma.prisma = new PrismaClient({
+      adapter,
+      log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    });
   }
   return globalForPrisma.prisma;
 }

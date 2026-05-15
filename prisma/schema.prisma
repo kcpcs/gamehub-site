@@ -16,10 +16,10 @@ model Game {
   igdb_id      Int?      @unique
   steam_appid  Int?      @unique
   cover_url    String
-  screenshots  Json      @default("[]")
-  platforms    Json      @default("[]")
-  genres       Json      @default("[]")
-  tags         Json      @default("[]")
+  screenshots  String    @default("[]")
+  platforms    String
+  genres       String
+  tags         String
   developer    String?
   publisher    String?
   release_date DateTime?
@@ -73,7 +73,7 @@ model Video {
   published_at  DateTime?
 
   video_type VideoType @default(GAMEPLAY)
-  video_tags Json      @default("[]")
+  video_tags String    @default("[]")
 
   is_live     Boolean @default(false)
   is_featured Boolean @default(false)
@@ -125,7 +125,7 @@ model Article {
   article_type ArticleType
   status       ArticleStatus @default(draft)
   source_type  SourceType    @default(ai)
-  source_urls  Json          @default("[]")
+  source_urls  String      @default("[]")
 
   game_id String?
   game    Game?   @relation(fields: [game_id], references: [id])
@@ -142,10 +142,10 @@ model Article {
 
   seo_title       String
   seo_description String
-  seo_keywords    Json    @default("[]")
+  seo_keywords    String    @default("[]")
   canonical       String?
 
-  affiliate_links Json   @default("[]")
+  affiliate_links String   @default("[]")
   quality_score   Float?
   view_count      Int    @default(0)
   share_count     Int    @default(0)
@@ -205,7 +205,7 @@ model User {
   pending_cents   Int            @default(0)
   total_views     Int            @default(0)
   article_count   Int            @default(0)
-  preferred_games Json           @default("[]")
+  preferred_games String           @default("[]")
 
   articles           Article[]
   point_transactions PointTransaction[]
@@ -368,6 +368,52 @@ model AffiliateClick {
 
   @@index([partner])
   @@index([created_at])
+}
+
+model PageView {
+  id         String   @id @default(cuid())
+  path       String
+  referrer   String?
+  session_id String?
+  user_id    String?
+  ip_hash    String?
+  user_agent String?
+  duration   Int      @default(0)
+  created_at DateTime @default(now())
+
+  @@index([path])
+  @@index([session_id])
+  @@index([user_id])
+  @@index([created_at])
+}
+
+model DailyMetric {
+  id          String   @id @default(cuid())
+  date        DateTime
+  metric_type String
+  metric_key  String
+  value       Float    @default(0)
+  created_at  DateTime @default(now())
+
+  @@unique([date, metric_type, metric_key])
+  @@index([date])
+  @@index([metric_type])
+  @@index([metric_key])
+}
+
+model UserSegment {
+  id           String   @id @default(cuid())
+  user_id      String
+  segment_type String
+  segment_name String
+  score        Float    @default(0)
+  updated_at   DateTime @updatedAt
+  created_at   DateTime @default(now())
+
+  @@unique([user_id, segment_type])
+  @@index([segment_type])
+  @@index([segment_name])
+  @@index([user_id])
 }
 
 enum PointTransactionType {
@@ -549,8 +595,8 @@ model AIPlayer {
   occupation          String?
   bio                 String?
   region              String?
-  personality         Json           @default("{}")
-  interests           Json           @default("[]")
+  personality         String        @default("{}")
+  interests           String        @default("[]")
   activity_level      Float          @default(0.5)
   status              AIPlayerStatus @default(inactive)
   created_at          DateTime       @default(now())
@@ -559,7 +605,7 @@ model AIPlayer {
   joined_at_simulated DateTime?
   total_posts         Int            @default(0)
   total_comments      Int            @default(0)
-  follower_ids        Json           @default("[]")
+  follower_ids        String        @default("[]")
 
   behavior_config       AIBehaviorConfig?
   activity_logs         AIActivityLog[]
@@ -637,7 +683,7 @@ model AIContentReviewQueue {
   target_id           String?
   generated_content   String
   confidence_score    Float
-  quality_check_result Json                @default("{}")
+  quality_check_result String                @default("{}")
   status              ReviewStatus         @default(pending)
   reviewed_by         String?
   reviewed_at         DateTime?
@@ -731,7 +777,7 @@ model AuditLog {
   action        AuditAction
   resource_type String
   resource_id   String?
-  details       Json        @default("{}")
+  details       String        @default("{}")
   ip_address    String?
   user_agent    String?
   success       Boolean     @default(true)
@@ -808,7 +854,7 @@ model CreatorApplication {
   channel_url      String
   channel_name     String
   subscriber_count Int                        @default(0)
-  content_type     Json                       @default("[]")
+  content_type     String                       @default("[]")
   experience       String?
   status           CreatorApplicationStatus   @default(pending)
   rejection_reason String?
@@ -865,7 +911,7 @@ model Subscriber {
   email               String   @unique
   status              String   @default("active") // active | unsubscribed
   games               String? // JSON array of game slugs (legacy)
-  game_subscriptions  Json     @default("[]") // JSON array of subscribed game IDs
+  game_subscriptions  String     @default("[]") // JSON array of subscribed game IDs
   token               String?
   discord_webhook_url String?
   created_at          DateTime @default(now())

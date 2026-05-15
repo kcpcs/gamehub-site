@@ -2,7 +2,9 @@ const { PrismaClient } = require('@prisma/client')
 const { PrismaLibSql } = require('@prisma/adapter-libsql')
 require('dotenv').config()
 
-const adapter = new PrismaLibSql({ url: process.env.DATABASE_URL || 'file:./dev.db' })
+const adapter = new PrismaLibSql({
+  url: process.env.DATABASE_URL || 'file:./dev.db',
+})
 const db = new PrismaClient({ adapter })
 
 const PLAYER_PRESETS = {

@@ -1,25 +1,61 @@
 // Mock Redis client for development without Upstash account
+const MAX_CACHE_SIZE = 10000
+const CLEANUP_INTERVAL = 60000
+
 class MockRedis {
   private cache: Map<string, { value: string; expiresAt: number | null }> = new Map()
+  private accessOrder: string[] = []
+  private cleanupTimer: ReturnType<typeof setInterval> | null = null
+
+  constructor() {
+    this.cleanupTimer = setInterval(() => this.evictExpired(), CLEANUP_INTERVAL)
+    if (typeof beforeExit === 'function') {
+      beforeExit(() => this.destroy())
+    }
+  }
+
+  destroy() {
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer)
+      this.cleanupTimer = null
+    }
+  }
+
+  private evictExpired() {
+    const now = Date.now()
+    for (const [key, item] of this.cache) {
+      if (item.expiresAt && now > item.expiresAt) {
+        this.cache.delete(key)
+      }
+    }
+  }
+
+  private enforceSizeLimit() {
+    while (this.accessOrder.length > MAX_CACHE_SIZE) {
+      const oldest = this.accessOrder.shift()
+      if (oldest) this.cache.delete(oldest)
+    }
+  }
+
+  private touchKey(key: string) {
+    const idx = this.accessOrder.indexOf(key)
+    if (idx > -1) this.accessOrder.splice(idx, 1)
+    this.accessOrder.push(key)
+    this.enforceSizeLimit()
+  }
 
   async ping() {
     return 'PONG'
   }
 
   async set(key: string, value: string, options?: { ex?: number; px?: number; nx?: boolean; xx?: boolean }) {
-    if (options?.nx && this.cache.has(key)) {
-      return null
-    }
-    if (options?.xx && !this.cache.has(key)) {
-      return null
-    }
+    if (options?.nx && this.cache.has(key)) return null
+    if (options?.xx && !this.cache.has(key)) return null
     let expiresAt: number | null = null
-    if (options?.ex) {
-      expiresAt = Date.now() + options.ex * 1000
-    } else if (options?.px) {
-      expiresAt = Date.now() + options.px
-    }
+    if (options?.ex) expiresAt = Date.now() + options.ex * 1000
+    else if (options?.px) expiresAt = Date.now() + options.px
     this.cache.set(key, { value, expiresAt })
+    this.touchKey(key)
     return 'OK'
   }
 
@@ -30,6 +66,7 @@ class MockRedis {
       this.cache.delete(key)
       return null
     }
+    this.touchKey(key)
     return item.value
   }
 
@@ -65,8 +102,11 @@ class MockRedis {
     const item = this.cache.get(key)
     if (!item) return -2
     if (!item.expiresAt) return -1
-    const ttl = Math.max(-1, Math.ceil((item.expiresAt - Date.now()) / 1000))
-    return ttl
+    return Math.max(-1, Math.ceil((item.expiresAt - Date.now()) / 1000))
+  }
+
+  get size() {
+    return this.cache.size
   }
 }
 

@@ -31,7 +31,7 @@ export function GameGuideList({ gameSlug }: GameGuideListProps) {
         if (response.ok) {
           const data = await response.json()
           if (data.success) {
-            setGuides(data.data)
+            setGuides(data.data.articles || [])
           }
         }
       } catch (error) {

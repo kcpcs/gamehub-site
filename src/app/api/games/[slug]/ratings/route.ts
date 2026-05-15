@@ -100,7 +100,7 @@ export async function POST(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const session = getSession()
+    const session = await getSession()
     if (!session?.user?.id) {
       return NextResponse.json({
         success: false,
@@ -201,7 +201,7 @@ export async function DELETE(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const session = getSession()
+    const session = await getSession()
     if (!session?.user?.id) {
       return NextResponse.json({
         success: false,

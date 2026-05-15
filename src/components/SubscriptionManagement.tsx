@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Mail, Trash2, Send, Search, Filter, Users } from 'lucide-react'
+import { useLanguage } from '@/lib/language-context'
 
 interface Subscriber {
   id: string
@@ -18,6 +19,7 @@ interface ApiResponse<T> {
 }
 
 export function SubscriptionManagement() {
+  const { t } = useLanguage()
   const [subscribers, setSubscribers] = useState<Subscriber[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -234,7 +236,7 @@ export function SubscriptionManagement() {
                         onClick={() => { setSelectedSubscriber(subscriber); setNotificationModalOpen(true) }}
                         className="p-2 rounded-lg transition-colors hover:bg-white/5"
                         style={{ color: 'var(--text-secondary)' }}
-                        title="Send notification"
+                        title={t('send_notification')}
                       >
                         <Send className="w-4 h-4" />
                       </button>
@@ -242,7 +244,7 @@ export function SubscriptionManagement() {
                         onClick={() => handleDelete(subscriber.id)}
                         className="p-2 rounded-lg transition-colors hover:bg-red-500/20"
                         style={{ color: 'var(--danger)' }}
-                        title="Delete"
+                        title={t('delete')}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

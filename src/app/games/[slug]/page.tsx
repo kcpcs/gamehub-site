@@ -113,8 +113,8 @@ async function getGame(slug: string) {
       guide_count: game.guide_count || 0,
       code_count: game.code_count || 0,
       has_tier_list: game.has_tier_list || false,
-      created_at: game.created_at?.toISOString() || new Date().toISOString(),
-      updated_at: game.updated_at?.toISOString() || new Date().toISOString(),
+      created_at: game.created_at?.toISOString() || '',
+      updated_at: game.updated_at?.toISOString() || '',
     }
   } catch (error) {
     console.error('Error fetching game:', error)

@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireAdmin } from '@/lib/admin-auth'
 
-// GET /api/admin/comments - 获取所有评论 (with pagination)
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
     const search = searchParams.get('search') || ''
-    const status = searchParams.get('status') || 'all' // all, pending, approved, spam
 
     const skip = (page - 1) * limit
 
@@ -18,15 +17,7 @@ export async function GET(request: NextRequest) {
       where.OR = [
         { content: { contains: search } },
         { author_username: { contains: search } },
-        { article_slug: { contains: search } },
       ]
-    }
-
-    // We don't have a status field in Comment model, so we handle it client-side
-    // But we can filter by parent_id for top-level vs replies
-    const filterTopLevel = searchParams.get('top_level')
-    if (filterTopLevel === 'true') {
-      where.parent_id = null
     }
 
     const [comments, total] = await Promise.all([
@@ -71,7 +62,6 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// DELETE /api/admin/comments - 批量删除评论
 export async function DELETE(request: NextRequest) {
   try {
     const body = await request.json()
@@ -84,12 +74,10 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // Delete replies first (child comments)
     await db.comment.deleteMany({
       where: { parent_id: { in: ids } },
     })
 
-    // Delete the comments themselves
     const result = await db.comment.deleteMany({
       where: { id: { in: ids } },
     })

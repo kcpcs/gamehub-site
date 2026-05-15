@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireAdmin } from '@/lib/admin-auth'
 import { z } from 'zod'
 
 const gameUpdateSchema = z.object({
@@ -24,6 +25,7 @@ const batchActionSchema = z.object({
 // GET /api/admin/games - 获取所有游戏
 export async function GET(request: NextRequest) {
   try {
+    await requireAdmin(request)
     const searchParams = request.nextUrl.searchParams
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
@@ -60,9 +62,18 @@ export async function GET(request: NextRequest) {
       db.game.count({ where }),
     ])
 
+    // 将 JSON 字符串字段解析为数组
+    const parsedGames = games.map(game => ({
+      ...game,
+      screenshots: game.screenshots ? JSON.parse(game.screenshots) : [],
+      platforms: game.platforms ? JSON.parse(game.platforms) : [],
+      genres: game.genres ? JSON.parse(game.genres) : [],
+      tags: game.tags ? JSON.parse(game.tags) : [],
+    }))
+
     return NextResponse.json({
       success: true,
-      data: games,
+      data: parsedGames,
       pagination: {
         page,
         limit,
@@ -82,8 +93,9 @@ export async function GET(request: NextRequest) {
 // POST /api/admin/games - 创建游戏
 export async function POST(request: NextRequest) {
   try {
+    await requireAdmin(request)
     const body = await request.json()
-    const { name, slug, cover_url, platforms, genres, description, developer, publisher, release_date } = body
+    const { name, slug, cover_url, platforms, genres, tags, screenshots, description, developer, publisher, release_date } = body
 
     if (!name || !slug || !cover_url) {
       return NextResponse.json(
@@ -105,8 +117,10 @@ export async function POST(request: NextRequest) {
         name,
         slug,
         cover_url,
-        platforms: platforms || [],
-        genres: genres || [],
+        screenshots: JSON.stringify(screenshots || []),
+        platforms: JSON.stringify(platforms || []),
+        genres: JSON.stringify(genres || []),
+        tags: JSON.stringify(tags || []),
         description,
         developer,
         publisher,
@@ -127,6 +141,7 @@ export async function POST(request: NextRequest) {
 // PATCH /api/admin/games - 批量更新游戏
 export async function PATCH(request: NextRequest) {
   try {
+    await requireAdmin(request)
     const body = await request.json()
     
     const validation = batchActionSchema.safeParse(body)
@@ -157,8 +172,7 @@ export async function PATCH(request: NextRequest) {
             { status: 400 }
           )
         }
-        // 添加字段白名单过滤
-        const ALLOWED_GAME_UPDATE_FIELDS = ['name', 'slug', 'cover_url', 'platforms', 'genres', 'description', 'developer', 'publisher', 'release_date', 'status']
+        // 添加字段白名单过�?        const ALLOWED_GAME_UPDATE_FIELDS = ['name', 'slug', 'cover_url', 'platforms', 'genres', 'description', 'developer', 'publisher', 'release_date', 'status']
         const sanitizedData = Object.fromEntries(
           Object.entries(data).filter(([key]) => ALLOWED_GAME_UPDATE_FIELDS.includes(key))
         )

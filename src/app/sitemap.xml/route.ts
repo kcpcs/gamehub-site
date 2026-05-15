@@ -1,88 +1,84 @@
-import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
 export async function GET() {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-  
-  const [games, articles] = await Promise.all([
-    db.game.findMany({ select: { slug: true, updated_at: true, has_tier_list: true } }),
-    db.article.findMany({ 
-      where: { status: 'published' },
-      select: { slug: true, updated_at: true }
-    })
-  ])
+  try {
+    const [games, articles] = await Promise.all([
+      db.game.findMany({ select: { slug: true, updated_at: true } }),
+      db.article.findMany({ 
+        where: { status: 'published' },
+        select: { slug: true, updated_at: true } 
+      }),
+    ])
 
-  const gameUrls = games.map(game => `
-    <url>
-      <loc>${baseUrl}/games/${game.slug}</loc>
-      <lastmod>${new Date(game.updated_at).toISOString()}</lastmod>
-      <priority>0.8</priority>
-    </url>
-  `).join('')
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    const currentDate = new Date().toISOString().split('T')[0]
 
-  const articleUrls = articles.map(article => `
-    <url>
-      <loc>${baseUrl}/guides/${article.slug}</loc>
-      <lastmod>${new Date(article.updated_at).toISOString()}</lastmod>
-      <priority>0.9</priority>
-    </url>
-  `).join('')
-
-  const codesUrls = games.map(game => `
-    <url>
-      <loc>${baseUrl}/codes/${game.slug}</loc>
-      <lastmod>${new Date(game.updated_at).toISOString()}</lastmod>
-      <priority>0.75</priority>
-    </url>
-  `).join('')
-
-  const tierListUrls = games
-    .filter(game => game.has_tier_list)
-    .map(game => `
-    <url>
-      <loc>${baseUrl}/tier-list/${game.slug}</loc>
-      <lastmod>${new Date(game.updated_at).toISOString()}</lastmod>
-      <priority>0.7</priority>
-    </url>
-  `).join('')
-
-  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+    let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>${baseUrl}/</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
+    <lastmod>${currentDate}</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>${baseUrl}/games</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
-    <priority>0.9</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/guides</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
+    <lastmod>${currentDate}</lastmod>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>${baseUrl}/codes</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
+    <lastmod>${currentDate}</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>${baseUrl}/guides</loc>
+    <lastmod>${currentDate}</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>${baseUrl}/tier-list</loc>
-    <lastmod>${new Date().toISOString()}</lastmod>
+    <lastmod>${currentDate}</lastmod>
     <priority>0.7</priority>
+  </url>`
+
+    games.forEach(game => {
+      const lastMod = game.updated_at?.toISOString().split('T')[0] || currentDate
+      sitemap += `
+  <url>
+    <loc>${baseUrl}/games/${game.slug}</loc>
+    <lastmod>${lastMod}</lastmod>
+    <priority>0.85</priority>
   </url>
-  ${gameUrls}
-  ${articleUrls}
-  ${codesUrls}
-  ${tierListUrls}
+  <url>
+    <loc>${baseUrl}/codes/${game.slug}</loc>
+    <lastmod>${lastMod}</lastmod>
+    <priority>0.8</priority>
+  </url>`
+    })
+
+    articles.forEach(article => {
+      const lastMod = article.updated_at?.toISOString().split('T')[0] || currentDate
+      sitemap += `
+  <url>
+    <loc>${baseUrl}/guides/${article.slug}</loc>
+    <lastmod>${lastMod}</lastmod>
+    <priority>0.8</priority>
+  </url>`
+    })
+
+    sitemap += `
 </urlset>`
 
-  return new NextResponse(sitemap, {
-    headers: {
-      'Content-Type': 'application/xml',
-      'Cache-Control': 'public, max-age=86400'
-    }
-  })
+    return new Response(sitemap, {
+      headers: {
+        'Content-Type': 'application/xml',
+        'Cache-Control': 'public, max-age=3600',
+      },
+    })
+  } catch (error) {
+    console.error('Error generating sitemap:', error)
+    return new Response('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>', {
+      headers: { 'Content-Type': 'application/xml' },
+    })
+  }
 }

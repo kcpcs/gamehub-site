@@ -52,18 +52,33 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     if (body.behavior) {
       updateData.behavior_config = {
-        update: {
-          wake_up_time: body.behavior.wake_up_time,
-          sleep_time: body.behavior.sleep_time,
-          activity_interval_min: body.behavior.activity_interval_min,
-          activity_interval_max: body.behavior.activity_interval_max,
-          post_probability: body.behavior.post_probability,
-          comment_probability: body.behavior.comment_probability,
-          reply_probability: body.behavior.reply_probability,
-          typing_speed_min: body.behavior.typing_speed_min,
-          typing_speed_max: body.behavior.typing_speed_max,
-          thinking_time_min: body.behavior.thinking_time_min,
-          thinking_time_max: body.behavior.thinking_time_max,
+        upsert: {
+          create: {
+            wake_up_time: body.behavior.wake_up_time || '08:00',
+            sleep_time: body.behavior.sleep_time || '00:00',
+            activity_interval_min: body.behavior.activity_interval_min || 30,
+            activity_interval_max: body.behavior.activity_interval_max || 120,
+            post_probability: body.behavior.post_probability || 0.3,
+            comment_probability: body.behavior.comment_probability || 0.5,
+            reply_probability: body.behavior.reply_probability || 0.3,
+            typing_speed_min: body.behavior.typing_speed_min || 3,
+            typing_speed_max: body.behavior.typing_speed_max || 8,
+            thinking_time_min: body.behavior.thinking_time_min || 2,
+            thinking_time_max: body.behavior.thinking_time_max || 10,
+          },
+          update: {
+            wake_up_time: body.behavior.wake_up_time,
+            sleep_time: body.behavior.sleep_time,
+            activity_interval_min: body.behavior.activity_interval_min,
+            activity_interval_max: body.behavior.activity_interval_max,
+            post_probability: body.behavior.post_probability,
+            comment_probability: body.behavior.comment_probability,
+            reply_probability: body.behavior.reply_probability,
+            typing_speed_min: body.behavior.typing_speed_min,
+            typing_speed_max: body.behavior.typing_speed_max,
+            thinking_time_min: body.behavior.thinking_time_min,
+            thinking_time_max: body.behavior.thinking_time_max,
+          },
         },
       }
     }
@@ -76,6 +91,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     return NextResponse.json({ success: true, data: player })
   } catch (error) {
+    console.error('Error updating AI player:', error)
     return NextResponse.json({ error: 'Failed to update AI player' }, { status: 500 })
   }
 }

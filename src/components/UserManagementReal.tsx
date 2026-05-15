@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Plus, Search, Edit2, Trash2, Ban, Unlock, Mail, User, RefreshCw, AlertCircle, X as XIcon, ChevronLeft, ChevronRight, Shield, Crown } from 'lucide-react'
+import { useLanguage } from '@/lib/language-context'
 
 interface User {
   id: string
@@ -44,6 +45,7 @@ const membershipLabels: Record<string, { label: string; className: string }> = {
 }
 
 export function UserManagementReal() {
+  const { t } = useLanguage()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -342,16 +344,16 @@ export function UserManagementReal() {
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex gap-1">
-                          <button onClick={() => handleView(user)} className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors" title="View">
+                          <button onClick={() => handleView(user)} className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors" title={t('view')}>
                             <User size={18} />
                           </button>
-                          <button onClick={() => handleEdit(user)} className="p-2 text-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 rounded-lg transition-colors" title="Edit">
+                          <button onClick={() => handleEdit(user)} className="p-2 text-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 rounded-lg transition-colors" title={t('edit')}>
                             <Edit2 size={18} />
                           </button>
-                          <button onClick={() => setBanConfirm(user.id)} className="p-2 text-orange-600 hover:bg-orange-100 dark:hover:bg-orange-900/50 rounded-lg transition-colors" title="Ban">
+                          <button onClick={() => setBanConfirm(user.id)} className="p-2 text-orange-600 hover:bg-orange-100 dark:hover:bg-orange-900/50 rounded-lg transition-colors" title={t('ban')}>
                             <Ban size={18} />
                           </button>
-                          <button onClick={() => setDeleteConfirm(user.id)} className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors" title="Delete">
+                          <button onClick={() => setDeleteConfirm(user.id)} className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors" title={t('delete')}>
                             <Trash2 size={18} />
                           </button>
                         </div>

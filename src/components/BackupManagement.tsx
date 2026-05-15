@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { RefreshCw, Download, Trash2, Plus, AlertCircle, Check, Clock, HardDrive, Database } from 'lucide-react'
+import { useLanguage } from '@/lib/language-context'
+import { tf } from '@/lib/i18n'
 
 interface BackupFile {
   id: string
@@ -21,6 +23,7 @@ interface BackupFile {
 }
 
 export function BackupManagement() {
+  const { t, lang } = useLanguage()
   const [backups, setBackups] = useState<BackupFile[]>([])
   const [loading, setLoading] = useState(true)
   const [creating, setCreating] = useState(false)
@@ -143,9 +146,9 @@ export function BackupManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Backup Management</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('backup_management')}</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            Complete database backup and restore
+            {t('backup_management_desc')}
           </p>
         </div>
         <button
@@ -154,7 +157,7 @@ export function BackupManagement() {
           className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
         >
           {creating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Plus size={18} />}
-          Create Backup
+          {t('create_backup')}
         </button>
       </div>
 
@@ -189,8 +192,8 @@ export function BackupManagement() {
                 <Database className="text-blue-500" size={20} />
               </div>
               <div>
-                <h3 className="font-semibold text-gray-900 dark:text-white">Backup List</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{backups.length} backup{backups.length !== 1 ? 's' : ''} total</p>
+                <h3 className="font-semibold text-gray-900 dark:text-white">{t('backup_list')}</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">{tf('backups_total', { count: backups.length }, lang)}</p>
               </div>
             </div>
           </div>
@@ -198,8 +201,8 @@ export function BackupManagement() {
           {backups.length === 0 ? (
             <div className="p-8 text-center">
               <HardDrive className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-              <p className="text-gray-500 dark:text-gray-400">No backups yet</p>
-              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Click the button above to create your first backup</p>
+              <p className="text-gray-500 dark:text-gray-400">{t('no_backups_yet')}</p>
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">{t('create_first_backup_hint')}</p>
             </div>
           ) : (
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
@@ -247,14 +250,14 @@ export function BackupManagement() {
                       <button
                         onClick={() => handleDownload(backup.filename)}
                         className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors"
-                        title="Download"
+                        title={t('download')}
                       >
                         <Download size={18} />
                       </button>
                       <button
                         onClick={() => setDeleteConfirm(backup.filename)}
                         className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors"
-                        title="Delete"
+                        title={t('delete')}
                       >
                         <Trash2 size={18} />
                       </button>
@@ -269,12 +272,12 @@ export function BackupManagement() {
 
       {/* Info Box */}
       <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-        <h4 className="font-medium text-yellow-800 dark:text-yellow-400 mb-2">Backup Information</h4>
+        <h4 className="font-medium text-yellow-800 dark:text-yellow-400 mb-2">{t('backup_info_title')}</h4>
         <ul className="text-sm text-yellow-700 dark:text-yellow-300 space-y-1">
-          <li>• Backups include all games, articles, codes, users, and other core data</li>
-          <li>• Regular backups are recommended to prevent data loss</li>
-          <li>• Downloaded backup files can be used for emergency recovery</li>
-          <li>• Backups are stored locally on the server, please download promptly</li>
+          <li>• {t('backup_info_line1')}</li>
+          <li>• {t('backup_info_line2')}</li>
+          <li>• {t('backup_info_line3')}</li>
+          <li>• {t('backup_info_line4')}</li>
         </ul>
       </div>
 
@@ -284,23 +287,23 @@ export function BackupManagement() {
           <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full mx-4 p-6">
             <div className="flex items-center gap-3 mb-4">
               <AlertCircle className="w-6 h-6 text-red-500" />
-              <h3 className="text-lg font-bold">Confirm Delete</h3>
+              <h3 className="text-lg font-bold">{t('confirm_delete')}</h3>
             </div>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Are you sure you want to delete this backup? This action cannot be undone.
+              {t('confirm_delete_backup')}
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setDeleteConfirm(null)}
                 className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
               >
-                Cancel
+                {t('cancel')}
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm)}
                 className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
               >
-                Delete
+                {t('delete')}
               </button>
             </div>
           </div>

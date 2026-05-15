@@ -1,5 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireAdmin } from '@/lib/admin-auth'
+import { z } from 'zod'
+
+const updateUserSchema = z.object({
+  username: z.string().min(2).max(50).optional(),
+  avatar: z.string().max(500).nullable().optional(),
+  membership: z.enum(['free', 'pro', 'creator']).optional(),
+  creator_level: z.enum(['reader', 'creator', 'verified', 'partner']).optional(),
+  points: z.number().int().min(0).optional(),
+  total_views: z.number().int().min(0).optional(),
+  preferred_games: z.string().optional(),
+})
 
 // GET /api/admin/users - 获取所有用户
 export async function GET(request: NextRequest) {
@@ -103,9 +115,16 @@ export async function PATCH(request: NextRequest) {
             { status: 400 }
           )
         }
+        const validated = updateUserSchema.safeParse(data)
+        if (!validated.success) {
+          return NextResponse.json(
+            { success: false, error: 'Invalid data', details: validated.error.flatten() },
+            { status: 400 }
+          )
+        }
         result = await db.user.updateMany({
           where: { id: { in: ids } },
-          data,
+          data: validated.data,
         })
         break
 

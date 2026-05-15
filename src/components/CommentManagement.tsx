@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Search, Trash2, User, Loader2, AlertCircle, RefreshCw, ChevronLeft, ChevronRight, MessageSquare, ExternalLink } from 'lucide-react'
+import { useLanguage } from '@/lib/language-context'
 
 interface Comment {
   id: string
@@ -28,6 +29,7 @@ interface Pagination {
 }
 
 export function CommentManagement() {
+  const { t } = useLanguage()
   const [comments, setComments] = useState<Comment[]>([])
   const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, totalPages: 0 })
   const [loading, setLoading] = useState(true)
@@ -284,7 +286,7 @@ export function CommentManagement() {
                       <button
                         onClick={() => handleDeleteSingle(comment.id)}
                         className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors"
-                        title="Delete"
+                        title={t('delete')}
                       >
                         <Trash2 size={16} />
                       </button>

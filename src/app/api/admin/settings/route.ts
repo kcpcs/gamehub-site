@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import fs from 'fs'
 import path from 'path'
+import { requireAdmin } from '@/lib/admin-auth'
 
 const SETTINGS_PATH = path.join(process.cwd(), 'site-settings.json')
 
@@ -56,6 +57,7 @@ function writeSettings(settings: any): void {
 // GET /api/admin/settings - 获取网站设置
 export async function GET() {
   try {
+    await requireAdmin(request)
     const settings = readSettings()
 
     // Enrich with environment-detected status
@@ -86,6 +88,7 @@ export async function GET() {
 // PUT /api/admin/settings - 更新网站设置
 export async function PUT(request: NextRequest) {
   try {
+    await requireAdmin(request)
     const body = await request.json()
 
     // Read current settings and merge with incoming

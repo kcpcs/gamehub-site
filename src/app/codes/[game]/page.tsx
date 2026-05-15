@@ -99,7 +99,7 @@ export default async function CodesPage({ params }: { params: Promise<{ game: st
   const { game: gameSlug } = await params
   const { game, codes } = await getGameAndCodes(gameSlug)
   
-  const currentMonthYear = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+  const currentMonthYear = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }).replace(/\u200E/g, '')
 
   if (!game) {
     return (

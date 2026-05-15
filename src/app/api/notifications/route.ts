@@ -6,7 +6,7 @@ import type { ApiResponse } from '@/types'
 // GET /api/notifications - 获取通知列表
 export async function GET(req: NextRequest) {
   try {
-    const session = getSession()
+    const session = await getSession()
     if (!session?.user?.id) {
       return NextResponse.json({
         success: false,
@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
 // PATCH /api/notifications - 标记通知为已读
 export async function PATCH(req: NextRequest) {
   try {
-    const session = getSession()
+    const session = await getSession()
     if (!session?.user?.id) {
       return NextResponse.json({
         success: false,
@@ -113,7 +113,7 @@ export async function PATCH(req: NextRequest) {
 // DELETE /api/notifications - 删除旧通知
 export async function DELETE(req: NextRequest) {
   try {
-    const session = getSession()
+    const session = await getSession()
     if (!session?.user?.id) {
       return NextResponse.json({
         success: false,

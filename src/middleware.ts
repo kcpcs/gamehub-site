@@ -1,52 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-/**
- * Next.js Middleware to protect all /api/admin/* routes.
- *
- * This acts as a first-line security gate ensuring that no admin API route
- * can be accessed without valid credentials. It checks:
- * 1. The `admin_session` cookie (set during login)
- * 2. The `x-admin-api-key` header (for server-to-server calls)
- *
- * In development mode, requests are allowed through for convenience.
- *
- * Auth routes (/api/admin/auth/login, /api/admin/auth/logout) are exempt
- * so that admins can authenticate without already being authenticated.
- */
-
-// Paths that should NOT require authentication
-const PUBLIC_ADMIN_PATHS = [
-  '/api/admin/auth/login',
-  '/api/admin/auth/logout',
-]
-
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Allow public admin auth routes (login/logout) without any checks
-  if (PUBLIC_ADMIN_PATHS.some((path) => pathname === path)) {
-    return NextResponse.next()
-  }
-
-  // In development mode, allow all requests through for convenience
+  // 开发模式：完全开放所有API，不做任何验证
   if (process.env.NODE_ENV === 'development') {
-    return NextResponse.next()
+    const response = NextResponse.next()
+    response.headers.set('x-admin-id', 'admin-1')
+    response.headers.set('x-admin-role', 'super_admin')
+    return response
   }
 
-  // Check for admin session cookie
+  // 生产模式才做验证
   const sessionToken = request.cookies.get('admin_session')?.value
   if (sessionToken) {
-    return NextResponse.next()
+    try {
+      const { validateAdminSession } = await import('@/lib/admin-auth')
+      const session = await validateAdminSession(sessionToken)
+      if (session) {
+        const response = NextResponse.next()
+        response.headers.set('x-admin-id', session.userId.toString())
+        response.headers.set('x-admin-role', session.role)
+        return response
+      }
+    } catch {
+      // Session validation failed, fall through to rejection
+    }
   }
 
-  // Check for API key header (used for internal/server-to-server calls)
   const adminApiKey = request.headers.get('x-admin-api-key')
   const expectedKey = process.env.INTERNAL_API_SECRET || process.env.ADMIN_API_KEY
   if (expectedKey && adminApiKey === expectedKey) {
     return NextResponse.next()
   }
 
-  // No valid credentials found - reject the request
   return NextResponse.json(
     {
       success: false,

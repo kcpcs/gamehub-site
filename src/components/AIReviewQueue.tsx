@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { Check, X, Eye, AlertCircle, Clock, User } from 'lucide-react'
+import { useLanguage } from '@/lib/language-context'
+import { tf } from '@/lib/i18n'
 
 interface ReviewItem {
   id: string
@@ -23,6 +25,7 @@ interface ReviewItem {
 }
 
 export function AIReviewQueue() {
+  const { lang, t } = useLanguage()
   const [reviews, setReviews] = useState<ReviewItem[]>([])
   const [selectedStatus, setSelectedStatus] = useState('all')
   const [loading, setLoading] = useState(true)
@@ -82,34 +85,30 @@ export function AIReviewQueue() {
   }
 
   const getStatusBadge = (status: string) => {
+    const { t } = useLanguage()
     const styles: Record<string, string> = {
       pending: 'bg-yellow-100 text-yellow-800',
       approved: 'bg-green-100 text-green-800',
       rejected: 'bg-red-100 text-red-800',
       auto_published: 'bg-blue-100 text-blue-800'
     }
-    const labels: Record<string, string> = {
-      pending: 'Pending',
-      approved: 'Approved',
-      rejected: 'Rejected',
-      auto_published: 'Auto Published'
-    }
     return (
       <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status] || styles.pending}`}>
-        {labels[status] || status}
+        {t(status === 'pending' ? 'status_pending' : status === 'approved' ? 'status_approved' : status === 'rejected' ? 'status_rejected' : status === 'auto_published' ? 'status_auto_published' : status)}
       </span>
     )
   }
 
   const getActionTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      post: 'Post',
-      comment: 'Comment',
-      reply: 'Reply',
-      like: 'Like',
-      view: 'View'
+    const actionKeys: Record<string, string> = {
+      post: 'action_post',
+      comment: 'action_comment',
+      reply: 'action_reply',
+      like: 'action_like',
+      view: 'action_view'
     }
-    return labels[type] || type
+    const { t: translate } = useLanguage()
+    return translate(actionKeys[type] || type)
   }
 
   const pendingCount = reviews.filter(r => r.status === 'pending').length
@@ -126,33 +125,41 @@ export function AIReviewQueue() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">AI Content Review Queue</h2>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t('ai_content_review_queue')}</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            Review and moderate AI-generated content before publication
+            {t('review_moderation_desc')}
           </p>
         </div>
         <div className="flex items-center gap-2 px-4 py-2 bg-yellow-50 dark:bg-yellow-900/30 rounded-lg border border-yellow-200 dark:border-yellow-800">
           <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
           <span className="text-sm font-medium text-yellow-700 dark:text-yellow-300">
-            {pendingCount} pending reviews
+            {tf('pending_reviews', { count: pendingCount }, lang)}
           </span>
         </div>
       </div>
 
       <div className="flex gap-2">
-        {['all', 'pending', 'approved', 'rejected'].map(status => (
-          <button
-            key={status}
-            onClick={() => setSelectedStatus(status)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              selectedStatus === status
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-            }`}
-          >
-            {status.charAt(0).toUpperCase() + status.slice(1)}
-          </button>
-        ))}
+        {['all', 'pending', 'approved', 'rejected'].map(status => {
+          const statusKeys: Record<string, string> = {
+            all: 'all',
+            pending: 'status_pending',
+            approved: 'status_approved',
+            rejected: 'status_rejected'
+          }
+          return (
+            <button
+              key={status}
+              onClick={() => setSelectedStatus(status)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                selectedStatus === status
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              {t(statusKeys[status] || status)}
+            </button>
+          )
+        })}
       </div>
 
       <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -161,25 +168,25 @@ export function AIReviewQueue() {
             <thead className="bg-gray-50 dark:bg-gray-700">
               <tr>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  AI Player
+                  {t('ai_player')}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Action
+                  {t('action')}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Content Preview
+                  {t('content_preview')}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Confidence
+                  {t('confidence')}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Status
+                  {t('status')}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Created
+                  {t('created')}
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Actions
+                  {t('actions')}
                 </th>
               </tr>
             </thead>
@@ -189,7 +196,7 @@ export function AIReviewQueue() {
                   <td colSpan={7} className="px-4 py-12 text-center">
                     <div className="text-gray-400">
                       <AlertCircle className="w-12 h-12 mx-auto mb-3" />
-                      <p>No reviews found</p>
+                      <p>{t('no_reviews_found')}</p>
                     </div>
                   </td>
                 </tr>
@@ -249,7 +256,7 @@ export function AIReviewQueue() {
                         <button
                           onClick={() => setSelectedReview(review)}
                           className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
-                          title="View Details"
+                          title={t('view_details')}
                         >
                           <Eye className="w-4 h-4" />
                         </button>
@@ -258,14 +265,14 @@ export function AIReviewQueue() {
                             <button
                               onClick={() => handleApprove(review.id)}
                               className="p-2 text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
-                              title="Approve"
+                              title={t('approve')}
                             >
                               <Check className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => handleReject(review.id)}
                               className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                              title="Reject"
+                              title={t('reject')}
                             >
                               <X className="w-4 h-4" />
                             </button>

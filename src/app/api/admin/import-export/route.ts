@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireAdmin } from '@/lib/admin-auth'
 
 // POST /api/admin/import-export - 批量导入数据
 export async function POST(request: NextRequest) {

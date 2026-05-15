@@ -5,6 +5,7 @@ import {
   Users, Plus, Edit2, Trash2, Eye, Search, X, Save, 
   AlertCircle, CheckCircle, Lock, Unlock
 } from 'lucide-react'
+import { useLanguage } from '@/lib/language-context'
 
 interface AdminUser {
   id: string
@@ -27,6 +28,7 @@ const roleLabels: Record<string, { label: string; className: string }> = {
 type AdminRole = 'super_admin' | 'admin' | 'moderator' | 'editor'
 
 export function AdminUserManagement() {
+  const { t } = useLanguage()
   const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -151,7 +153,7 @@ export function AdminUserManagement() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500 dark:text-gray-400">加载中...</p>
+          <p className="text-gray-500 dark:text-gray-400">{t('loading_text')}</p>
         </div>
       </div>
     )
@@ -167,7 +169,7 @@ export function AdminUserManagement() {
             onClick={fetchUsers}
             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
           >
-            重试
+            {t('retry')}
           </button>
         </div>
       </div>
@@ -179,15 +181,15 @@ export function AdminUserManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">管理员用户管理</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">管理后台管理员账户</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('admin_user_management')}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('admin_user_management_desc')}</p>
         </div>
         <button
           onClick={handleOpenCreateModal}
           className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
         >
           <Plus size={18} />
-          创建管理员
+          {t('create_admin')}
         </button>
       </div>
 
@@ -198,7 +200,7 @@ export function AdminUserManagement() {
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="搜索邮箱或用户名..."
+          placeholder={t('search_admin_placeholder')}
           className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
@@ -210,19 +212,19 @@ export function AdminUserManagement() {
             <thead className="bg-gray-50 dark:bg-gray-700/50">
               <tr>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  用户信息
+                  {t('user_info')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  角色
+                  {t('role')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  最后登录
+                  {t('last_login')}
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  创建时间
+                  {t('created_at')}
                 </th>
                 <th className="px-6 py-4 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  操作
+                  {t('actions')}
                 </th>
               </tr>
             </thead>
@@ -297,7 +299,7 @@ export function AdminUserManagement() {
             {/* Modal Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {editingUser ? '编辑管理员' : '创建管理员'}
+                {editingUser ? t('edit_admin') : t('create_admin')}
               </h2>
               <button
                 onClick={() => setShowModal(false)}

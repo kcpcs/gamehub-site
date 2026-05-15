@@ -172,7 +172,7 @@ export function GameRating({ gameSlug }: GameRatingProps) {
 
           <div className="space-y-2">
             {[10, 9, 8, 7, 6, 5, 4, 3, 2, 1].map(score => {
-              const count = stats.distribution[score] || 0
+              const count = stats.distribution?.[score] || 0
               const percentage = stats.total > 0 ? (count / stats.total) * 100 : 0
               
               return (

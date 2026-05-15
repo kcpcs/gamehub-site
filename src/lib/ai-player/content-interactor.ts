@@ -15,6 +15,57 @@ export interface GeneratedContent {
   confidence: number
 }
 
+const AI_EXPOSURE_PATTERNS = [
+  /\bas an (artificial intelligence|AI|language model)\b/i,
+  /\bChatGPT\b/i, /\bClaude\b/i, /\bGPT[- ]?\d/i,
+  /\bI (don't|cannot|can't) have (personal|real|actual) (experience|opinions)\b/i,
+  /\bas a (large )?language model\b/i, /\bI am (an )?AI\b/i,
+  /\bI hope this (message|comment|post) finds you well\b/i,
+  /\bIt is important to (note|remember|consider)\b/i,
+]
+
+const REPETITIVE_PATTENS = [
+  /(\b\w+\b)\s+\1\s+\1/i,
+  /(.{20,})\1{2,}/,
+]
+
+function calculateQualityScore(content: string, minLen: number, maxLen: number): number {
+  if (!content || content.length < minLen) return 0.3
+  if (content.length > maxLen * 1.5) return 0.5
+  let score = 0.7
+
+  const len = content.length
+  const idealMin = minLen * 0.8
+  const idealMax = maxLen * 1.1
+  if (len >= idealMin && len <= idealMax) score += 0.1
+
+  const sentences = content.split(/[.!?。！？]+/).filter(s => s.trim().length > 0)
+  if (sentences.length >= 2) score += 0.05
+  if (sentences.length >= 3) score += 0.02
+
+  const avgSentenceLen = sentences.reduce((sum, s) => sum + s.trim().length, 0) / Math.max(sentences.length, 1)
+  if (avgSentenceLen > 10 && avgSentenceLen < 200) score += 0.03
+
+  for (const pattern of AI_EXPOSURE_PATTERNS) {
+    if (pattern.test(content)) {
+      score -= 0.25
+      break
+    }
+  }
+
+  for (const pattern of REPETITIVE_PATTENS) {
+    if (pattern.test(content)) {
+      score -= 0.15
+      break
+    }
+  }
+
+  const capsRatio = (content.match(/[A-Z]/g) || []).length / Math.max(content.length, 1)
+  if (capsRatio > 0.3 && content.length > 20) score -= 0.1
+
+  return Math.max(0.1, Math.min(0.99, Math.round(score * 100) / 100))
+}
+
 export class ContentInteractor {
   private player: AIPlayer
 
@@ -99,7 +150,7 @@ export class ContentInteractor {
 
     return {
       content: response.content.trim(),
-      confidence: 0.9,
+      confidence: calculateQualityScore(response.content.trim(), 5, 300),
     }
   }
 
@@ -136,7 +187,7 @@ export class ContentInteractor {
 
     return {
       content: response.content.trim(),
-      confidence: 0.85,
+      confidence: calculateQualityScore(response.content.trim(), 50, 2000),
     }
   }
 
@@ -174,7 +225,7 @@ export class ContentInteractor {
 
     return {
       content: response.content.trim(),
-      confidence: 0.88,
+      confidence: calculateQualityScore(response.content.trim(), 10, 500),
     }
   }
 

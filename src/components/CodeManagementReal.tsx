@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Plus, Search, Edit2, Trash2, Copy, Check, RefreshCw, AlertCircle, X as XIcon, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useLanguage } from '@/lib/language-context'
 
 interface Code {
   id: string
@@ -33,6 +34,7 @@ const statusLabels: Record<string, { label: string; className: string }> = {
 }
 
 export function CodeManagementReal() {
+  const { t } = useLanguage()
   const [codes, setCodes] = useState<Code[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -278,7 +280,7 @@ export function CodeManagementReal() {
                         <button
                           onClick={() => handleCopy(code.code, code.id)}
                           className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
-                          title="Copy"
+                          title={t('copy')}
                         >
                           {copiedId === code.id ? (
                             <Check size={16} className="text-green-500" />
@@ -308,13 +310,13 @@ export function CodeManagementReal() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex gap-2">
-                        <button onClick={() => handleView(code)} className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors" title="View">
+                        <button onClick={() => handleView(code)} className="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition-colors" title={t('view')}>
                           <Copy size={18} />
                         </button>
-                        <button onClick={() => handleEdit(code)} className="p-2 text-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 rounded-lg transition-colors" title="Edit">
+                        <button onClick={() => handleEdit(code)} className="p-2 text-yellow-600 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 rounded-lg transition-colors" title={t('edit')}>
                           <Edit2 size={18} />
                         </button>
-                        <button onClick={() => setDeleteConfirm(code.id)} className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors" title="Delete">
+                        <button onClick={() => setDeleteConfirm(code.id)} className="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition-colors" title={t('delete')}>
                           <Trash2 size={18} />
                         </button>
                       </div>

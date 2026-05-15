@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
+import { requireAdmin } from '@/lib/admin-auth'
 
 // GET /api/admin/codes - 获取所有兑换码
 export async function GET(request: NextRequest) {
@@ -74,7 +75,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/admin/codes - 创建兑换码
+// POST /api/admin/codes - 创建兑换�?
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -87,17 +88,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const game = await db.game.findUnique({ where: { id: game_id } })
+    const [game, existingCode] = await Promise.all([
+      db.game.findUnique({ where: { id: game_id } }),
+      db.gameCode.findFirst({ where: { code, game_id } }),
+    ])
     if (!game) {
       return NextResponse.json(
         { success: false, error: 'Game not found' },
         { status: 404 }
       )
     }
-
-    const existingCode = await db.gameCode.findFirst({
-      where: { code, game_id },
-    })
     if (existingCode) {
       return NextResponse.json(
         { success: false, error: 'Code already exists for this game' },
@@ -131,7 +131,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PATCH /api/admin/codes - 批量更新兑换码
+// PATCH /api/admin/codes - 批量更新兑换?
 export async function PATCH(request: NextRequest) {
   try {
     const body = await request.json()

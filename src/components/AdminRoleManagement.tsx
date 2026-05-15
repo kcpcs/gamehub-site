@@ -5,6 +5,7 @@ import {
   Shield, Plus, Edit2, Trash2, X, Save, AlertCircle, CheckCircle,
   Check, X as XIcon
 } from 'lucide-react'
+import { useLanguage } from '@/lib/language-context'
 
 interface AdminRole {
   id: string
@@ -24,20 +25,8 @@ interface AdminRole {
   updated_at: string
 }
 
-const permissionLabels: Record<string, string> = {
-  can_manage_users: 'Manage Users',
-  can_manage_games: 'Manage Games',
-  can_manage_articles: 'Manage Articles',
-  can_manage_codes: 'Manage Codes',
-  can_manage_tierlists: 'Manage Tier Lists',
-  can_manage_comments: 'Manage Comments',
-  can_view_analytics: 'View Analytics',
-  can_manage_settings: 'Manage Settings',
-  can_manage_roles: 'Manage Roles',
-  can_manage_ai_players: 'Manage AI Players',
-}
-
 export function AdminRoleManagement() {
+  const { t } = useLanguage()
   const [roles, setRoles] = useState<AdminRole[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -56,6 +45,19 @@ export function AdminRoleManagement() {
   ] as const
 
   type PermissionKey = typeof permissionKeys[number]
+
+  const permissionLabels: Record<string, string> = {
+    can_manage_users: t('perm_manage_users'),
+    can_manage_games: t('perm_manage_games'),
+    can_manage_articles: t('perm_manage_articles'),
+    can_manage_codes: t('perm_manage_codes'),
+    can_manage_tierlists: t('perm_manage_tierlists'),
+    can_manage_comments: t('perm_manage_comments'),
+    can_view_analytics: t('perm_view_analytics'),
+    can_manage_settings: t('perm_manage_settings'),
+    can_manage_roles: t('perm_manage_roles'),
+    can_manage_ai_players: t('perm_manage_ai_players'),
+  }
 
   const [editingRole, setEditingRole] = useState<AdminRole | null>(null)
   const [formData, setFormData] = useState<{
@@ -153,7 +155,7 @@ export function AdminRoleManagement() {
 
       const result = await response.json()
       if (result.success) {
-        setOperationSuccess(editingRole ? 'Updated successfully' : 'Created successfully')
+        setOperationSuccess(editingRole ? t('updated_successfully') : t('created_successfully'))
         setTimeout(() => {
           setShowModal(false)
           fetchRoles()
@@ -167,7 +169,7 @@ export function AdminRoleManagement() {
   }
 
   const handleDelete = async (roleId: string) => {
-    if (!confirm('Are you sure you want to delete this role?')) return
+    if (!confirm(t('confirm_delete_role'))) return
     try {
       const response = await fetch(`/api/admin/roles/${roleId}`, {
         method: 'DELETE',
@@ -194,7 +196,7 @@ export function AdminRoleManagement() {
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-500 dark:text-gray-400">Loading...</p>
+          <p className="text-gray-500 dark:text-gray-400">{t('loading_text')}</p>
         </div>
       </div>
     )
@@ -210,7 +212,7 @@ export function AdminRoleManagement() {
             onClick={fetchRoles}
             className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
           >
-            Retry
+            {t('retry')}
           </button>
         </div>
       </div>
@@ -222,15 +224,15 @@ export function AdminRoleManagement() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Role & Permission Management</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Manage admin roles and permissions</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('role_permission_management')}</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('role_permission_management_desc')}</p>
         </div>
         <button
           onClick={handleOpenCreateModal}
           className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
         >
           <Plus size={18} />
-          Create Role
+          {t('create_role')}
         </button>
       </div>
 
@@ -259,7 +261,7 @@ export function AdminRoleManagement() {
                   <button
                     onClick={() => handleOpenEditModal(role)}
                     className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
-                    title="Edit"
+                    title={t('edit')}
                   >
                     <Edit2 size={16} />
                   </button>
@@ -267,7 +269,7 @@ export function AdminRoleManagement() {
                     <button
                       onClick={() => handleDelete(role.id)}
                       className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
-                      title="Delete"
+                      title={t('delete')}
                     >
                       <Trash2 size={16} />
                     </button>
@@ -305,7 +307,7 @@ export function AdminRoleManagement() {
               <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
                 <span>Created {formatDate(role.created_at)}</span>
                 {defaultRoles.includes(role.id) && (
-                  <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-600 rounded-full">Default Role</span>
+                  <span className="px-2 py-0.5 bg-gray-200 dark:bg-gray-600 rounded-full">{t('default_role')}</span>
                 )}
               </div>
             </div>
@@ -321,7 +323,7 @@ export function AdminRoleManagement() {
             {/* Modal Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {editingRole ? 'Edit Role' : 'Create Role'}
+                {editingRole ? t('edit_role') : t('create_role')}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
@@ -346,7 +348,7 @@ export function AdminRoleManagement() {
               {/* Name */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Role Name <span className="text-red-500">*</span>
+                  {t('role_name')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -360,7 +362,7 @@ export function AdminRoleManagement() {
               {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Description
+                  {t('role_description')}
                 </label>
                 <textarea
                   value={formData.description}
@@ -373,7 +375,7 @@ export function AdminRoleManagement() {
               {/* Permissions */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  Permission Settings
+                  {t('permission_settings')}
                 </label>
                 <div className="grid grid-cols-2 gap-2">
                   {Object.entries(permissionLabels).map(([key, label]) => (
@@ -417,14 +419,14 @@ export function AdminRoleManagement() {
                   onClick={() => setShowModal(false)}
                   className="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
                 <button
                   type="submit"
                   className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center justify-center gap-2"
                 >
                   <Save size={16} />
-                  {editingRole ? 'Update' : 'Create'}
+                  {editingRole ? t('update') : t('create')}
                 </button>
               </div>
             </form>

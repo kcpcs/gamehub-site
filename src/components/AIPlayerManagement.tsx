@@ -6,6 +6,7 @@ import {
   Activity, Clock, Settings, ChevronDown, ChevronUp,
   RefreshCw, X, Save, AlertCircle, CheckCircle
 } from 'lucide-react'
+import { useLanguage } from '@/lib/language-context'
 
 interface AIPlayer {
   id: string
@@ -41,6 +42,7 @@ interface BehaviorConfig {
 }
 
 export function AIPlayerManagement() {
+  const { t } = useLanguage()
   const [players, setPlayers] = useState<AIPlayer[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedPlayer, setSelectedPlayer] = useState<AIPlayer | null>(null)

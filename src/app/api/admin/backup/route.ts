@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import fs from 'fs'
 import path from 'path'
+import { requireAdmin } from '@/lib/admin-auth'
 
 interface BackupMetadata {
   id: string
@@ -14,15 +15,28 @@ interface BackupMetadata {
 
 const BACKUP_DIR = path.join(process.cwd(), 'backups')
 
+function safeBackupPath(filename: string): string {
+  const safeName = path.basename(filename)
+  if (!safeName || safeName.includes('..') || safeName !== filename) {
+    throw new Error('Invalid filename')
+  }
+  const resolved = path.resolve(BACKUP_DIR, safeName)
+  if (!resolved.startsWith(path.resolve(BACKUP_DIR))) {
+    throw new Error('Path traversal detected')
+  }
+  return resolved
+}
+
 async function ensureBackupDir() {
   if (!fs.existsSync(BACKUP_DIR)) {
     fs.mkdirSync(BACKUP_DIR, { recursive: true })
   }
 }
 
-// GET /api/admin/backup - 获取备份列表或创建备份
+// GET /api/admin/backup - 获取备份列表或创建备�?
 export async function GET(request: NextRequest) {
   try {
+    await requireAdmin(request)
     const searchParams = request.nextUrl.searchParams
     const action = searchParams.get('action') || 'list'
 
@@ -60,7 +74,15 @@ export async function GET(request: NextRequest) {
         )
       }
 
-      const filePath = path.join(BACKUP_DIR, filename)
+      let filePath: string
+      try {
+        filePath = safeBackupPath(filename)
+      } catch {
+        return NextResponse.json(
+          { success: false, error: 'Invalid filename' },
+          { status: 400 }
+        )
+      }
       if (!fs.existsSync(filePath)) {
         return NextResponse.json(
           { success: false, error: 'Backup file not found' },
@@ -72,7 +94,7 @@ export async function GET(request: NextRequest) {
       return new NextResponse(fileContent, {
         headers: {
           'Content-Type': 'application/json',
-          'Content-Disposition': `attachment; filename="${filename}"`,
+          'Content-Disposition': `attachment; filename="${path.basename(filename)}"`,
         },
       })
     }
@@ -93,6 +115,7 @@ export async function GET(request: NextRequest) {
 // POST /api/admin/backup - 创建备份
 export async function POST(request: NextRequest) {
   try {
+    await requireAdmin(request)
     await ensureBackupDir()
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
@@ -158,6 +181,7 @@ export async function POST(request: NextRequest) {
 // DELETE /api/admin/backup - 删除备份
 export async function DELETE(request: NextRequest) {
   try {
+    await requireAdmin(request)
     const searchParams = request.nextUrl.searchParams
     const filename = searchParams.get('filename')
 
@@ -169,7 +193,16 @@ export async function DELETE(request: NextRequest) {
     }
 
     await ensureBackupDir()
-    const filePath = path.join(BACKUP_DIR, filename)
+
+    let filePath: string
+    try {
+      filePath = safeBackupPath(filename)
+    } catch {
+      return NextResponse.json(
+        { success: false, error: 'Invalid filename' },
+        { status: 400 }
+      )
+    }
 
     if (!fs.existsSync(filePath)) {
       return NextResponse.json(
