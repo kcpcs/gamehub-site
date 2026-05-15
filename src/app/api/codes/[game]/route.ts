@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
-import { redis } from '@/lib/redis'
-import { validateBody, codeSubmissionSchema } from '@/lib/validations'
-import type { ApiResponse, CodesPageData, GameCode } from '@/types'
+import { NextRequest, NextResponse } from 'next/server';
+import { db } from '@/lib/db';
+import { redis } from '@/lib/redis';
+import { validateBody, codeSubmissionSchema } from '@/lib/validations';
+import { checkCodeValidity, validateCodeFormat } from '@/lib/codes-checker';
+import type { ApiResponse, CodesPageData, GameCode } from '@/types';
 
 const CACHE_TTL = 120 // 2 minutes — codes update frequently
 
@@ -98,6 +99,15 @@ export async function POST(
     if (!result.success) return result.error
     const body = result.data
 
+    // 1. 预验证兑换码格式
+    const formatCheck = validateCodeFormat(body.code, gameSlug)
+    if (!formatCheck.valid) {
+      return NextResponse.json(
+        { success: false, error: formatCheck.message || 'Invalid code format', code: 'INVALID_FORMAT' },
+        { status: 400 }
+      )
+    }
+
     const game = await db.game.findUnique({ where: { slug: gameSlug }, select: { id: true, name: true } })
     if (!game) {
       return NextResponse.json({ success: false, error: 'Game not found', code: 'NOT_FOUND' }, { status: 404 })
@@ -105,12 +115,12 @@ export async function POST(
 
     const created = await db.gameCode.create({
       data: {
-        code:        body.code,
-        game_id:     game.id,
+        code: body.code.trim().toUpperCase(), // 确保存储格式统一
+        game_id: game.id,
         reward_desc: body.reward_desc,
-        status:      'unverified',
-        source:      'user',
-        source_url:  body.source_url || null,
+        status: 'unverified',
+        source: 'user',
+        source_url: body.source_url || null,
         verified_at: new Date(),
       },
     })

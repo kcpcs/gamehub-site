@@ -206,6 +206,18 @@ curl -X POST http://localhost:3000/api/codes/nonexistent-game \
 2. ✅ 使用 `formatGameCode()` 统一格式化返回数据
 3. ✅ 添加了缓存清除的注释说明
 4. ✅ 返回完整格式化的 GameCode 对象而非原始数据库对象
+5. ✅ 集成兑换码格式预验证（步骤3新增）
+6. ✅ 添加了 code 格式统一处理（trim + toUpperCase）
+7. ✅ 添加了 INVALID_FORMAT 错误码
+
+### 步骤3：兑换码验证功能：
+1. ✅ 实现了 `validateCodeFormat()` - 格式验证函数
+2. ✅ 实现了 `checkIfExpired()` - 过期检查函数
+3. ✅ 实现了 `checkCodeValidity()` - 完整验证函数
+4. ✅ 实现了 `validateCodesBatch()` - 批量验证函数
+5. ✅ 添加了游戏特定格式规则（Genshin Impact格式等）
+6. ✅ 添加了无效模式检测（测试码、过期标记等）
+7. ✅ 在 POST 接口中集成预验证
 
 ## 测试验证清单
 
@@ -223,4 +235,84 @@ curl -X POST http://localhost:3000/api/codes/nonexistent-game \
 - [ ] 提交后缓存被正确清除
 - [ ] 返回格式化的 GameCode 对象
 - [ ] 错误处理正常
-- [ ] 没有副作用影响其他功能
+- [ ] 无副作用影响其他功能
+
+## 步骤3：兑换码验证功能测试
+
+### 1. 测试无效格式被拒绝
+
+```powershell
+# 测试太短的码（应该被拒绝）
+$body = @{
+    code = "AB"
+    reward_desc = "Test Reward"
+} | ConvertTo-Json
+
+Invoke-WebRequest -Uri "http://localhost:3000/api/codes/genshin-impact" `
+    -Method POST `
+    -ContentType "application/json" `
+    -Body $body
+```
+
+**预期结果：**
+- ✅ HTTP 400 状态码
+- ✅ 错误码："INVALID_FORMAT"
+- ✅ 错误信息："Invalid code format"
+
+### 2. 测试无效模式检测
+
+```powershell
+# 测试 TEST 前缀（应该被拒绝）
+$body = @{
+    code = "TEST123"
+    reward_desc = "Test Reward"
+} | ConvertTo-Json
+
+Invoke-WebRequest -Uri "http://localhost:3000/api/codes/genshin-impact" `
+    -Method POST `
+    -ContentType "application/json" `
+    -Body $body
+```
+
+**预期结果：**
+- ✅ HTTP 400 状态码
+- ✅ 被拒绝
+
+### 3. 测试有效格式（Genshin Impact）
+
+```powershell
+# 测试 6 位格式（应该通过）
+$body = @{
+    code = "GENSHN"
+    reward_desc = "100 Primogems"
+} | ConvertTo-Json
+
+Invoke-WebRequest -Uri "http://localhost:3000/api/codes/genshin-impact" `
+    -Method POST `
+    -ContentType "application/json" `
+    -Body $body
+```
+
+**预期结果：**
+- ✅ HTTP 201 状态码
+- ✅ 成功提交
+- ✅ 返回格式化的 GameCode
+
+### 4. 测试格式标准化
+
+```powershell
+# 测试带空格和小写的码
+$body = @{
+    code = "  genshin  "
+    reward_desc = "Test Reward"
+} | ConvertTo-Json
+
+Invoke-WebRequest -Uri "http://localhost:3000/api/codes/genshin-impact" `
+    -Method POST `
+    -ContentType "application/json" `
+    -Body $body
+```
+
+**预期结果：**
+- ✅ 应该被接受
+- ✅ 返回的 code 应该是 "GENSHIN"（已 trim 并转大写）
