@@ -98,7 +98,7 @@ export async function POST(
     if (!result.success) return result.error
     const body = result.data
 
-    const game = await db.game.findUnique({ where: { slug: gameSlug }, select: { id: true } })
+    const game = await db.game.findUnique({ where: { slug: gameSlug }, select: { id: true, name: true } })
     if (!game) {
       return NextResponse.json({ success: false, error: 'Game not found', code: 'NOT_FOUND' }, { status: 404 })
     }
@@ -115,10 +115,13 @@ export async function POST(
       },
     })
 
+    // Clear cache for this game
     const cacheKey = `api:codes:${gameSlug}`
     await redis.del(cacheKey)
 
-    return NextResponse.json({ success: true, data: created }, { status: 201 })
+    // Return formatted GameCode object
+    const formattedCode = formatGameCode(created, gameSlug, game.name)
+    return NextResponse.json({ success: true, data: formattedCode }, { status: 201 })
   } catch (err: unknown) {
     if ((err as { code?: string }).code === 'P2002') {
       return NextResponse.json({ success: false, error: 'Code already exists', code: 'DUPLICATE' }, { status: 409 })
