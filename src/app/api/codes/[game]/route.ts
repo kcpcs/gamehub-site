@@ -2,9 +2,30 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { redis } from '@/lib/redis'
 import { validateBody, codeSubmissionSchema } from '@/lib/validations'
-import type { ApiResponse, CodesPageData } from '@/types'
+import type { ApiResponse, CodesPageData, GameCode } from '@/types'
 
 const CACHE_TTL = 120 // 2 minutes — codes update frequently
+
+/**
+ * Helper to format GameCode from database to API response
+ */
+function formatGameCode(code: any, gameSlug: string, gameName: string): GameCode {
+  return {
+    id: code.id,
+    code: code.code,
+    game_id: code.game_id,
+    game_slug: gameSlug,
+    game_name: gameName,
+    reward_desc: code.reward_desc,
+    status: code.status,
+    source: code.source,
+    source_url: code.source_url || undefined,
+    expires_at: code.expires_at?.toISOString(),
+    verified_at: code.verified_at.toISOString(),
+    submitted_by: code.submitted_by_id || undefined,
+    created_at: code.created_at.toISOString(),
+  }
+}
 
 /**
  * GET /api/codes/[game]
@@ -20,7 +41,7 @@ export async function GET(
 
   try {
     const cached = await redis.get(cacheKey)
-    if (cached) return NextResponse.json(cached)
+    if (cached) return NextResponse.json(typeof cached === 'string' ? JSON.parse(cached) : cached)
 
     const game = await db.game.findUnique({
       where: { slug: gameSlug },
@@ -47,13 +68,13 @@ export async function GET(
       game_slug:    gameSlug,
       game_name:    game.name,
       game_cover:   game.cover_url,
-      active_codes: active as never,
-      expired_codes: expired as never,
+      active_codes: active.map(code => formatGameCode(code, gameSlug, game.name)),
+      expired_codes: expired.map(code => formatGameCode(code, gameSlug, game.name)),
       last_updated: new Date().toISOString(),
     }
 
     const response: ApiResponse<CodesPageData> = { success: true, data }
-    await redis.set(cacheKey, response, { ex: CACHE_TTL })
+    await redis.set(cacheKey, JSON.stringify(response), { ex: CACHE_TTL })
     return NextResponse.json(response)
   } catch (err) {
     console.error('[GET /api/codes/[game]]', err)
@@ -93,6 +114,9 @@ export async function POST(
         verified_at: new Date(),
       },
     })
+
+    const cacheKey = `api:codes:${gameSlug}`
+    await redis.del(cacheKey)
 
     return NextResponse.json({ success: true, data: created }, { status: 201 })
   } catch (err: unknown) {
