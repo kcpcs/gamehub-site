@@ -19,19 +19,6 @@ const CODE_PATTERNS: Record<string, RegExp[]> = {
   ]
 };
 
-// 常见无效兑换码模式
-const INVALID_PATTERNS = [
-  /^TEST/i,                  // 测试码
-  /^EXPIRE/i,                // 过期标记
-  /^INVALID/i,               // 无效标记
-  /^PLACEHOLDER/i,           // 占位符
-  /^\s*$/,                   // 空白
-  /^[0-9]+$/,                // 纯数字（通常无效）
-  /^[A-Z]+$/,                // 纯字母（通常无效）
-  /^[A-Z0-9]{1,3}$/,         // 太短
-  /^[A-Z0-9]{21,}$/,         // 太长
-];
-
 /**
  * 检查兑换码格式是否有效
  * @param code 兑换码
@@ -40,21 +27,46 @@ const INVALID_PATTERNS = [
 export function validateCodeFormat(code: string, gameSlug?: string): { valid: boolean; message?: string } {
   const cleanCode = code.trim().toUpperCase();
 
-  // 检查无效模式
-  for (const pattern of INVALID_PATTERNS) {
+  // 1. 先检查明显无效的模式
+  const obviousInvalid = [
+    /^TEST/i,                  // 测试码
+    /^EXPIRE/i,                // 过期标记
+    /^INVALID/i,               // 无效标记
+    /^PLACEHOLDER/i,           // 占位符
+    /^\s*$/,                   // 空白
+  ];
+  
+  for (const pattern of obviousInvalid) {
     if (pattern.test(cleanCode)) {
       return { valid: false, message: 'Invalid code format' };
     }
   }
 
-  // 获取针对特定游戏的验证规则
+  // 2. 获取针对特定游戏的验证规则，先尝试匹配
   const patterns = gameSlug ? (CODE_PATTERNS[gameSlug] || CODE_PATTERNS['default']) : CODE_PATTERNS['default'];
 
-  // 检查是否匹配任何有效模式
   for (const pattern of patterns) {
     if (pattern.test(cleanCode)) {
       return { valid: true };
     }
+  }
+
+  // 3. 如果没有匹配游戏特定规则，再检查更一般的无效模式
+  const moreInvalid = [
+    /^[0-9]+$/,                // 纯数字（通常无效）
+    /^[A-Z0-9]{1,3}$/,         // 太短
+    /^[A-Z0-9]{21,}$/,         // 太长
+  ];
+  
+  for (const pattern of moreInvalid) {
+    if (pattern.test(cleanCode)) {
+      return { valid: false, message: 'Invalid code format' };
+    }
+  }
+
+  // 4. 最后检查是否是一个合理的通用格式
+  if (/^[A-Z0-9-]{4,20}$/.test(cleanCode)) {
+    return { valid: true };
   }
 
   return { valid: false, message: 'Code format not recognized for this game' };
