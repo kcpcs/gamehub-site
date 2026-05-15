@@ -19,11 +19,11 @@ export async function autoApproveCodes() {
     where: { status: 'UNVERIFIED' }
   });
 
-  console.log(`👀 Found ${unverified.length} unverified codes to process...');
+  console.log(`👀 Found ${unverified.length} unverified codes to process...`);
 
   for (const code of unverified) {
     // Check if it's valid (simple validation)
-    if (code.code.toUpperCase() !== code.code && !code.code.startsWith('TEST')) {
+    if (!code.code.startsWith('TEST')) {
       await prisma.gameCode.update({
         where: { id: code.id },
         data: { status: 'ACTIVE' }
@@ -46,7 +46,7 @@ export async function checkExpiredCodes() {
     }
   });
 
-  console.log(`👀 Found ${expired.length} codes to mark as expired...');
+  console.log(`👀 Found ${expired.length} codes to mark as expired...`);
 
   for (const code of expired) {
     await prisma.gameCode.update({
@@ -64,13 +64,13 @@ export async function cleanTestData() {
   const testCodes = await prisma.gameCode.deleteMany({
     where: {
       OR: [
-        { code: { contains: 'TEST' },
+        { code: { contains: 'TEST' } },
         { code: 'GENSHIN' },
         { code: 'TEST123' }
       ]
     }
   });
-  console.log(`✅ Cleaned ${testCodes.count} test codes...');
+  console.log(`✅ Cleaned ${testCodes.count} test codes...`);
 }
 
 // === TASK 4: Update SEO last modified
@@ -88,7 +88,7 @@ export async function updateSeoLastModified() {
     });
   }
   
-  console.log(`✅ Updated ${allGames.length} games SEO times...');
+  console.log(`✅ Updated ${allGames.length} games SEO times...`);
 }
 
 // === MAIN
@@ -109,7 +109,7 @@ async function main() {
 }
 
 // If executed directly
-if (import.meta.url === `file://${process.argv[1].replace(/\\/g, '/')}) {
+if (import.meta.url === `file://${process.argv[1].replace(/\\/g, '/')}`) {
   main();
 }
 
