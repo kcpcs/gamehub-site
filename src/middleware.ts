@@ -19,7 +19,7 @@ export async function middleware(request: NextRequest) {
       const session = await validateAdminSession(sessionToken)
       if (session) {
         const response = NextResponse.next()
-        response.headers.set('x-admin-id', session.userId.toString())
+        response.headers.set('x-admin-id', session.id.toString())
         response.headers.set('x-admin-role', session.role)
         return response
       }

@@ -100,7 +100,7 @@ export async function GET(
     })
     
     return NextResponse.json(response)
-  } catch (err) {
+  } catch (err: unknown) {
     console.error('[GET /api/games/[slug]]', err)
     return NextResponse.json({ success: false, error: 'Internal server error', code: 'SERVER_ERROR' }, { status: 500 })
   }

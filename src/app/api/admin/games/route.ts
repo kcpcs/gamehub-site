@@ -172,7 +172,7 @@ export async function PATCH(request: NextRequest) {
             { status: 400 }
           )
         }
-        // 添加字段白名单过�?        const ALLOWED_GAME_UPDATE_FIELDS = ['name', 'slug', 'cover_url', 'platforms', 'genres', 'description', 'developer', 'publisher', 'release_date', 'status']
+        const ALLOWED_GAME_UPDATE_FIELDS = ['name', 'slug', 'cover_url', 'platforms', 'genres', 'description', 'developer', 'publisher', 'release_date', 'status']
         const sanitizedData = Object.fromEntries(
           Object.entries(data).filter(([key]) => ALLOWED_GAME_UPDATE_FIELDS.includes(key))
         )

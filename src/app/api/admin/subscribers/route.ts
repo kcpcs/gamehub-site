@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import type { ApiResponse } from '@/types'
 import { sendEmail } from '@/lib/mailer'
+import { requireAdmin } from '@/lib/admin-auth'
 
 export async function GET(req: NextRequest) {
   try {
@@ -40,7 +41,7 @@ export async function GET(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    await requireAdmin(request)
+    await requireAdmin(req)
     const { searchParams } = new URL(req.url)
     const id = searchParams.get('id')
 
@@ -62,7 +63,7 @@ export async function DELETE(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    await requireAdmin(request)
+    await requireAdmin(req)
     const { searchParams } = new URL(req.url)
     const action = searchParams.get('action')
 

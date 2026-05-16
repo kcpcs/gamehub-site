@@ -97,6 +97,7 @@ export async function POST(request: NextRequest) {
         content,
         article_type: 'guide',
         status: 'draft',
+        cover_url: '/placeholder.jpg',
         cover_alt: title,
         excerpt: content.substring(0, 200) + '...',
         read_time: 5,

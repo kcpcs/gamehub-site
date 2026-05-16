@@ -55,9 +55,9 @@ function writeSettings(settings: any): void {
 }
 
 // GET /api/admin/settings - 获取网站设置
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    await requireAdmin(request)
+    await requireAdmin(req)
     const settings = readSettings()
 
     // Enrich with environment-detected status
