@@ -95,7 +95,7 @@ export async function GET(
     const response: ApiResponse<typeof transformedGame> = { success: true, data: transformedGame }
     
     // 【窗口A优化】异步缓存设置，不阻塞响应
-    redis.set(cacheKey, JSON.stringify(response), { ex: CACHE_TTL }).catch(err => {
+    redis.set(cacheKey, JSON.stringify(response), { ex: CACHE_TTL }).catch((err: unknown) => {
       console.error('[Redis Cache Error]', err)
     })
     

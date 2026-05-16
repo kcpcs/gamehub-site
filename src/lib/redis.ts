@@ -9,9 +9,7 @@ class MockRedis {
 
   constructor() {
     this.cleanupTimer = setInterval(() => this.evictExpired(), CLEANUP_INTERVAL)
-    if (typeof beforeExit === 'function') {
-      beforeExit(() => this.destroy())
-    }
+    process.on('exit', () => this.destroy())
   }
 
   destroy() {

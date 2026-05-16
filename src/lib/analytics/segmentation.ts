@@ -83,7 +83,7 @@ export async function getActivitySegments(days: number = 30): Promise<SegmentRes
     const moderatelyActiveSet = new Set<string>()
 
     for (const userId of activeUserIds) {
-      const userViews = activeUsers.find(u => u.user_id === userId)?._count?.user_id || 0
+      const userViews = activeUsers.filter(u => u.user_id === userId).length
       const hasArticle = usersWithArticles.some(a => a.author_id === userId)
       const hasRating = usersWithRatings.some(r => r.user_id === userId)
 

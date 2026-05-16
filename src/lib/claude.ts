@@ -103,7 +103,7 @@ export async function createClaudeCompletion(
   messages: ClaudeMessage[],
   systemPrompt?: string,
   maxTokens: number = 4096,
-  model: keyof typeof MODEL_CONFIG = 'sonnet',
+  model: string = 'sonnet',
   cacheControl?: { type: 'ephemeral' }
 ): Promise<ClaudeResponse> {
   
@@ -129,7 +129,7 @@ export async function createClaudeCompletion(
     throw new Error('ANTHROPIC_API_KEY is not configured for Claude API')
   }
 
-  const modelId = MODEL_CONFIG[model]?.id || (MODEL_CONFIG as any).sonnet?.id || 'claude-sonnet-4-6'
+  const modelId = (MODEL_CONFIG as Record<string, {id: string}>)[model]?.id || (MODEL_CONFIG as any).sonnet?.id || 'claude-sonnet-4-6'
 
   const response = await client.messages.create({
     model: modelId,

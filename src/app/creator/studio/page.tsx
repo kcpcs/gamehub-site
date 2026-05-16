@@ -332,11 +332,7 @@ export default function CreatorStudioPage() {
                   <div key={item.id} className="space-y-1">
                     <button
                       onClick={() => setActiveTab(item.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                        activeTab === item.id 
-                          ? 'bg-[var(--accent)] text-white shadow-lg shadow-[var(--accent)]/30' 
-                          : 'hover:bg-[var(--bg-surface)] text-[var(--text-secondary)]'
-                      }`}
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all hover:bg-[var(--bg-surface)] text-[var(--text-secondary)]"
                     >
                       <item.icon className="w-5 h-5" />
                       <span className="text-sm font-medium">创建内容</span>
@@ -355,9 +351,7 @@ export default function CreatorStudioPage() {
                   }`}
                 >
                   <item.icon className="w-5 h-5" />
-                  <span className="text-sm font-medium">
-                    {item.id === 'dashboard' ? '控制面板' : item.id === 'articles' ? '文章管理' : item.id === 'settings' ? '设置' : item.label}
-                  </span>
+                  <span className="text-sm font-medium">{item.label}</span>
                 </button>
               )
             })}

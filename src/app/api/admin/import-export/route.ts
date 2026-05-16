@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
                   cover_url: item.cover_url || `https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=video%20game%20guide%20cover%20art%20${encodeURIComponent(item.name || item.slug)}%20gaming%20dark%20theme%20fantasy%20style&image_size=landscape_16_9`,
                   platforms: item.platforms ? JSON.stringify(item.platforms) : '[]',
                   genres: item.genres ? JSON.stringify(item.genres) : '[]',
+                  tags: item.tags ? JSON.stringify(item.tags) : '[]',
                   description: item.description,
                   developer: item.developer,
                   publisher: item.publisher,
