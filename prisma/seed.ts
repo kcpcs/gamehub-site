@@ -57,9 +57,9 @@ async function main() {
           'https://picsum.photos/seed/genshin2/1200/675',
           'https://picsum.photos/seed/genshin3/1200/675'
         ]),
-        platforms: ['PC', 'PlayStation 5', 'PlayStation 4', 'Nintendo Switch', 'Mobile'],
-        genres: ['RPG', 'Action', 'Adventure'],
-        tags: ['open-world', 'anime', 'fantasy', 'gacha'],
+        platforms: JSON.stringify(['PC', 'PlayStation 5', 'PlayStation 4', 'Nintendo Switch', 'Mobile']),
+        genres: JSON.stringify(['RPG', 'Action', 'Adventure']),
+        tags: JSON.stringify(['open-world', 'anime', 'fantasy', 'gacha']),
         developer: 'miHoYo',
         publisher: 'miHoYo',
         release_date: new Date('2020-09-28'),
@@ -82,9 +82,9 @@ async function main() {
           'https://picsum.photos/seed/zelda1/1200/675',
           'https://picsum.photos/seed/zelda2/1200/675'
         ]),
-        platforms: ['Nintendo Switch', 'Wii U'],
-        genres: ['Adventure', 'RPG'],
-        tags: ['open-world', 'action', 'exploration'],
+        platforms: JSON.stringify(['Nintendo Switch', 'Wii U']),
+        genres: JSON.stringify(['Adventure', 'RPG']),
+        tags: JSON.stringify(['open-world', 'action', 'exploration']),
         developer: 'Nintendo',
         publisher: 'Nintendo',
         release_date: new Date('2017-03-03'),
@@ -108,9 +108,9 @@ async function main() {
           'https://picsum.photos/seed/elden1/1200/675',
           'https://picsum.photos/seed/elden2/1200/675'
         ]),
-        platforms: ['PC', 'PlayStation 5', 'Xbox Series X', 'PlayStation 4', 'Xbox One'],
-        genres: ['Action', 'RPG'],
-        tags: ['soulsborne', 'open-world', 'fantasy'],
+        platforms: JSON.stringify(['PC', 'PlayStation 5', 'Xbox Series X', 'PlayStation 4', 'Xbox One']),
+        genres: JSON.stringify(['Action', 'RPG']),
+        tags: JSON.stringify(['soulsborne', 'open-world', 'fantasy']),
         developer: 'FromSoftware',
         publisher: 'Bandai Namco',
         release_date: new Date('2022-02-25'),
@@ -134,9 +134,9 @@ async function main() {
         screenshots: JSON.stringify([
           'https://picsum.photos/seed/cyber1/1200/675'
         ]),
-        platforms: ['PC', 'PlayStation 5', 'Xbox Series X', 'PlayStation 4', 'Xbox One'],
-        genres: ['Action', 'RPG', 'Shooter'],
-        tags: ['cyberpunk', 'open-world', 'first-person', 'future'],
+        platforms: JSON.stringify(['PC', 'PlayStation 5', 'Xbox Series X', 'PlayStation 4', 'Xbox One']),
+        genres: JSON.stringify(['Action', 'RPG', 'Shooter']),
+        tags: JSON.stringify(['cyberpunk', 'open-world', 'first-person', 'future']),
         developer: 'CD Projekt Red',
         publisher: 'CD Projekt Red',
         release_date: new Date('2020-12-10'),
@@ -160,9 +160,9 @@ async function main() {
           'https://picsum.photos/seed/valorant1/1200/675',
           'https://picsum.photos/seed/valorant2/1200/675'
         ]),
-        platforms: ['PC'],
-        genres: ['FPS', 'Strategy', 'Tactical'],
-        tags: ['competitive', 'esports', 'tactical'],
+        platforms: JSON.stringify(['PC']),
+        genres: JSON.stringify(['FPS', 'Strategy', 'Tactical']),
+        tags: JSON.stringify(['competitive', 'esports', 'tactical']),
         developer: 'Riot Games',
         publisher: 'Riot Games',
         release_date: new Date('2020-06-02'),
@@ -184,9 +184,9 @@ async function main() {
         screenshots: JSON.stringify([
           'https://picsum.photos/seed/lol1/1200/675'
         ]),
-        platforms: ['PC', 'Mac'],
-        genres: ['MOBA', 'Strategy', 'Action'],
-        tags: ['competitive', 'esports', 'multiplayer'],
+        platforms: JSON.stringify(['PC', 'Mac']),
+        genres: JSON.stringify(['MOBA', 'Strategy', 'Action']),
+        tags: JSON.stringify(['competitive', 'esports', 'multiplayer']),
         developer: 'Riot Games',
         publisher: 'Riot Games',
         release_date: new Date('2009-10-27'),
@@ -208,9 +208,9 @@ async function main() {
         screenshots: JSON.stringify([
           'https://picsum.photos/seed/fortnite1/1200/675'
         ]),
-        platforms: ['PC', 'PlayStation 5', 'Xbox Series X', 'Nintendo Switch', 'PlayStation 4', 'Xbox One', 'Mobile'],
-        genres: ['Battle Royale', 'FPS', 'Survival'],
-        tags: ['battle royale', 'building', 'competitive'],
+        platforms: JSON.stringify(['PC', 'PlayStation 5', 'Xbox Series X', 'Nintendo Switch', 'PlayStation 4', 'Xbox One', 'Mobile']),
+        genres: JSON.stringify(['Battle Royale', 'FPS', 'Survival']),
+        tags: JSON.stringify(['battle royale', 'building', 'competitive']),
         developer: 'Epic Games',
         publisher: 'Epic Games',
         release_date: new Date('2017-07-25'),
@@ -232,9 +232,9 @@ async function main() {
         screenshots: JSON.stringify([
           'https://picsum.photos/seed/minecraft1/1200/675'
         ]),
-        platforms: ['PC', 'PlayStation 5', 'Xbox Series X', 'Nintendo Switch', 'PlayStation 4', 'Xbox One', 'Mobile'],
-        genres: ['Sandbox', 'Adventure', 'Survival'],
-        tags: ['building', 'sandbox', 'multiplayer', 'creative'],
+        platforms: JSON.stringify(['PC', 'PlayStation 5', 'Xbox Series X', 'Nintendo Switch', 'PlayStation 4', 'Xbox One', 'Mobile']),
+        genres: JSON.stringify(['Sandbox', 'Adventure', 'Survival']),
+        tags: JSON.stringify(['building', 'sandbox', 'multiplayer', 'creative']),
         developer: 'Mojang Studios',
         publisher: 'Mojang Studios',
         release_date: new Date('2011-11-18'),
@@ -256,9 +256,9 @@ async function main() {
         screenshots: JSON.stringify([
           'https://picsum.photos/seed/stardew1/1200/675'
         ]),
-        platforms: ['PC', 'PlayStation 5', 'Xbox Series X', 'Nintendo Switch', 'Mobile'],
-        genres: ['Simulation', 'Farming', 'Indie'],
-        tags: ['cozy', 'farming', 'relaxing', 'indie'],
+        platforms: JSON.stringify(['PC', 'PlayStation 5', 'Xbox Series X', 'Nintendo Switch', 'Mobile']),
+        genres: JSON.stringify(['Simulation', 'Farming', 'Indie']),
+        tags: JSON.stringify(['cozy', 'farming', 'relaxing', 'indie']),
         developer: 'ConcernedApe',
         publisher: 'ConcernedApe',
         release_date: new Date('2016-02-26'),
@@ -280,9 +280,9 @@ async function main() {
         screenshots: JSON.stringify([
           'https://picsum.photos/seed/gow1/1200/675'
         ]),
-        platforms: ['PlayStation 5', 'PlayStation 4'],
-        genres: ['Action', 'Adventure'],
-        tags: ['action-adventure', 'norse', 'story-rich'],
+        platforms: JSON.stringify(['PlayStation 5', 'PlayStation 4']),
+        genres: JSON.stringify(['Action', 'Adventure']),
+        tags: JSON.stringify(['action-adventure', 'norse', 'story-rich']),
         developer: 'Santa Monica Studio',
         publisher: 'Sony Interactive Entertainment',
         release_date: new Date('2022-11-09'),
@@ -304,9 +304,9 @@ async function main() {
         screenshots: JSON.stringify([
           'https://picsum.photos/seed/ds3/1200/675'
         ]),
-        platforms: ['PC', 'PlayStation 4', 'Xbox One'],
-        genres: ['Action', 'RPG'],
-        tags: ['soulsborne', 'difficult', 'dark-fantasy'],
+        platforms: JSON.stringify(['PC', 'PlayStation 4', 'Xbox One']),
+        genres: JSON.stringify(['Action', 'RPG']),
+        tags: JSON.stringify(['soulsborne', 'difficult', 'dark-fantasy']),
         developer: 'FromSoftware',
         publisher: 'Bandai Namco',
         release_date: new Date('2016-04-12'),
@@ -328,9 +328,9 @@ async function main() {
         screenshots: JSON.stringify([
           'https://picsum.photos/seed/hogwarts1/1200/675'
         ]),
-        platforms: ['PC', 'PlayStation 5', 'Xbox Series X', 'PlayStation 4', 'Xbox One', 'Nintendo Switch'],
-        genres: ['RPG', 'Action', 'Adventure'],
-        tags: ['harry-potter', 'magic', 'open-world'],
+        platforms: JSON.stringify(['PC', 'PlayStation 5', 'Xbox Series X', 'PlayStation 4', 'Xbox One', 'Nintendo Switch']),
+        genres: JSON.stringify(['RPG', 'Action', 'Adventure']),
+        tags: JSON.stringify(['harry-potter', 'magic', 'open-world']),
         developer: 'Portkey Games',
         publisher: 'Warner Bros.',
         release_date: new Date('2023-02-10'),
@@ -352,9 +352,9 @@ async function main() {
         screenshots: JSON.stringify([
           'https://picsum.photos/seed/bg3/1200/675'
         ]),
-        platforms: ['PC', 'PlayStation 5', 'Xbox Series X'],
-        genres: ['RPG', 'Turn-Based', 'Strategy'],
-        tags: ['d&d', 'story-rich', 'party-based'],
+        platforms: JSON.stringify(['PC', 'PlayStation 5', 'Xbox Series X']),
+        genres: JSON.stringify(['RPG', 'Turn-Based', 'Strategy']),
+        tags: JSON.stringify(['d&d', 'story-rich', 'party-based']),
         developer: 'Larian Studios',
         publisher: 'Larian Studios',
         release_date: new Date('2023-08-03'),
@@ -377,9 +377,9 @@ async function main() {
         screenshots: JSON.stringify([
           'https://picsum.photos/seed/hollow1/1200/675'
         ]),
-        platforms: ['PC', 'PlayStation 4', 'Xbox One', 'Nintendo Switch'],
-        genres: ['Metroidvania', 'Action', 'Indie'],
-        tags: ['metroidvania', 'indie', 'atmospheric'],
+        platforms: JSON.stringify(['PC', 'PlayStation 4', 'Xbox One', 'Nintendo Switch']),
+        genres: JSON.stringify(['Metroidvania', 'Action', 'Indie']),
+        tags: JSON.stringify(['metroidvania', 'indie', 'atmospheric']),
         developer: 'Team Cherry',
         publisher: 'Team Cherry',
         release_date: new Date('2017-02-24'),
@@ -401,9 +401,9 @@ async function main() {
         screenshots: JSON.stringify([
           'https://picsum.photos/seed/p5r/1200/675'
         ]),
-        platforms: ['PlayStation 4', 'PlayStation 5', 'PC', 'Nintendo Switch', 'Xbox Series X', 'Xbox One'],
-        genres: ['JRPG', 'Turn-Based', 'Life Simulation'],
-        tags: ['jrpg', 'anime', 'persona'],
+        platforms: JSON.stringify(['PlayStation 4', 'PlayStation 5', 'PC', 'Nintendo Switch', 'Xbox Series X', 'Xbox One']),
+        genres: JSON.stringify(['JRPG', 'Turn-Based', 'Life Simulation']),
+        tags: JSON.stringify(['jrpg', 'anime', 'persona']),
         developer: 'P-Studio',
         publisher: 'Atlus',
         release_date: new Date('2020-03-31'),
