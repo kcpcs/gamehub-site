@@ -60,6 +60,8 @@ services:
       - ALERT_SLACK_WEBHOOK_URL=${ALERT_SLACK_WEBHOOK_URL}
       - ALERT_DISCORD_ENABLED=${ALERT_DISCORD_ENABLED}
       - ALERT_DISCORD_WEBHOOK_URL=${ALERT_DISCORD_WEBHOOK_URL}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID}
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
       interval: 30s
@@ -68,33 +70,9 @@ services:
       start_period: 10s
     networks:
       - gamehub-network
-
-  # Optional: PostgreSQL database (for future migration to PostgreSQL)
-  # To use PostgreSQL, update prisma/schema.prisma provider to "postgresql"
-  # and uncomment this section
-  # postgres:
-  #   image: postgres:16-alpine
-  #   container_name: gamehub-postgres
-  #   restart: unless-stopped
-  #   environment:
-  #     POSTGRES_USER: ${POSTGRES_USER:-gamehub}
-  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gamehub_secret}
-  #     POSTGRES_DB: ${POSTGRES_DB:-gamehub}
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #   ports:
-  #     - "5432:5432"
-  #   healthcheck:
-  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gamehub}"]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-  #   networks:
-  #     - gamehub-network
+    volumes:
+      - ./prisma:/app/prisma
 
 networks:
   gamehub-network:
     driver: bridge
-
-# volumes:
-#   postgres_data:

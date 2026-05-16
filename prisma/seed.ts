@@ -52,11 +52,11 @@ async function main() {
         name: 'Genshin Impact',
         igdb_id: 105416,
         cover_url: 'https://images.igdb.com/igdb/image/upload/t_cover_big/co4k5r.jpg',
-        screenshots: [
+        screenshots: JSON.stringify([
           'https://picsum.photos/seed/genshin1/1200/675',
           'https://picsum.photos/seed/genshin2/1200/675',
           'https://picsum.photos/seed/genshin3/1200/675'
-        ],
+        ]),
         platforms: ['PC', 'PlayStation 5', 'PlayStation 4', 'Nintendo Switch', 'Mobile'],
         genres: ['RPG', 'Action', 'Adventure'],
         tags: ['open-world', 'anime', 'fantasy', 'gacha'],
@@ -78,10 +78,10 @@ async function main() {
         name: 'The Legend of Zelda: Breath of the Wild',
         igdb_id: 7346,
         cover_url: 'https://images.igdb.com/igdb/image/upload/t_cover_big/co1wyy.jpg',
-        screenshots: [
+        screenshots: JSON.stringify([
           'https://picsum.photos/seed/zelda1/1200/675',
           'https://picsum.photos/seed/zelda2/1200/675'
-        ],
+        ]),
         platforms: ['Nintendo Switch', 'Wii U'],
         genres: ['Adventure', 'RPG'],
         tags: ['open-world', 'action', 'exploration'],
@@ -104,10 +104,10 @@ async function main() {
         igdb_id: 133347,
         steam_appid: 1245620,
         cover_url: 'https://images.igdb.com/igdb/image/upload/t_cover_big/co2l4k.jpg',
-        screenshots: [
+        screenshots: JSON.stringify([
           'https://picsum.photos/seed/elden1/1200/675',
           'https://picsum.photos/seed/elden2/1200/675'
-        ],
+        ]),
         platforms: ['PC', 'PlayStation 5', 'Xbox Series X', 'PlayStation 4', 'Xbox One'],
         genres: ['Action', 'RPG'],
         tags: ['soulsborne', 'open-world', 'fantasy'],
@@ -131,9 +131,9 @@ async function main() {
         igdb_id: 10798,
         steam_appid: 1091500,
         cover_url: 'https://images.igdb.com/igdb/image/upload/t_cover_big/co2m3y.jpg',
-        screenshots: [
+        screenshots: JSON.stringify([
           'https://picsum.photos/seed/cyber1/1200/675'
-        ],
+        ]),
         platforms: ['PC', 'PlayStation 5', 'Xbox Series X', 'PlayStation 4', 'Xbox One'],
         genres: ['Action', 'RPG', 'Shooter'],
         tags: ['cyberpunk', 'open-world', 'first-person', 'future'],
@@ -156,10 +156,10 @@ async function main() {
         name: 'Valorant',
         igdb_id: 111801,
         cover_url: 'https://images.igdb.com/igdb/image/upload/t_cover_big/co3f8k.jpg',
-        screenshots: [
+        screenshots: JSON.stringify([
           'https://picsum.photos/seed/valorant1/1200/675',
           'https://picsum.photos/seed/valorant2/1200/675'
-        ],
+        ]),
         platforms: ['PC'],
         genres: ['FPS', 'Strategy', 'Tactical'],
         tags: ['competitive', 'esports', 'tactical'],
@@ -181,9 +181,9 @@ async function main() {
         name: 'League of Legends',
         igdb_id: 20232,
         cover_url: 'https://images.igdb.com/igdb/image/upload/t_cover_big/co3j2e.jpg',
-        screenshots: [
+        screenshots: JSON.stringify([
           'https://picsum.photos/seed/lol1/1200/675'
-        ],
+        ]),
         platforms: ['PC', 'Mac'],
         genres: ['MOBA', 'Strategy', 'Action'],
         tags: ['competitive', 'esports', 'multiplayer'],
@@ -205,9 +205,9 @@ async function main() {
         name: 'Fortnite',
         igdb_id: 108343,
         cover_url: 'https://images.igdb.com/igdb/image/upload/t_cover_big/co3f9v.jpg',
-        screenshots: [
+        screenshots: JSON.stringify([
           'https://picsum.photos/seed/fortnite1/1200/675'
-        ],
+        ]),
         platforms: ['PC', 'PlayStation 5', 'Xbox Series X', 'Nintendo Switch', 'PlayStation 4', 'Xbox One', 'Mobile'],
         genres: ['Battle Royale', 'FPS', 'Survival'],
         tags: ['battle royale', 'building', 'competitive'],
@@ -229,9 +229,9 @@ async function main() {
         name: 'Minecraft',
         igdb_id: 1428,
         cover_url: 'https://images.igdb.com/igdb/image/upload/t_cover_big/co4k5s.jpg',
-        screenshots: [
+        screenshots: JSON.stringify([
           'https://picsum.photos/seed/minecraft1/1200/675'
-        ],
+        ]),
         platforms: ['PC', 'PlayStation 5', 'Xbox Series X', 'Nintendo Switch', 'PlayStation 4', 'Xbox One', 'Mobile'],
         genres: ['Sandbox', 'Adventure', 'Survival'],
         tags: ['building', 'sandbox', 'multiplayer', 'creative'],
@@ -253,9 +253,9 @@ async function main() {
         name: 'Stardew Valley',
         igdb_id: 4553,
         cover_url: 'https://images.igdb.com/igdb/image/upload/t_cover_big/co383v.jpg',
-        screenshots: [
+        screenshots: JSON.stringify([
           'https://picsum.photos/seed/stardew1/1200/675'
-        ],
+        ]),
         platforms: ['PC', 'PlayStation 5', 'Xbox Series X', 'Nintendo Switch', 'Mobile'],
         genres: ['Simulation', 'Farming', 'Indie'],
         tags: ['cozy', 'farming', 'relaxing', 'indie'],
@@ -277,9 +277,9 @@ async function main() {
         name: 'God of War Ragnarök',
         igdb_id: 152385,
         cover_url: 'https://images.igdb.com/igdb/image/upload/t_cover_big/co3m69.jpg',
-        screenshots: [
+        screenshots: JSON.stringify([
           'https://picsum.photos/seed/gow1/1200/675'
-        ],
+        ]),
         platforms: ['PlayStation 5', 'PlayStation 4'],
         genres: ['Action', 'Adventure'],
         tags: ['action-adventure', 'norse', 'story-rich'],
@@ -301,9 +301,9 @@ async function main() {
         name: 'Dark Souls III',
         igdb_id: 24172,
         cover_url: 'https://images.igdb.com/igdb/image/upload/t_cover_big/co2j1k.jpg',
-        screenshots: [
+        screenshots: JSON.stringify([
           'https://picsum.photos/seed/ds3/1200/675'
-        ],
+        ]),
         platforms: ['PC', 'PlayStation 4', 'Xbox One'],
         genres: ['Action', 'RPG'],
         tags: ['soulsborne', 'difficult', 'dark-fantasy'],
@@ -325,9 +325,9 @@ async function main() {
         name: 'Hogwarts Legacy',
         igdb_id: 149836,
         cover_url: 'https://images.igdb.com/igdb/image/upload/t_cover_big/co4g5m.jpg',
-        screenshots: [
+        screenshots: JSON.stringify([
           'https://picsum.photos/seed/hogwarts1/1200/675'
-        ],
+        ]),
         platforms: ['PC', 'PlayStation 5', 'Xbox Series X', 'PlayStation 4', 'Xbox One', 'Nintendo Switch'],
         genres: ['RPG', 'Action', 'Adventure'],
         tags: ['harry-potter', 'magic', 'open-world'],
@@ -349,9 +349,9 @@ async function main() {
         name: 'Baldur\'s Gate 3',
         igdb_id: 144741,
         cover_url: 'https://images.igdb.com/igdb/image/upload/t_cover_big/co319m.jpg',
-        screenshots: [
+        screenshots: JSON.stringify([
           'https://picsum.photos/seed/bg3/1200/675'
-        ],
+        ]),
         platforms: ['PC', 'PlayStation 5', 'Xbox Series X'],
         genres: ['RPG', 'Turn-Based', 'Strategy'],
         tags: ['d&d', 'story-rich', 'party-based'],
@@ -374,9 +374,9 @@ async function main() {
         name: 'Hollow Knight',
         igdb_id: 60951,
         cover_url: 'https://images.igdb.com/igdb/image/upload/t_cover_big/co383w.jpg',
-        screenshots: [
+        screenshots: JSON.stringify([
           'https://picsum.photos/seed/hollow1/1200/675'
-        ],
+        ]),
         platforms: ['PC', 'PlayStation 4', 'Xbox One', 'Nintendo Switch'],
         genres: ['Metroidvania', 'Action', 'Indie'],
         tags: ['metroidvania', 'indie', 'atmospheric'],
@@ -398,9 +398,9 @@ async function main() {
         name: 'Persona 5 Royal',
         igdb_id: 103869,
         cover_url: 'https://images.igdb.com/igdb/image/upload/t_cover_big/co2m3z.jpg',
-        screenshots: [
+        screenshots: JSON.stringify([
           'https://picsum.photos/seed/p5r/1200/675'
-        ],
+        ]),
         platforms: ['PlayStation 4', 'PlayStation 5', 'PC', 'Nintendo Switch', 'Xbox Series X', 'Xbox One'],
         genres: ['JRPG', 'Turn-Based', 'Life Simulation'],
         tags: ['jrpg', 'anime', 'persona'],

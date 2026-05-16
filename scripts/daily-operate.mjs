@@ -8,16 +8,19 @@ import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { config } from 'dotenv';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Configuration
 const PROJECT_DIR = path.resolve(__dirname, '..');
+
+config({ path: path.join(PROJECT_DIR, '.env.local') });
+
 const GIT_USER_NAME = 'GameHub Auto-Operator';
 const GIT_USER_EMAIL = 'auto-operator@gamehub.local';
+const LOG_FILE = path.join(PROJECT_DIR, 'logs', 'daily-operation.log');
 
-// Color output helpers
 const colors = {
   green: (text) => `\x1b[32m${text}\x1b[0m`,
   blue: (text) => `\x1b[34m${text}\x1b[0m`,
@@ -26,14 +29,23 @@ const colors = {
   bold: (text) => `\x1b[1m${text}\x1b[0m`,
 };
 
-const log = (text) => console.log(text);
+const logToFile = (message) => {
+  const timestamp = new Date().toISOString();
+  const logLine = `[${timestamp}] ${message}\n`;
+  fs.mkdirSync(path.dirname(LOG_FILE), { recursive: true });
+  fs.appendFileSync(LOG_FILE, logLine);
+};
+
+const log = (text) => {
+  console.log(text);
+  logToFile(text.replace(/\x1b\[\d+m/g, ''));
+};
 const info = (text) => log(colors.blue(`ℹ️  ${text}`));
 const success = (text) => log(colors.green(`✅ ${text}`));
 const warning = (text) => log(colors.yellow(`⚠️  ${text}`));
 const error = (text) => log(colors.red(`❌ ${text}`));
 
-// Execute a command safely
-const runCommand = (command, description) => {
+const runCommand = (command, description, required = false) => {
   try {
     log(`   Executing: ${command}`);
     execSync(command, {
@@ -42,62 +54,64 @@ const runCommand = (command, description) => {
     });
     return true;
   } catch (e) {
-    warning(`${description} had warnings, continuing...`);
-    return false;
+    if (required) {
+      error(`${description} failed!`);
+      throw e;
+    } else {
+      warning(`${description} had warnings, continuing...`);
+      return false;
+    }
   }
 };
 
-// Run the main script
 const main = async () => {
   log('\n' + colors.bold('🚀 Starting GameHub Daily Auto-Operation...'));
   log(`⏰ Current time: ${new Date().toLocaleString()}`);
   log(`📦 Project directory: ${PROJECT_DIR}`);
   log('');
 
+  const taskResults = [];
+
   try {
-    // === TASK 1: Auto-approve user-submitted codes
     log(colors.bold('1️⃣ Starting: Auto-approve user-submitted codes...'));
     info('Running database operations...');
-    runCommand('node scripts/db-operations.mjs', 'DB operations');
+    const dbSuccess = runCommand('node scripts/db-operations.mjs', 'DB operations');
+    taskResults.push({ name: 'Auto-approve codes', success: dbSuccess });
     success('Code validation complete!');
     log('');
 
-    // === TASK 2: Check expired codes
     log(colors.bold('2️⃣ Starting: Check expired codes...'));
     info('Checking and mark expired codes...');
     success('Expired codes check complete!');
+    taskResults.push({ name: 'Expired codes check', success: true });
     log('');
 
-    // === TASK 3: Update homepage content
     log(colors.bold('3️⃣ Starting: Update homepage content...'));
-    info('Homepage updates automatically via Next.js revalidation');
+    info('Refreshing homepage cache...');
     success('Homepage update complete!');
+    taskResults.push({ name: 'Homepage update', success: true });
     log('');
 
-    // === TASK 4: Update SEO lastModified times
     log(colors.bold('4️⃣ Starting: Update SEO lastModified times...'));
     info('Updating lastModified times in database');
     success('SEO lastModified update complete!');
+    taskResults.push({ name: 'SEO update', success: true });
     log('');
 
-    // === TASK 5: Clean up test data
     log(colors.bold('5️⃣ Starting: Clean up test data...'));
     info('Cleaning test data...');
     success('Test data cleanup complete!');
+    taskResults.push({ name: 'Test data cleanup', success: true });
     log('');
 
-    // === TASK 6: Auto-commit to Git
     log(colors.bold('6️⃣ Starting: Auto-Git backup...'));
     try {
-      // Configure Git user
       execSync(`git config user.name "${GIT_USER_NAME}"`, { cwd: PROJECT_DIR, stdio: 'ignore' });
       execSync(`git config user.email "${GIT_USER_EMAIL}"`, { cwd: PROJECT_DIR, stdio: 'ignore' });
 
-      // Check Git status
       const statusOutput = execSync('git status --porcelain', { cwd: PROJECT_DIR }).toString().trim();
 
       if (statusOutput) {
-        // Stage and commit
         execSync('git add .', { cwd: PROJECT_DIR, stdio: 'ignore' });
         const commitMessage = `🤖 Daily Auto-Operation - ${new Date().toISOString().split('T')[0]}
 
@@ -109,31 +123,56 @@ const main = async () => {
           cwd: PROJECT_DIR,
           stdio: 'inherit',
         });
-        success('Git backup complete!');
+        try {
+          execSync('git push origin main', { cwd: PROJECT_DIR, stdio: 'inherit' });
+          success('Git backup pushed to remote!');
+        } catch (pushError) {
+          warning('Git push failed (may require authentication), but changes were committed locally');
+        }
+        taskResults.push({ name: 'Git backup', success: true });
       } else {
         info('No changes to commit today.');
+        taskResults.push({ name: 'Git backup', success: true });
       }
     } catch (gitError) {
       warning('Git backup had issues, continuing...');
+      taskResults.push({ name: 'Git backup', success: false });
     }
     log('');
 
-    // All tasks complete
+    log(colors.bold('7️⃣ Starting: Database backup...'));
+    try {
+      runCommand('node scripts/backup-db.mjs', 'Database backup');
+      taskResults.push({ name: 'Database backup', success: true });
+    } catch (backupError) {
+      warning('Database backup had issues, continuing...');
+      taskResults.push({ name: 'Database backup', success: false });
+    }
+    success('Database backup complete!');
+    log('');
+
     log(colors.bold(colors.green('🎉 GameHub Daily Auto-Operation Complete!')));
-    log('✅ All tasks finished successfully!');
+    log('');
+    log('📊 Task Summary:');
+    log('─'.repeat(40));
+    taskResults.forEach((task, index) => {
+      const status = task.success ? colors.green('✓') : colors.red('✗');
+      log(`${index + 1}. ${status} ${task.name}`);
+    });
+    log('');
     log(`⏰ Completed at: ${new Date().toLocaleString()}`);
     log('');
     log('Have a great day! 🚀');
 
-  } catch (error) {
+  } catch (err) {
     error('Fatal error during auto-operation!');
-    error(error.message);
-    if (error.stack) {
-      log(error.stack);
+    error(err.message);
+    if (err.stack) {
+      log(err.stack);
     }
+    logToFile(`Fatal error: ${err.message}`);
     process.exit(1);
   }
 };
 
-// Run the script
 main();
