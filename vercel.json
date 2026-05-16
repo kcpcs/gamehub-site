@@ -51,7 +51,7 @@
   ],
   "functions": {
     "src/app/api/**/*.ts": {
-      "runtime": "@vercel/node@3",
+      "runtime": "@vercel/node",
       "memory": 256,
       "maxDuration": 10
     }
